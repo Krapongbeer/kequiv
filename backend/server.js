@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -53,10 +54,14 @@ app.use((req, res, next) => {
     next();
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`====================================================`);
-    console.log(`🚀 Kequiv Web System is running!`);
-    console.log(`📍 URL: http://localhost:${PORT}`);
-    console.log(`====================================================`);
-});
+// Start server when run directly (not on Vercel serverless)
+if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`====================================================`);
+        console.log(`🚀 Kequiv Web System is running!`);
+        console.log(`📍 URL: http://localhost:${PORT}`);
+        console.log(`====================================================`);
+    });
+}
+
+module.exports = app;

@@ -3,6 +3,7 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
+const { supabase, isSupabaseConfigured } = require('../supabase');
 
 const uploadDir = path.join(__dirname, '..', '..', 'uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -25,13 +26,12 @@ router.post('/', async (req, res) => {
 
         const buffer = Buffer.from(matches[2], 'base64');
         const filename = `${type}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.webp`;
-        const filepath = path.join(uploadDir, filename);
 
         // Resize and optimize
         // Items: compact thumbnail max 320x320
         // Logo: max 600x300
         const maxDimension = type === 'logo' ? 600 : 320;
-        await sharp(buffer)
+        const optimizedBuffer = await sharp(buffer)
             .resize({
                 width: maxDimension,
                 height: maxDimension,
@@ -39,7 +39,39 @@ router.post('/', async (req, res) => {
                 withoutEnlargement: true
             })
             .webp({ quality: 85 })
-            .toFile(filepath);
+            .toBuffer();
+
+        // If Supabase Storage is configured, upload to Supabase CDN
+        if (isSupabaseConfigured && supabase) {
+            try {
+                const storagePath = `uploads/${filename}`;
+                const { data, error } = await supabase.storage
+                    .from('kequiv')
+                    .upload(storagePath, optimizedBuffer, {
+                        contentType: 'image/webp',
+                        upsert: true
+                    });
+
+                if (error) {
+                    console.error('Supabase storage upload error, fallback to local:', error.message);
+                } else {
+                    const { data: urlData } = supabase.storage
+                        .from('kequiv')
+                        .getPublicUrl(storagePath);
+
+                    return res.json({
+                        success: true,
+                        url: urlData.publicUrl
+                    });
+                }
+            } catch (storageErr) {
+                console.error('Supabase storage exception, fallback to local:', storageErr);
+            }
+        }
+
+        // Local storage fallback
+        const filepath = path.join(uploadDir, filename);
+        fs.writeFileSync(filepath, optimizedBuffer);
 
         res.json({
             success: true,

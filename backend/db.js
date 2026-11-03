@@ -6,13 +6,19 @@ const { DatabaseSync } = require('node:sqlite');
 const fs = require('fs');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, '..', 'data', 'kequiv.sqlite');
+const DB_PATH = process.env.VERCEL
+    ? path.join('/tmp', 'kequiv.sqlite')
+    : path.join(__dirname, '..', 'data', 'kequiv.sqlite');
 const SCHEMA_PATH = path.join(__dirname, 'schema.sql');
 
 // Ensure data folder exists
 const dataDir = path.dirname(DB_PATH);
 if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+    try {
+        fs.mkdirSync(dataDir, { recursive: true });
+    } catch (e) {
+        // Ignore if read-only or exists
+    }
 }
 
 const db = new DatabaseSync(DB_PATH);
