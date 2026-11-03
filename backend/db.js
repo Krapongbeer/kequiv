@@ -27,7 +27,9 @@ const db = new DatabaseSync(DB_PATH);
 db.exec('PRAGMA foreign_keys = ON;');
 db.exec('PRAGMA journal_mode = WAL;');
 
-// Initialize Schema
+const { DEFAULT_CONTENT, DEFAULT_SERVICES, DEFAULT_PORTFOLIO } = require('./utils/defaultCmsData');
+
+// Initialize Schema & Default Seeds
 function initSchema() {
     const schemaSql = fs.readFileSync(SCHEMA_PATH, 'utf8');
     db.exec(schemaSql);
@@ -46,6 +48,39 @@ function initSchema() {
             '1. กำหนดชำระเงินตามเงื่อนไขที่ตกลงกัน\n2. กรุณาโอนเงินเข้าบัญชีธนาคารที่ระบุ และส่งหลักฐานการชำระเงิน',
             'ขอบพระคุณที่ให้ความไว้วางใจในบริการของเรา'
         );
+    }
+
+    // Ensure default website content exists
+    const contentCount = db.prepare('SELECT count(*) as count FROM website_content').get().count;
+    if (contentCount === 0) {
+        const stmtContent = db.prepare('INSERT OR REPLACE INTO website_content (key, value) VALUES (?, ?)');
+        for (const [k, v] of DEFAULT_CONTENT) {
+            stmtContent.run(k, v);
+        }
+    }
+
+    // Ensure default services exist
+    const servicesCount = db.prepare('SELECT count(*) as count FROM website_services').get().count;
+    if (servicesCount === 0) {
+        const stmtService = db.prepare(`
+            INSERT INTO website_services (category, title, description, icon, bullets, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `);
+        for (const item of DEFAULT_SERVICES) {
+            stmtService.run(...item);
+        }
+    }
+
+    // Ensure default portfolio exists
+    const portfolioCount = db.prepare('SELECT count(*) as count FROM website_portfolio').get().count;
+    if (portfolioCount === 0) {
+        const stmtPortfolio = db.prepare(`
+            INSERT INTO website_portfolio (category, title, location, description, tag, status, gradient, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        for (const item of DEFAULT_PORTFOLIO) {
+            stmtPortfolio.run(...item);
+        }
     }
 }
 

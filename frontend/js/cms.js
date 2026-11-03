@@ -39,19 +39,21 @@ const cmsModule = {
     },
 
     switchTab(tabName) {
-        this.state.activeTab = tabName;
+        this.state.activeTab = tabName || 'general';
         document.querySelectorAll('.cms-tab-btn').forEach(btn => {
-            if (btn.getAttribute('data-tab') === tabName) {
+            const btnTab = btn.getAttribute('data-tab');
+            if (btnTab === this.state.activeTab) {
                 btn.classList.add('bg-sky-600', 'text-white', 'shadow-xs');
-                btn.classList.remove('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+                btn.classList.remove('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-200', 'dark:hover:bg-slate-800');
             } else {
                 btn.classList.remove('bg-sky-600', 'text-white', 'shadow-xs');
-                btn.classList.add('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+                btn.classList.add('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-200', 'dark:hover:bg-slate-800');
             }
         });
 
         document.querySelectorAll('.cms-tab-pane').forEach(pane => {
-            pane.classList.toggle('hidden', pane.getAttribute('data-pane') !== tabName);
+            const paneName = pane.getAttribute('data-pane') || pane.id.replace('cms-pane-', '');
+            pane.classList.toggle('hidden', paneName !== this.state.activeTab);
         });
     },
 

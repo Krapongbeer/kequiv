@@ -121,6 +121,39 @@ CREATE TABLE IF NOT EXISTS leads (
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 9. Website CMS Key-Value Content
+CREATE TABLE IF NOT EXISTS website_content (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 10. Website CMS Services
+CREATE TABLE IF NOT EXISTS website_services (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    category TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    icon TEXT DEFAULT '⚡',
+    bullets TEXT DEFAULT '',
+    sort_order INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 11. Website CMS Portfolio
+CREATE TABLE IF NOT EXISTS website_portfolio (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    category TEXT NOT NULL,
+    title TEXT NOT NULL,
+    location TEXT DEFAULT '',
+    description TEXT DEFAULT '',
+    tag TEXT DEFAULT '',
+    status TEXT DEFAULT 'ส่งมอบงาน 100%',
+    gradient TEXT DEFAULT 'from-sky-900 to-slate-800',
+    sort_order INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes for performance & integrity
 CREATE INDEX IF NOT EXISTS idx_customers_deleted ON customers(deleted_at);
 CREATE INDEX IF NOT EXISTS idx_projects_customer ON customer_projects(customer_id, deleted_at);
@@ -130,3 +163,5 @@ CREATE INDEX IF NOT EXISTS idx_docs_issue_date ON documents(issue_date);
 CREATE INDEX IF NOT EXISTS idx_doc_items_doc ON document_items(document_id, sort_order);
 CREATE INDEX IF NOT EXISTS idx_reservations_type_status ON document_reservations(doc_type, status);
 CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_services_category ON website_services(category, sort_order);
+CREATE INDEX IF NOT EXISTS idx_portfolio_category ON website_portfolio(category, sort_order);

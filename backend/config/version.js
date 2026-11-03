@@ -3,10 +3,22 @@
  */
 
 module.exports = {
-    version: '2.6.2',
+    version: '2.7.0',
     releaseDate: '2026-11-03',
-    codename: 'Comprehensive Security & System Hardening, Constant-Time Auth & Dual-Cloud Lead Sync',
+    codename: 'Complete Storefront Website CMS Restoration & Dynamic Management Portal Activation',
     changelog: [
+        {
+            version: '2.7.0',
+            date: '2026-11-03',
+            title: 'Website CMS Management Portal Fully Activated & Repaired',
+            features: [
+                'แก้ไขระบบจัดการเนื้อหาร้าน (Website CMS) ให้แสดงผลและใช้งานได้ครบทุกแท็บ 100%',
+                'แก้ปัญหาแท็บข้อมูลทั่วไป (General) ไม่แสดงผลโดยผูก data-pane ให้กับคอนเทนเนอร์เนื้อหา',
+                'เพิ่มสคีมา website_content, website_services, website_portfolio ลงในฐานข้อมูล พร้อม Seeding เริ่มต้นครบ 18 บริการ และ 6 โครงการ',
+                'เปิดใช้งานฟอร์มแก้ไขแบนเนอร์, เบอร์โทร, LINE, ที่อยู่สาขา, บริการ, และผลงาน พร้อมปุ่มบันทึกทันที',
+                'เชื่อมต่อระบบจัดการคำขอใบเสนอราคา (Leads Management) ให้ตรวจดูและแปลงเป็นลูกค้าได้ในคลิกเดียว'
+            ]
+        },
         {
             version: '2.6.2',
             date: '2026-11-03',
