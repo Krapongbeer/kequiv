@@ -368,25 +368,25 @@ const app = {
 
     getDocTypeBadge(type) {
         const types = {
-            quotation: { label: '[QT] ใบเสนอราคา', class: 'bg-sky-100 text-sky-900 border border-sky-400' },
-            billing: { label: '[INV] ใบแจ้งหนี้/วางบิล', class: 'bg-amber-100 text-amber-950 border border-amber-400' },
-            receipt: { label: '[RE] ใบเสร็จรับเงิน', class: 'bg-emerald-100 text-emerald-950 border border-emerald-400' }
+            quotation: { label: 'ใบเสนอราคา (QT)', class: 'bg-sky-50 text-sky-800 border border-sky-300' },
+            billing: { label: 'ใบแจ้งหนี้/วางบิล (INV)', class: 'bg-amber-50 text-amber-900 border border-amber-300' },
+            receipt: { label: 'ใบเสร็จรับเงิน (RE)', class: 'bg-emerald-50 text-emerald-900 border border-emerald-300' }
         };
-        const item = types[type] || { label: type, class: 'bg-slate-200 text-slate-800' };
-        return `<span class="px-2.5 py-0.5 rounded text-xs font-bold font-mono whitespace-nowrap inline-block ${item.class}">${item.label}</span>`;
+        const item = types[type] || { label: type, class: 'bg-slate-100 text-slate-800 border border-slate-300' };
+        return `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold font-mono whitespace-nowrap inline-block ${item.class}">${item.label}</span>`;
     },
 
     getStatusBadge(status) {
         const map = {
-            draft: { label: 'ฉบับร่าง', class: 'border border-slate-400 text-slate-600 bg-slate-50' },
-            issued: { label: 'ออกเอกสารแล้ว', class: 'border border-sky-500 text-sky-900 bg-sky-50 font-bold' },
-            paid: { label: 'ชำระเงินแล้ว', class: 'border border-emerald-500 text-emerald-900 bg-emerald-50 font-bold' },
-            cancelled: { label: 'ยกเลิก', class: 'border border-rose-500 text-rose-800 bg-rose-50' },
-            reserved: { label: 'กันเลขไว้', class: 'border border-purple-500 text-purple-900 bg-purple-50 font-bold' },
-            used: { label: 'ใช้งานแล้ว', class: 'border border-slate-400 text-slate-500 bg-slate-100' }
+            draft: { label: 'ฉบับร่าง', class: 'border border-slate-300 text-slate-600 bg-slate-100' },
+            issued: { label: 'ออกเอกสารแล้ว', class: 'border border-sky-300 text-sky-800 bg-sky-50 font-bold' },
+            paid: { label: 'ชำระเงินแล้ว', class: 'border border-emerald-300 text-emerald-800 bg-emerald-50 font-bold' },
+            cancelled: { label: 'ยกเลิกแล้ว', class: 'border border-rose-300 text-rose-800 bg-rose-50' },
+            reserved: { label: 'เลขสำรอง', class: 'border border-purple-300 text-purple-800 bg-purple-50 font-bold' },
+            used: { label: 'ใช้งานแล้ว', class: 'border border-slate-200 text-slate-400 bg-slate-50' }
         };
-        const item = map[status] || { label: status, class: 'bg-slate-200 text-slate-800' };
-        return `<span class="px-2 py-0.5 rounded text-[11px] font-mono whitespace-nowrap inline-block ${item.class}">${item.label}</span>`;
+        const item = map[status] || { label: status, class: 'bg-slate-100 text-slate-800 border border-slate-200' };
+        return `<span class="px-2 py-0.5 rounded-md text-[11px] font-mono whitespace-nowrap inline-block ${item.class}">${item.label}</span>`;
     }
 };
 

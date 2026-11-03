@@ -55,82 +55,82 @@ window.documentsModule = {
         if (!container) return;
 
         container.innerHTML = `
-            <div class="typewriter-card rounded-xl p-6 md:p-8 font-mono">
+            <div class="typewriter-card rounded-xl p-6 md:p-8 font-mono bg-white">
                 <!-- Header -->
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b-2 border-stone-800">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
                     <div>
-                        <h2 class="text-xl font-bold text-stone-900 font-typewriter flex items-center gap-2">
-                            <span>📄</span> [ แฟ้มจัดเก็บเอกสารธุรกิจทั้งหมด ]
+                        <h2 class="text-xl font-bold text-slate-900 font-typewriter flex items-center gap-2">
+                            <span>📄</span> รายการเอกสารทั้งหมด
                         </h2>
-                        <p class="text-xs text-stone-600 mt-1">ใบเสนอราคา (QT), ใบแจ้งหนี้/วางบิล (INV) และใบเสร็จรับเงิน (RE)</p>
+                        <p class="text-xs text-slate-500 mt-1">ใบเสนอราคา (QT), ใบแจ้งหนี้/วางบิล (INV) และใบเสร็จรับเงิน (RE)</p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button onclick="app.switchTab('create-doc')" class="btn-typewriter">
-                            <span>+ สอดกระดาษออกบิลใหม่</span>
+                        <button onclick="app.switchTab('create-doc')" class="btn-ocean text-xs py-2 px-3.5">
+                            <span>+ ออกเอกสารใหม่</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Tabs by Type / Status -->
-                <div class="flex flex-wrap items-center gap-1.5 p-1 bg-[#eee3c8] border-2 border-stone-700 rounded-lg text-xs font-mono my-4">
-                    <button onclick="window.documentsModule.setFilter('type', 'all', 'status', 'all')" class="px-3 py-1 rounded transition ${this.filters.type === 'all' && this.filters.status === 'all' ? 'bg-[#2b2725] text-amber-50 font-bold' : 'text-stone-700 hover:bg-stone-300'}">
-                        [ ทั้งหมด ]
+                <div class="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-mono my-4">
+                    <button onclick="window.documentsModule.setFilter('type', 'all', 'status', 'all')" class="px-3 py-1.5 rounded-lg transition ${this.filters.type === 'all' && this.filters.status === 'all' ? 'bg-slate-900 text-white font-bold shadow-xs' : 'text-slate-700 hover:bg-slate-200'}">
+                        ทั้งหมด
                     </button>
-                    <button onclick="window.documentsModule.setFilter('type', 'quotation', 'status', 'all')" class="px-3 py-1 rounded transition ${this.filters.type === 'quotation' ? 'bg-blue-900 text-white font-bold' : 'text-stone-700 hover:bg-stone-300'}">
-                        [QT] ใบเสนอราคา
+                    <button onclick="window.documentsModule.setFilter('type', 'quotation', 'status', 'all')" class="px-3 py-1.5 rounded-lg transition ${this.filters.type === 'quotation' ? 'bg-sky-600 text-white font-bold shadow-xs' : 'text-slate-700 hover:bg-slate-200'}">
+                        ใบเสนอราคา (QT)
                     </button>
-                    <button onclick="window.documentsModule.setFilter('type', 'billing', 'status', 'all')" class="px-3 py-1 rounded transition ${this.filters.type === 'billing' && this.filters.status === 'all' ? 'bg-amber-900 text-white font-bold' : 'text-stone-700 hover:bg-stone-300'}">
-                        [INV] ใบแจ้งหนี้/วางบิล
+                    <button onclick="window.documentsModule.setFilter('type', 'billing', 'status', 'all')" class="px-3 py-1.5 rounded-lg transition ${this.filters.type === 'billing' && this.filters.status === 'all' ? 'bg-amber-600 text-white font-bold shadow-xs' : 'text-slate-700 hover:bg-slate-200'}">
+                        ใบแจ้งหนี้/วางบิล (INV)
                     </button>
-                    <button onclick="window.documentsModule.setFilter('type', 'receipt', 'status', 'all')" class="px-3 py-1 rounded transition ${this.filters.type === 'receipt' ? 'bg-emerald-900 text-white font-bold' : 'text-stone-700 hover:bg-stone-300'}">
-                        [RE] ใบเสร็จรับเงิน
+                    <button onclick="window.documentsModule.setFilter('type', 'receipt', 'status', 'all')" class="px-3 py-1.5 rounded-lg transition ${this.filters.type === 'receipt' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-700 hover:bg-slate-200'}">
+                        ใบเสร็จรับเงิน (RE)
                     </button>
-                    <button onclick="window.documentsModule.setFilter('type', 'billing', 'status', 'issued')" class="px-3 py-1 rounded transition ${this.filters.type === 'billing' && this.filters.status === 'issued' ? 'bg-amber-600 text-white font-bold' : 'text-amber-900 hover:bg-amber-100'}">
+                    <button onclick="window.documentsModule.setFilter('type', 'billing', 'status', 'issued')" class="px-3 py-1.5 rounded-lg transition ${this.filters.type === 'billing' && this.filters.status === 'issued' ? 'bg-amber-700 text-white font-bold shadow-xs' : 'text-amber-800 hover:bg-amber-100'}">
                         ⏳ รอชำระเงิน
                     </button>
-                    <button onclick="window.documentsModule.setFilter('type', 'all', 'status', 'cancelled')" class="px-3 py-1 rounded transition ${this.filters.status === 'cancelled' ? 'bg-rose-900 text-white font-bold' : 'text-rose-900 hover:bg-rose-100'}">
-                        🚫 ยกเลิก
+                    <button onclick="window.documentsModule.setFilter('type', 'all', 'status', 'cancelled')" class="px-3 py-1.5 rounded-lg transition ${this.filters.status === 'cancelled' ? 'bg-rose-700 text-white font-bold shadow-xs' : 'text-rose-800 hover:bg-rose-100'}">
+                        🚫 ยกเลิกแล้ว
                     </button>
                 </div>
 
                 <!-- Search & Filters Bar -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5 font-mono">
                     <div class="md:col-span-2 relative">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-500">🔍</span>
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">🔍</span>
                         <input type="text" id="doc-search-input" value="${this.filters.search || ''}" placeholder="ค้นหาเลขที่เอกสาร, ชื่อลูกค้า, โครงการ..." 
-                            class="w-full pl-9 pr-4 py-1.5 text-xs border-2 border-stone-800 rounded bg-[#fffdfa] focus:outline-none"
+                            class="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-sky-500"
                             onkeyup="if(event.key === 'Enter') window.documentsModule.applySearch()">
                     </div>
                     <div>
-                        <select id="doc-filter-customer" class="w-full px-3 py-1.5 text-xs border-2 border-stone-800 rounded bg-[#fffdfa] focus:outline-none" onchange="window.documentsModule.applyCustomerFilter(this.value)">
-                            <option value="">-- ลูกค้าทั้งหมด --</option>
+                        <select id="doc-filter-customer" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-sky-500" onchange="window.documentsModule.applyCustomerFilter(this.value)">
+                            <option value="">-- เลือกลูกค้าทั้งหมด --</option>
                             ${customers.map(c => `
                                 <option value="${c.id}" ${this.filters.customer_id == c.id ? 'selected' : ''}>${c.name}</option>
                             `).join('')}
                         </select>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button onclick="window.documentsModule.applySearch()" class="btn-typewriter flex-1 text-xs py-1.5">
+                        <button onclick="window.documentsModule.applySearch()" class="btn-ocean flex-1 text-xs py-2">
                             ค้นหา
                         </button>
-                        <button onclick="window.documentsModule.resetFilters()" class="btn-paper text-xs py-1.5 px-3">
-                            ล้าง
+                        <button onclick="window.documentsModule.resetFilters()" class="btn-paper text-xs py-2 px-3">
+                            ล้างค่า
                         </button>
                     </div>
                 </div>
 
                 <!-- Table -->
-                <div class="overflow-x-auto border-2 border-stone-800 rounded-lg bg-white">
+                <div class="overflow-x-auto border border-slate-200 rounded-xl bg-white">
                     <table class="w-full text-xs text-left min-w-[960px] border-collapse">
-                        <thead class="bg-[#ede4d3] text-stone-900 font-bold border-b-2 border-stone-800 font-typewriter">
+                        <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 font-typewriter">
                             <tr>
-                                <th class="px-3.5 py-2.5 whitespace-nowrap w-44">เลขที่ / ประเภท</th>
-                                <th class="px-3.5 py-2.5 min-w-[240px]">ลูกค้าและโครงการ</th>
-                                <th class="px-3.5 py-2.5 whitespace-nowrap w-32">วันที่เอกสาร</th>
-                                <th class="px-3.5 py-2.5 whitespace-nowrap w-32">ครบกำหนด</th>
-                                <th class="px-3.5 py-2.5 whitespace-nowrap w-32 text-right">ยอดรวมสุทธิ</th>
-                                <th class="px-3.5 py-2.5 whitespace-nowrap w-32 text-center">สถานะ</th>
-                                <th class="px-3.5 py-2.5 whitespace-nowrap w-48 text-right">จัดการ</th>
+                                <th class="px-3.5 py-3 whitespace-nowrap w-44">เลขที่ / ประเภท</th>
+                                <th class="px-3.5 py-3 min-w-[240px]">ลูกค้าและโครงการ</th>
+                                <th class="px-3.5 py-3 whitespace-nowrap w-32">วันที่เอกสาร</th>
+                                <th class="px-3.5 py-3 whitespace-nowrap w-32">ครบกำหนด</th>
+                                <th class="px-3.5 py-3 whitespace-nowrap w-32 text-right">ยอดรวมสุทธิ</th>
+                                <th class="px-3.5 py-3 whitespace-nowrap w-32 text-center">สถานะ</th>
+                                <th class="px-3.5 py-3 whitespace-nowrap w-48 text-right">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-stone-200 font-mono">
@@ -142,24 +142,24 @@ window.documentsModule = {
                                     </td>
                                 </tr>
                             ` : docs.map(d => `
-                                <tr class="hover:bg-amber-50/40 transition">
+                                <tr class="hover:bg-slate-50 transition">
                                     <td class="px-3.5 py-3 whitespace-nowrap">
-                                        <div class="font-bold text-stone-900 font-typewriter text-sm">${d.code}</div>
+                                        <div class="font-bold text-slate-900 font-typewriter text-sm">${d.code}</div>
                                         <div class="mt-1">${app.getDocTypeBadge(d.type)}</div>
                                     </td>
                                     <td class="px-3.5 py-3 min-w-[240px]">
-                                        <div class="font-bold text-stone-900 text-xs">${d.customer_name || '-'}</div>
+                                        <div class="font-bold text-slate-900 text-xs">${d.customer_name || '-'}</div>
                                         ${d.project_name_custom || d.project_name ? `
-                                            <div class="text-[11px] text-indigo-900 font-medium mt-0.5">📌 ${d.project_name_custom || d.project_name}</div>
+                                            <div class="text-[11px] text-sky-800 font-medium mt-0.5">📌 ${d.project_name_custom || d.project_name}</div>
                                         ` : ''}
                                     </td>
-                                    <td class="px-3.5 py-3 text-xs text-stone-600 whitespace-nowrap">
+                                    <td class="px-3.5 py-3 text-xs text-slate-600 whitespace-nowrap">
                                         ${app.formatDateThai(d.issue_date)}
                                     </td>
-                                    <td class="px-3.5 py-3 text-xs text-stone-500 whitespace-nowrap">
+                                    <td class="px-3.5 py-3 text-xs text-slate-500 whitespace-nowrap">
                                         ${d.due_date ? app.formatDateThai(d.due_date) : '-'}
                                     </td>
-                                    <td class="px-3.5 py-3 text-right font-bold text-stone-900 whitespace-nowrap">
+                                    <td class="px-3.5 py-3 text-right font-bold text-slate-900 whitespace-nowrap">
                                         ฿${app.formatCurrency(d.grand_total)}
                                     </td>
                                     <td class="px-3.5 py-3 text-center whitespace-nowrap">
@@ -177,18 +177,18 @@ window.documentsModule = {
                                                 🔄 แปลง
                                             </button>
                                             ${d.type === 'billing' && d.status !== 'paid' ? `
-                                                <button onclick="window.documentsModule.markPaid(${d.id})" class="btn-paper text-xs py-1 px-2 text-emerald-800 border-emerald-800 bg-emerald-50" title="ทำเครื่องหมายว่าชำระแล้ว">
+                                                <button onclick="window.documentsModule.markPaid(${d.id})" class="btn-paper text-xs py-1 px-2 text-emerald-800 border-emerald-300 bg-emerald-50 hover:bg-emerald-100" title="ทำเครื่องหมายว่าชำระแล้ว">
                                                     ✓ ชำระแล้ว
                                                 </button>
                                             ` : ''}
                                             <button onclick="window.documentsModule.duplicate(${d.id})" class="btn-paper text-xs py-1 px-2" title="คัดลอกสร้างฉบับใหม่">
                                                 📋
                                             </button>
-                                            <button onclick="window.documentsModule.openCancelModal(${d.id}, '${d.code}')" class="btn-paper text-xs py-1 px-2 text-rose-700 border-rose-800" title="ยกเลิกเอกสารนี้">
+                                            <button onclick="window.documentsModule.openCancelModal(${d.id}, '${d.code}')" class="btn-paper text-xs py-1 px-2 text-rose-700 border-rose-300 hover:bg-rose-50" title="ยกเลิกเอกสารนี้">
                                                 🚫
                                             </button>
                                         ` : `
-                                            <span class="text-xs text-rose-700 font-bold">ยกเลิกแล้ว</span>
+                                            <span class="text-xs text-rose-600 font-bold">ยกเลิกแล้ว</span>
                                         `}
                                     </td>
                                 </tr>
@@ -292,17 +292,17 @@ window.documentsModule = {
         } = ctx;
 
         container.innerHTML = `
-            <div class="max-w-5xl mx-auto typewriter-card rounded-xl p-6 md:p-8 font-mono">
+            <div class="max-w-5xl mx-auto typewriter-card rounded-xl p-6 md:p-8 font-mono bg-white">
                 <!-- Form Header -->
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b-2 border-stone-800">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
                     <div>
-                        <span class="text-xs font-bold text-stone-700 uppercase tracking-wider font-mono">[ ระบบพิมพ์ดีดและจัดการเอกสารธุรกิจ ]</span>
-                        <h2 class="text-2xl font-bold text-stone-900 font-typewriter mt-1" id="form-doc-title">
-                            ✍️ สอดกระดาษพิมพ์ออกบิลใหม่
+                        <span class="text-xs font-bold text-sky-700 uppercase tracking-wider font-mono">ระบบจัดการเอกสาร (ใบเสนอราคา • ใบแจ้งหนี้ • ใบเสร็จรับเงิน)</span>
+                        <h2 class="text-2xl font-bold text-slate-900 font-typewriter mt-1" id="form-doc-title">
+                            ✍️ ออกเอกสารใหม่
                         </h2>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button type="button" onclick="app.switchTab('documents')" class="btn-paper text-xs">
+                        <button type="button" onclick="app.switchTab('documents')" class="btn-paper text-xs py-1.5 px-3">
                             ✕ ยกเลิก
                         </button>
                     </div>
@@ -310,16 +310,16 @@ window.documentsModule = {
 
                 <form id="doc-create-form" onsubmit="event.preventDefault(); window.documentsModule.submitDocument();" class="mt-6 space-y-6">
                     <!-- Section 1: Document Type & Numbering Setup -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 p-5 bg-[#faf6ee] rounded-xl border-2 border-stone-800">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 p-5 bg-slate-50/80 rounded-xl border border-slate-200">
                         <!-- Doc Type -->
                         <div>
-                            <label class="block text-xs font-bold text-stone-800 mb-1.5 font-typewriter">
-                                ประเภทเอกสาร <span class="text-red-700">*</span>
+                            <label class="block text-xs font-bold text-slate-800 mb-1.5 font-typewriter">
+                                ประเภทเอกสาร <span class="text-rose-600">*</span>
                             </label>
-                            <select id="doc-type-select" name="type" class="w-full px-3 py-2 text-sm bg-white border-2 border-stone-800 rounded font-bold text-stone-900" onchange="window.documentsModule.onDocTypeChanged(this.value)">
-                                <option value="quotation" ${type === 'quotation' ? 'selected' : ''}>[QT] ใบเสนอราคา (Quotation)</option>
-                                <option value="billing" ${type === 'billing' ? 'selected' : ''}>[INV] ใบแจ้งหนี้ / วางบิล (Billing Note)</option>
-                                <option value="receipt" ${type === 'receipt' ? 'selected' : ''}>[RE] ใบเสร็จรับเงิน (Receipt)</option>
+                            <select id="doc-type-select" name="type" class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg font-bold text-slate-900 focus:outline-none focus:border-sky-500" onchange="window.documentsModule.onDocTypeChanged(this.value)">
+                                <option value="quotation" ${type === 'quotation' ? 'selected' : ''}>ใบเสนอราคา (Quotation / QT)</option>
+                                <option value="billing" ${type === 'billing' ? 'selected' : ''}>ใบแจ้งหนี้ / วางบิล (Invoice / INV)</option>
+                                <option value="receipt" ${type === 'receipt' ? 'selected' : ''}>ใบเสร็จรับเงิน (Receipt / RE)</option>
                             </select>
                         </div>
 
@@ -327,34 +327,34 @@ window.documentsModule = {
                         <div class="md:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
                                 <span>เลขที่เอกสาร <span class="text-rose-500">*</span></span>
-                                <span class="text-[11px] text-purple-600 font-medium">รองรับการใช้เลขที่กันไว้ออกย้อนหลัง</span>
+                                <span class="text-[11px] text-sky-700 font-medium">มีเลขสำรองพร้อมใช้ออกย้อนหลัง</span>
                             </label>
 
                             <div class="space-y-2">
                                 <div class="flex items-center gap-4 text-xs">
                                     <label class="inline-flex items-center gap-1.5 cursor-pointer">
-                                        <input type="radio" name="code_mode" value="auto" ${!useReservedCode ? 'checked' : ''} onchange="window.documentsModule.toggleCodeMode('auto')" class="text-blue-600">
+                                        <input type="radio" name="code_mode" value="auto" ${!useReservedCode ? 'checked' : ''} onchange="window.documentsModule.toggleCodeMode('auto')" class="text-sky-600">
                                         <span class="font-medium text-slate-700">รันเลขอัตโนมัติ (ปัจจุบัน)</span>
                                     </label>
                                     <label class="inline-flex items-center gap-1.5 cursor-pointer">
                                         <input type="radio" name="code_mode" value="reserved" ${useReservedCode ? 'checked' : ''} onchange="window.documentsModule.toggleCodeMode('reserved')" class="text-purple-600">
-                                        <span class="font-semibold text-purple-700">ดึงเลขที่เคยกันไว้ (สำหรับบิลย้อนหลัง)</span>
+                                        <span class="font-semibold text-purple-700">ใช้เลขสำรอง (สำหรับออกบิลย้อนหลัง)</span>
                                     </label>
                                 </div>
 
                                 <!-- Container for Auto Code Display -->
                                 <div id="code-auto-container" class="${useReservedCode ? 'hidden' : ''}">
                                     <div class="flex items-center gap-2">
-                                        <input type="text" id="auto-code-preview" value="${nextCodePreview}" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-sm font-mono font-bold text-slate-700">
+                                        <input type="text" id="auto-code-preview" value="${nextCodePreview}" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm font-mono font-bold text-slate-700">
                                         <span class="text-[11px] text-slate-400 whitespace-nowrap">ระบบจะล็อกเลขนี้ตอนกดบันทึก</span>
                                     </div>
                                 </div>
 
                                 <!-- Container for Reserved Code Dropdown -->
                                 <div id="code-reserved-container" class="${useReservedCode ? '' : 'hidden'}">
-                                    <select id="reserved-code-select" class="w-full px-3 py-2 bg-purple-50 border border-purple-200 text-purple-950 font-mono font-bold text-sm rounded-xl focus:outline-none">
+                                    <select id="reserved-code-select" class="w-full px-3 py-2 bg-purple-50 border border-purple-200 text-purple-950 font-mono font-bold text-sm rounded-lg focus:outline-none">
                                         ${availableReservations.length === 0 ? `
-                                            <option value="">-- ไม่มีเลขที่กันไว้สำหรับประเภทนี้ (ไปที่แท็บ 'คลังเลขที่กันไว้' เพื่อกดกันเลข) --</option>
+                                            <option value="">-- ไม่มีเลขสำรองในคลัง (ไปที่แท็บ 'คลังเลขสำรอง' เพื่อกดเพิ่มเลข) --</option>
                                         ` : availableReservations.map(r => `
                                             <option value="${r.code}" ${useReservedCode === r.code ? 'selected' : ''}>
                                                 ${r.code} ${r.note ? `— [${r.note}]` : ''}
@@ -507,15 +507,15 @@ window.documentsModule = {
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="pt-6 border-t-2 border-stone-800 flex flex-col md:flex-row items-center justify-end gap-3 font-mono">
-                        <button type="button" onclick="app.switchTab('documents')" class="btn-paper w-full md:w-auto">
+                    <div class="pt-6 border-t border-slate-200 flex flex-col md:flex-row items-center justify-end gap-3 font-mono">
+                        <button type="button" onclick="app.switchTab('documents')" class="btn-paper w-full md:w-auto text-xs py-2 px-4">
                             ✕ ยกเลิก
                         </button>
-                        <button type="button" onclick="window.documentsModule.submitDocument('draft')" class="btn-paper w-full md:w-auto">
-                            💾 บันทึกเป็นฉบับร่าง (Draft)
+                        <button type="button" onclick="window.documentsModule.submitDocument('draft')" class="btn-paper w-full md:w-auto text-xs py-2 px-4">
+                            💾 บันทึกเป็นฉบับร่าง
                         </button>
-                        <button type="submit" class="btn-typewriter w-full md:w-auto">
-                            <span>✓ สอดกระดาษ & บันทึกเปิดพิมพ์ A4</span>
+                        <button type="submit" class="btn-ocean w-full md:w-auto text-xs py-2 px-5">
+                            <span>✓ บันทึกเอกสาร & เปิดพิมพ์ A4</span>
                         </button>
                     </div>
                 </form>

@@ -1,5 +1,6 @@
 /**
- * Reservations Management Module (สมุดคุมเลขที่กันไว้สำหรับออกบิลย้อนหลัง - สไตล์พิมพ์ดีด)
+ * Reservations Management Module (Clean Ocean Edition)
+ * Zero-Collision Auto Buffer Pool & Manual Backdating Slates
  */
 
 window.reservationsModule = {
@@ -11,10 +12,10 @@ window.reservationsModule = {
         if (!container) return;
 
         container.innerHTML = `
-            <div class="flex items-center justify-center p-12 text-stone-600 font-mono">
+            <div class="flex items-center justify-center p-12 text-slate-500 font-mono">
                 <div class="text-center">
-                    <div class="text-3xl mb-2">⌨️</div>
-                    <div>กำลังเปิดสมุดคุมเลขที่กันไว้...</div>
+                    <div class="animate-spin text-3xl mb-2">⚙️</div>
+                    <div>กำลังโหลดข้อมูลคลังเลขสำรอง...</div>
                 </div>
             </div>
         `;
@@ -24,8 +25,8 @@ window.reservationsModule = {
             this.render(res.data);
         } catch (err) {
             container.innerHTML = `
-                <div class="p-6 typewriter-card border-red-800 text-red-800 font-mono">
-                    <p class="font-bold">[ เกิดข้อผิดพลาดในการโหลดสมุดคุมเลขที่กันไว้ ]</p>
+                <div class="p-6 typewriter-card border-rose-300 text-rose-800 font-mono bg-rose-50/50">
+                    <p class="font-bold">เกิดข้อผิดพลาดในการโหลดคลังเลขสำรอง</p>
                     <p class="text-xs mt-1">${err.message}</p>
                 </div>
             `;
@@ -37,114 +38,114 @@ window.reservationsModule = {
         if (!container) return;
 
         container.innerHTML = `
-            <div class="typewriter-card rounded-xl p-6 mb-6 font-mono">
+            <div class="typewriter-card rounded-xl p-6 mb-6 font-mono bg-white">
                 <!-- Header & Controls -->
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b-2 border-stone-800">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
                     <div>
-                        <h2 class="text-xl font-bold text-stone-900 font-typewriter flex items-center gap-2">
-                            <span>🔢</span> [ สมุดคุมเลขที่กันไว้สำหรับออกบิลย้อนหลัง ]
+                        <h2 class="text-xl font-bold text-slate-900 font-typewriter flex items-center gap-2">
+                            <span>🔢</span> คลังเลขสำรอง (สำหรับออกบิลย้อนหลัง)
                         </h2>
-                        <p class="text-xs text-stone-600 mt-1">
-                            ป้องกันเลขชนกัน 100% ระบบล็อกเลขไว้ในคลัง และให้เลขรันปกติข้ามเลขที่ถูกกันไว้โดยอัตโนมัติ
+                        <p class="text-xs text-slate-500 mt-1">
+                            ระบบรันเลขกันไว้ล่วงหน้าวันละ 5 เลขอัตโนมัติ เพื่อให้มีเลขพร้อมดึงออกบิลย้อนหลังได้ตลอดเวลา เลขไม่กระโดดข้าม ไม่ชนกับบิลปัจจุบัน
                         </p>
                     </div>
-                    <button onclick="window.reservationsModule.openReserveModal()" class="btn-typewriter">
-                        <span>+ ประทับตรากันเลขที่ใหม่ (เดี่ยว / ชุด)</span>
+                    <button onclick="window.reservationsModule.openReserveModal()" class="btn-ocean text-xs py-2 px-3.5">
+                        <span>+ จองเลขสำรองเพิ่ม</span>
                     </button>
                 </div>
 
                 <!-- Filters -->
                 <div class="flex flex-wrap items-center justify-between gap-4 my-4">
                     <!-- Doc Type Filter -->
-                    <div class="flex items-center gap-1.5 p-1 bg-[#eee3c8] border-2 border-stone-700 rounded-lg text-xs font-mono">
-                        <button onclick="window.reservationsModule.filterType('')" class="px-2.5 py-1 rounded transition ${this.currentType === '' ? 'bg-[#2b2725] text-amber-50 font-bold' : 'text-stone-700 hover:bg-stone-300'}">
-                            [ ทุกประเภท ]
+                    <div class="flex items-center gap-1.5 p-1.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-mono">
+                        <button onclick="window.reservationsModule.filterType('')" class="px-3 py-1.5 rounded-lg transition ${this.currentType === '' ? 'bg-slate-900 text-white font-bold' : 'text-slate-700 hover:bg-slate-200'}">
+                            ทุกประเภท
                         </button>
-                        <button onclick="window.reservationsModule.filterType('quotation')" class="px-2.5 py-1 rounded transition ${this.currentType === 'quotation' ? 'bg-blue-900 text-white font-bold' : 'text-stone-700 hover:bg-stone-300'}">
-                            [QT] ใบเสนอราคา
+                        <button onclick="window.reservationsModule.filterType('quotation')" class="px-3 py-1.5 rounded-lg transition ${this.currentType === 'quotation' ? 'bg-sky-600 text-white font-bold' : 'text-slate-700 hover:bg-slate-200'}">
+                            ใบเสนอราคา (QT)
                         </button>
-                        <button onclick="window.reservationsModule.filterType('billing')" class="px-2.5 py-1 rounded transition ${this.currentType === 'billing' ? 'bg-amber-900 text-white font-bold' : 'text-stone-700 hover:bg-stone-300'}">
-                            [INV] ใบแจ้งหนี้/วางบิล
+                        <button onclick="window.reservationsModule.filterType('billing')" class="px-3 py-1.5 rounded-lg transition ${this.currentType === 'billing' ? 'bg-amber-600 text-white font-bold' : 'text-slate-700 hover:bg-slate-200'}">
+                            ใบแจ้งหนี้/วางบิล (INV)
                         </button>
-                        <button onclick="window.reservationsModule.filterType('receipt')" class="px-2.5 py-1 rounded transition ${this.currentType === 'receipt' ? 'bg-emerald-900 text-white font-bold' : 'text-stone-700 hover:bg-stone-300'}">
-                            [RE] ใบเสร็จรับเงิน
+                        <button onclick="window.reservationsModule.filterType('receipt')" class="px-3 py-1.5 rounded-lg transition ${this.currentType === 'receipt' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-700 hover:bg-slate-200'}">
+                            ใบเสร็จรับเงิน (RE)
                         </button>
                     </div>
 
                     <!-- Status Filter -->
-                    <div class="flex items-center gap-1.5 p-1 bg-[#eee3c8] border-2 border-stone-700 rounded-lg text-xs font-mono">
-                        <button onclick="window.reservationsModule.filterStatus('reserved')" class="px-2.5 py-1 rounded transition ${this.currentStatus === 'reserved' ? 'bg-purple-900 text-white font-bold' : 'text-stone-700 hover:bg-stone-300'}">
+                    <div class="flex items-center gap-1.5 p-1.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-mono">
+                        <button onclick="window.reservationsModule.filterStatus('reserved')" class="px-3 py-1.5 rounded-lg transition ${this.currentStatus === 'reserved' ? 'bg-purple-700 text-white font-bold' : 'text-slate-700 hover:bg-slate-200'}">
                             เฉพาะที่ว่างอยู่
                         </button>
-                        <button onclick="window.reservationsModule.filterStatus('used')" class="px-2.5 py-1 rounded transition ${this.currentStatus === 'used' ? 'bg-stone-800 text-white font-bold' : 'text-stone-700 hover:bg-stone-300'}">
+                        <button onclick="window.reservationsModule.filterStatus('used')" class="px-3 py-1.5 rounded-lg transition ${this.currentStatus === 'used' ? 'bg-slate-800 text-white font-bold' : 'text-slate-700 hover:bg-slate-200'}">
                             ใช้งานแล้ว
                         </button>
-                        <button onclick="window.reservationsModule.filterStatus('all')" class="px-2.5 py-1 rounded transition ${this.currentStatus === 'all' ? 'bg-stone-800 text-white font-bold' : 'text-stone-700 hover:bg-stone-300'}">
+                        <button onclick="window.reservationsModule.filterStatus('all')" class="px-3 py-1.5 rounded-lg transition ${this.currentStatus === 'all' ? 'bg-slate-800 text-white font-bold' : 'text-slate-700 hover:bg-slate-200'}">
                             ทั้งหมด
                         </button>
                     </div>
                 </div>
 
                 <!-- Ledger Table -->
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left border-collapse border-2 border-stone-800">
+                <div class="overflow-x-auto border border-slate-200 rounded-xl bg-white">
+                    <table class="w-full text-xs text-left border-collapse min-w-[850px]">
                         <thead>
-                            <tr class="bg-[#eee3c8] text-stone-900 border-b-2 border-stone-800 font-bold">
-                                <th class="p-2.5 border-r border-stone-700">เลขที่บิลที่กันไว้</th>
-                                <th class="p-2.5 border-r border-stone-700">ประเภท</th>
-                                <th class="p-2.5 border-r border-stone-700">ลูกค้า / โครงการที่ระบุไว้</th>
-                                <th class="p-2.5 border-r border-stone-700">หมายเหตุบันทึก</th>
-                                <th class="p-2.5 border-r border-stone-700">วันที่ทำรายการ</th>
-                                <th class="p-2.5 border-r border-stone-700 text-center">ตราประทับ</th>
-                                <th class="p-2.5 text-right">คำสั่งการ</th>
+                            <tr class="bg-slate-50 text-slate-700 border-b border-slate-200 font-bold font-typewriter">
+                                <th class="py-3 px-3.5 whitespace-nowrap">เลขที่เอกสารสำรอง</th>
+                                <th class="py-3 px-3.5 whitespace-nowrap">ประเภท</th>
+                                <th class="py-3 px-3.5 min-w-[200px]">ลูกค้า / โครงการที่ระบุ</th>
+                                <th class="py-3 px-3.5 min-w-[220px]">หมายเหตุ</th>
+                                <th class="py-3 px-3.5 whitespace-nowrap">วันที่สำรอง</th>
+                                <th class="py-3 px-3.5 text-center whitespace-nowrap">สถานะ</th>
+                                <th class="py-3 px-3.5 text-right whitespace-nowrap">การดำเนินการ</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-stone-300">
+                        <tbody class="divide-y divide-slate-100">
                             ${list.length === 0 ? `
                                 <tr>
-                                    <td colspan="7" class="p-10 text-center text-stone-500 font-typewriter">
-                                        [ ไม่พบรายการเลขที่กันไว้ในหมวดนี้ ]
+                                    <td colspan="7" class="py-12 text-center text-slate-400 font-mono">
+                                        ไม่มีรายการเลขสำรองในหมวดนี้
                                         <br>
-                                        <button onclick="window.reservationsModule.openReserveModal()" class="mt-2 text-purple-900 font-bold underline">
-                                            + คลิกเพื่อกันเลขใหม่
+                                        <button onclick="window.reservationsModule.openReserveModal()" class="mt-2 text-sky-700 font-bold hover:underline">
+                                            + คลิกเพื่อจองเลขสำรองเพิ่ม
                                         </button>
                                     </td>
                                 </tr>
                             ` : list.map(r => `
-                                <tr class="hover:bg-[#f7f1e1] transition">
-                                    <td class="p-2.5 border-r border-stone-300">
-                                        <span class="font-bold text-stone-950 font-typewriter text-sm">${r.code}</span>
+                                <tr class="hover:bg-slate-50 transition">
+                                    <td class="py-2.5 px-3.5 font-mono">
+                                        <span class="font-bold text-slate-900 font-typewriter text-sm">${r.code}</span>
                                     </td>
-                                    <td class="p-2.5 border-r border-stone-300">
+                                    <td class="py-2.5 px-3.5 whitespace-nowrap">
                                         ${app.getDocTypeBadge(r.doc_type)}
                                     </td>
-                                    <td class="p-2.5 border-r border-stone-300">
+                                    <td class="py-2.5 px-3.5">
                                         ${r.customer_name ? `
-                                            <div class="font-bold text-stone-900">${r.customer_name}</div>
-                                            ${r.project_name ? `<div class="text-[10px] text-blue-900">📌 ${r.project_name}</div>` : ''}
+                                            <div class="font-bold text-slate-900">${r.customer_name}</div>
+                                            ${r.project_name ? `<div class="text-[10px] text-sky-700 font-medium">📌 ${r.project_name}</div>` : ''}
                                         ` : `
-                                            <span class="text-stone-400 text-[11px]">[ ไม่ระบุลูกค้า ]</span>
+                                            <span class="text-slate-400 text-[11px]">ทั่วไป (ไม่ระบุ)</span>
                                         `}
                                     </td>
-                                    <td class="p-2.5 border-r border-stone-300 text-stone-700 max-w-[220px]">
+                                    <td class="py-2.5 px-3.5 text-slate-600 max-w-[220px]">
                                         ${r.note || '-'}
                                     </td>
-                                    <td class="p-2.5 border-r border-stone-300 whitespace-nowrap text-stone-600">
+                                    <td class="py-2.5 px-3.5 whitespace-nowrap text-slate-600">
                                         ${r.reserved_at ? app.formatDateThai(r.reserved_at.slice(0, 10)) : '-'}
                                     </td>
-                                    <td class="p-2.5 border-r border-stone-300 text-center whitespace-nowrap">
+                                    <td class="py-2.5 px-3.5 text-center whitespace-nowrap">
                                         ${app.getStatusBadge(r.status)}
                                     </td>
-                                    <td class="p-2.5 text-right whitespace-nowrap">
+                                    <td class="py-2.5 px-3.5 text-right whitespace-nowrap space-x-1">
                                         ${r.status === 'reserved' ? `
-                                            <button onclick="app.switchTab('create-doc', { type: '${r.doc_type}', useReservedCode: '${r.code}', customer_id: ${r.customer_id || 'null'}, project_id: ${r.project_id || 'null'} })" class="btn-typewriter text-[11px] py-1 px-2.5 mr-1 bg-purple-900 border-purple-950">
+                                            <button onclick="app.switchTab('create-doc', { type: '${r.doc_type}', useReservedCode: '${r.code}', customer_id: ${r.customer_id || 'null'}, project_id: ${r.project_id || 'null'} })" class="btn-ocean text-xs py-1 px-2.5">
                                                 ✍️ นำไปออกบิล
                                             </button>
-                                            <button onclick="window.reservationsModule.cancelReservation(${r.id}, '${r.code}')" class="btn-paper text-[11px] py-1 px-2 text-red-800 border-red-800" title="ยกเลิกการกันเลขนี้">
+                                            <button onclick="window.reservationsModule.cancelReservation(${r.id}, '${r.code}')" class="btn-paper text-xs py-1 px-2 text-rose-700 border-rose-300 hover:bg-rose-50" title="ยกเลิกเลขสำรองนี้">
                                                 ยกเลิก
                                             </button>
                                         ` : `
-                                            <span class="text-stone-400 text-[11px]">[ ใช้งานแล้ว ]</span>
+                                            <span class="text-slate-400 text-xs">ใช้งานแล้ว</span>
                                         `}
                                     </td>
                                 </tr>
@@ -195,7 +196,7 @@ window.reservationsModule = {
         const customer_id = form.customer_id.value || null;
 
         if (isNaN(count) || count < 1) {
-            app.toast('กรุณาระบุจำนวนเลขที่ต้องการกันอย่างน้อย 1 เลข', 'warning');
+            app.toast('กรุณาระบุจำนวนเลขที่ต้องการสำรองอย่างน้อย 1 เลข', 'warning');
             return;
         }
 
@@ -216,11 +217,11 @@ window.reservationsModule = {
     },
 
     async cancelReservation(id, code) {
-        if (!confirm(`คุณต้องการยกเลิกการกันเลข ${code} ใช่หรือไม่?`)) return;
+        if (!confirm(`คุณต้องการยกเลิกการสำรองเลข ${code} ใช่หรือไม่?`)) return;
 
         try {
             await api.cancelReservation(id);
-            app.toast(`ยกเลิกการกันเลข ${code} เรียบร้อยแล้ว`, 'success');
+            app.toast(`ยกเลิกเลขสำรอง ${code} เรียบร้อยแล้ว`, 'success');
             this.loadList();
         } catch (err) {
             app.toast(err.message, 'error');

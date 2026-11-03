@@ -1,45 +1,41 @@
 /* =============================================================
-   KEQUIV - VINTAGE TYPEWRITER & OCEAN CYAN THEME (v2.0.0)
-   Authentic Typewriter Typography meets Modern Tech Ocean Aesthetics
+   KEQUIV - CLEAN OCEAN TYPEWRITER THEME (v2.1.0)
+   Authentic Typewriter Typography meets Clean Modern Ocean Palette
    ============================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=Bai+Jamjuree:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Sarabun:ital,wght@0,300;0,400;0,600;0,700&display=swap');
 
 :root {
+    /* Fonts Strictly Preserved */
     --font-typewriter: 'Special Elite', 'Courier Prime', 'Courier New', monospace;
     --font-thai-mono: 'Courier Prime', 'Bai Jamjuree', 'Sarabun', monospace;
     
-    /* Logo Colors: Ocean Cyan & Deep Navy */
+    /* Logo Colors: Clean Vibrant Ocean Cyan & Deep Navy */
     --ocean-cyan: #06b6d4;
-    --ocean-light: #0ea5e9;
+    --ocean-light: #38bdf8;
     --ocean-primary: #0284c7;
     --ocean-deep: #0369a1;
     --ocean-navy: #0f172a;
     --ocean-slate: #1e293b;
-    --ocean-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%);
+    --ocean-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 60%, #0369a1 100%);
     --ocean-border: #0284c7;
 
-    /* Paper & Ledger Palette */
-    --paper-bg: #f5eedc;
-    --paper-card: #fffdfa;
-    --paper-cream: #faf5eb;
-    --paper-darker: #eae0c8;
-    --ink-black: #1a1816;
-    --ink-ribbon-red: #b91c1c;
-    --ink-carbon-blue: #0369a1;
+    /* Clean, Eye-friendly Paper & Card Palette */
+    --paper-bg: #f8fafc;
+    --paper-card: #ffffff;
+    --paper-cream: #f1f5f9;
+    --paper-darker: #e2e8f0;
+    --ink-black: #0f172a;
+    --ink-ribbon-red: #e11d48;
+    --ink-carbon-blue: #0284c7;
     --ink-faded: #64748b;
-    --border-ink: #334155;
+    --border-ink: #cbd5e1;
 }
 
 body {
     font-family: var(--font-thai-mono);
     background-color: var(--paper-bg);
     color: var(--ink-black);
-    background-image: 
-        radial-gradient(#d4c5a3 0.75px, transparent 0.75px),
-        radial-gradient(#d4c5a3 0.75px, var(--paper-bg) 0.75px);
-    background-size: 28px 28px;
-    background-position: 0 0, 14px 14px;
     line-height: 1.5;
 }
 
@@ -49,7 +45,7 @@ table, th, td {
 
 h1, h2, h3, h4, h5, h6, .font-heading, .typewriter-font, .font-typewriter {
     font-family: var(--font-typewriter);
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 /* Custom Sleek Scrollbar */
@@ -58,94 +54,93 @@ h1, h2, h3, h4, h5, h6, .font-heading, .typewriter-font, .font-typewriter {
     height: 6px;
 }
 ::-webkit-scrollbar-track {
-    background: #e2e8f0;
+    background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-    background: #0284c7;
+    background: #94a3b8;
     border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: #0369a1;
+    background: #0284c7;
 }
 
-/* Vintage Paper Card with Ocean Edge */
+/* Crisp Clean Paper Card */
 .typewriter-card {
-    background-color: var(--paper-card);
-    border: 2px solid var(--border-ink);
-    box-shadow: 4px 4px 0px rgba(15, 23, 42, 0.9);
+    background-color: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
     position: relative;
 }
 
-/* Primary Button: Ocean Cyan Keycap */
+/* Primary Button: Vibrant Ocean Cyan Keycap */
 .btn-ocean {
     font-family: var(--font-thai-mono);
     background: var(--ocean-gradient);
     color: #ffffff;
-    border: 2px solid #0369a1;
-    border-radius: 6px;
-    padding: 7px 16px;
+    border: 1.5px solid #0369a1;
+    border-radius: 8px;
+    padding: 8px 16px;
     font-size: 0.85rem;
     font-weight: 700;
-    box-shadow: 0 3px 0 #075985, 0 4px 6px rgba(2, 132, 199, 0.35);
-    transition: all 0.08s ease-in-out;
+    box-shadow: 0 2px 4px rgba(2, 132, 199, 0.25);
+    transition: all 0.12s ease-in-out;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
     cursor: pointer;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 .btn-ocean:hover {
-    filter: brightness(1.08);
-    transform: translateY(1px);
-    box-shadow: 0 2px 0 #075985, 0 2px 4px rgba(2, 132, 199, 0.3);
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(2, 132, 199, 0.32);
 }
 .btn-ocean:active {
-    transform: translateY(3px);
-    box-shadow: 0 0 0 #075985;
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(2, 132, 199, 0.2);
 }
 
 /* Typewriter Dark Keycap Button */
 .btn-typewriter {
     font-family: var(--font-thai-mono);
-    background-color: #1e293b;
+    background-color: #0f172a;
     color: #f8fafc;
-    border: 2px solid #0f172a;
-    border-radius: 6px;
-    padding: 6px 14px;
+    border: 1.5px solid #1e293b;
+    border-radius: 8px;
+    padding: 7px 15px;
     font-size: 0.85rem;
     font-weight: 600;
-    box-shadow: 0 3px 0 #020617, 0 4px 6px rgba(0, 0, 0, 0.3);
-    transition: all 0.08s ease-in-out;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+    transition: all 0.12s ease-in-out;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
     cursor: pointer;
-    text-shadow: 0 1px 1px black;
 }
 .btn-typewriter:hover {
-    background-color: #334155;
-    transform: translateY(1px);
-    box-shadow: 0 2px 0 #020617, 0 2px 4px rgba(0, 0, 0, 0.25);
+    background-color: #1e293b;
+    border-color: #334155;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(15, 23, 42, 0.2);
 }
 .btn-typewriter:active {
-    transform: translateY(3px);
-    box-shadow: 0 0 0 #020617;
+    transform: translateY(1px);
 }
 
-/* Secondary Button (Paper Style) */
+/* Secondary Button (Clean Slate Paper Style) */
 .btn-paper {
     font-family: var(--font-thai-mono);
-    background-color: #fffefb;
-    color: var(--ink-black);
-    border: 2px solid #334155;
-    border-radius: 6px;
-    padding: 6px 13px;
+    background-color: #ffffff;
+    color: #1e293b;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 7px 14px;
     font-size: 0.85rem;
     font-weight: 600;
-    box-shadow: 0 2px 0 #334155;
-    transition: all 0.08s ease-in-out;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.12s ease-in-out;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -153,15 +148,13 @@ h1, h2, h3, h4, h5, h6, .font-heading, .typewriter-font, .font-typewriter {
     cursor: pointer;
 }
 .btn-paper:hover {
-    background-color: #f1f5f9;
+    background-color: #f8fafc;
     border-color: #0284c7;
     color: #0284c7;
-    transform: translateY(1px);
-    box-shadow: 0 1px 0 #0284c7;
+    transform: translateY(-1px);
 }
 .btn-paper:active {
-    transform: translateY(2px);
-    box-shadow: 0 0 0 #334155;
+    transform: translateY(1px);
 }
 
 /* LINE Share Button */
@@ -169,68 +162,67 @@ h1, h2, h3, h4, h5, h6, .font-heading, .typewriter-font, .font-typewriter {
     font-family: var(--font-thai-mono);
     background-color: #06c755;
     color: white;
-    border: 2px solid #049f43;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 0.8rem;
+    border: 1.5px solid #05a746;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 0.82rem;
     font-weight: 700;
-    box-shadow: 0 2px 0 #037833;
+    box-shadow: 0 2px 4px rgba(6, 199, 85, 0.25);
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     cursor: pointer;
+    transition: all 0.12s ease;
 }
 .btn-line:hover {
     background-color: #05b34c;
-    transform: translateY(1px);
+    transform: translateY(-1px);
 }
 
-/* Vintage Dual Ribbon Banner (Ocean Cyan & Dark Navy) */
+/* Top Accent Stripe */
 .ribbon-banner {
-    height: 7px;
-    background: repeating-linear-gradient(
-        45deg,
-        #0284c7,
-        #0284c7 12px,
-        #0f172a 12px,
-        #0f172a 24px
-    );
-    border-bottom: 2px solid #0f172a;
+    height: 4px;
+    background: linear-gradient(90deg, #0ea5e9, #0284c7, #0f172a);
 }
 
-/* Rubber Stamp Badges */
+/* Status Badges */
 .badge-stamp {
-    display: inline-block;
-    padding: 2px 8px;
-    font-family: var(--font-typewriter);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    font-family: var(--font-thai-mono);
     font-size: 0.75rem;
     font-weight: 700;
-    text-transform: uppercase;
-    border: 2px solid;
-    border-radius: 4px;
-    transform: rotate(-1deg);
+    border: 1px solid;
+    border-radius: 6px;
     line-height: 1.2;
 }
 
 .badge-stamp-ocean {
-    color: #0284c7;
-    border-color: #0284c7;
-    background-color: rgba(14, 165, 233, 0.08);
+    color: #0369a1;
+    border-color: #bae6fd;
+    background-color: #f0f9ff;
 }
 .badge-stamp-red {
-    color: var(--ink-ribbon-red);
-    border-color: var(--ink-ribbon-red);
-    background-color: rgba(185, 28, 28, 0.08);
+    color: #be123c;
+    border-color: #fecdd3;
+    background-color: #fff1f2;
 }
 .badge-stamp-blue {
-    color: var(--ink-carbon-blue);
-    border-color: var(--ink-carbon-blue);
-    background-color: rgba(3, 105, 161, 0.08);
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+    background-color: #eff6ff;
 }
 .badge-stamp-green {
     color: #047857;
-    border-color: #047857;
-    background-color: rgba(4, 120, 87, 0.08);
+    border-color: #a7f3d0;
+    background-color: #ecfdf5;
+}
+.badge-stamp-amber {
+    color: #b45309;
+    border-color: #fde68a;
+    background-color: #fffbeb;
 }
 
 /* System Version Badge */
@@ -238,33 +230,33 @@ h1, h2, h3, h4, h5, h6, .font-heading, .typewriter-font, .font-typewriter {
     font-family: var(--font-typewriter);
     background: linear-gradient(135deg, #0ea5e9, #0284c7);
     color: #ffffff;
-    padding: 2px 8px;
+    padding: 3px 10px;
     border-radius: 9999px;
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.5px;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    box-shadow: 0 1px 3px rgba(2, 132, 199, 0.4);
+    gap: 5px;
+    box-shadow: 0 1px 3px rgba(2, 132, 199, 0.3);
     cursor: pointer;
     transition: all 0.15s ease;
 }
 .badge-version:hover {
-    transform: scale(1.05);
+    transform: scale(1.04);
     filter: brightness(1.1);
 }
 
 /* Fullscreen Login Overlay */
 #login-overlay {
-    background-color: rgba(15, 23, 42, 0.88);
-    backdrop-filter: blur(6px);
+    background-color: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(8px);
 }
 
 /* Modals */
 .modal-backdrop {
-    background-color: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(3px);
+    background-color: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
 }
 
 /* A4 Print Document Styles */
@@ -273,9 +265,9 @@ h1, h2, h3, h4, h5, h6, .font-heading, .typewriter-font, .font-typewriter {
     min-height: 297mm;
     padding: 12mm 15mm 15mm 15mm;
     margin: 0 auto;
-    background: #fffdf9;
-    color: #1a1816;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     position: relative;
     box-sizing: border-box;
 }
@@ -286,14 +278,14 @@ h1, h2, h3, h4, h5, h6, .font-heading, .typewriter-font, .font-typewriter {
     left: 50%;
     transform: translate(-50%, -50%) rotate(-25deg);
     font-family: var(--font-typewriter);
-    font-size: 7rem;
+    font-size: 6rem;
     font-weight: 900;
-    color: rgba(185, 28, 28, 0.12);
-    border: 8px solid rgba(185, 28, 28, 0.12);
+    color: rgba(225, 29, 72, 0.12);
+    border: 6px solid rgba(225, 29, 72, 0.15);
     border-radius: 12px;
-    padding: 10px 40px;
+    padding: 10px 36px;
     text-transform: uppercase;
-    letter-spacing: 12px;
+    letter-spacing: 10px;
     pointer-events: none;
     z-index: 50;
     user-select: none;

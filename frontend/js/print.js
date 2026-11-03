@@ -13,9 +13,9 @@ window.printModule = {
         if (!sheet) return;
 
         sheet.innerHTML = `
-            <div class="flex items-center justify-center p-20 text-stone-600 font-mono">
-                <div class="animate-spin rounded-full h-7 w-7 border-b-2 border-stone-800"></div>
-                <span class="ml-3 text-xs">กำลังสอดกระดาษพิมพ์ดีด A4...</span>
+            <div class="flex items-center justify-center p-20 text-slate-500 font-mono">
+                <div class="animate-spin rounded-full h-7 w-7 border-b-2 border-sky-600"></div>
+                <span class="ml-3 text-xs">กำลังเตรียมเอกสารสำหรับพิมพ์ A4...</span>
             </div>
         `;
 
