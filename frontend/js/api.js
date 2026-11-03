@@ -141,5 +141,17 @@ const api = {
     getLeads: () => request('/leads'),
     updateLeadStatus: (id, status) => request(`/leads/${id}`, { method: 'PUT', body: JSON.stringify({ status }) }),
     deleteLead: (id) => request(`/leads/${id}`, { method: 'DELETE' }),
-    convertLeadToCustomer: (id) => request(`/leads/${id}/convert`, { method: 'POST' })
+    convertLeadToCustomer: (id) => request(`/leads/${id}/convert`, { method: 'POST' }),
+
+    // Website CMS & Content Management
+    getCmsContent: () => request('/cms/content'),
+    updateCmsContent: (data) => request('/cms/content', { method: 'PUT', body: JSON.stringify(data) }),
+    getCmsServices: () => request('/cms/services'),
+    createCmsService: (data) => request('/cms/services', { method: 'POST', body: JSON.stringify(data) }),
+    updateCmsService: (id, data) => request(`/cms/services/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    deleteCmsService: (id) => request(`/cms/services/${id}`, { method: 'DELETE' }),
+    getCmsPortfolio: () => request('/cms/portfolio'),
+    createCmsPortfolio: (data) => request('/cms/portfolio', { method: 'POST', body: JSON.stringify(data) }),
+    updateCmsPortfolio: (id, data) => request(`/cms/portfolio/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    deleteCmsPortfolio: (id) => request(`/cms/portfolio/${id}`, { method: 'DELETE' })
 };

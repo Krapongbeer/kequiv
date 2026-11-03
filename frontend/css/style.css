@@ -9,6 +9,7 @@
     /* Fonts Strictly Preserved */
     --font-typewriter: 'Special Elite', 'Courier Prime', 'Courier New', monospace;
     --font-thai-mono: 'Courier Prime', 'Bai Jamjuree', 'Sarabun', monospace;
+    --font-thai-heading: 'Bai Jamjuree', 'Prompt', -apple-system, BlinkMacSystemFont, sans-serif;
     
     /* Logo Colors: Clean Vibrant Ocean Cyan & Deep Navy */
     --ocean-cyan: #06b6d4;
@@ -32,6 +33,24 @@
     --border-ink: #cbd5e1;
 }
 
+/* Dark Mode Overrides */
+html.dark {
+    --paper-bg: #070d1e;
+    --paper-card: #0d162d;
+    --paper-cream: #0f1c3a;
+    --paper-darker: #152449;
+    --ink-black: #f8fafc;
+    --ink-faded: #94a3b8;
+    --border-ink: #1e293b;
+    background-color: #070d1e;
+    color: #f8fafc;
+}
+
+html.dark body {
+    background-color: #070d1e;
+    color: #f8fafc;
+}
+
 body {
     font-family: var(--font-thai-mono);
     background-color: var(--paper-bg);
@@ -43,9 +62,14 @@ table, th, td {
     word-break: normal;
 }
 
-h1, h2, h3, h4, h5, h6, .font-heading, .typewriter-font, .font-typewriter {
+.font-typewriter, .typewriter-font {
     font-family: var(--font-typewriter);
     letter-spacing: 0.3px;
+}
+
+.font-heading, h1.font-heading, h2.font-heading, h3.font-heading, .heading-modern {
+    font-family: var(--font-thai-heading);
+    letter-spacing: -0.2px;
 }
 
 /* Custom Sleek Scrollbar */

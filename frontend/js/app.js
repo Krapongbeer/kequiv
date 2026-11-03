@@ -23,6 +23,9 @@ const app = {
     async init() {
         console.log('Kequiv v2.3 Initializing...');
 
+        // Initialize Theme (Dark/Light mode)
+        this.initTheme();
+
         // Initialize Storefront if loaded
         if (window.storefront && typeof window.storefront.init === 'function') {
             window.storefront.init();
@@ -50,7 +53,13 @@ const app = {
         // Check hash navigation
         const hash = window.location.hash || '';
         const backofficeTabs = ['#dashboard', '#documents', '#create-doc', '#customers', '#reservations', '#settings'];
-        if (hash.startsWith('#backoffice') || backofficeTabs.includes(hash)) {
+        if (hash === '#cms' || hash.startsWith('#cms-')) {
+            if (this.state.currentUser) {
+                this.openCms(hash.replace('#cms-', '').replace('#cms', ''));
+            } else {
+                this.openStorefront();
+            }
+        } else if (hash.startsWith('#backoffice') || backofficeTabs.includes(hash)) {
             if (this.state.currentUser) {
                 const target = hash.replace('#backoffice-', '').replace('#backoffice', '') || 'dashboard';
                 this.openBackoffice(backofficeTabs.includes(hash) ? hash.replace('#', '') : target);
@@ -62,15 +71,61 @@ const app = {
         }
     },
 
+    toggleTheme() {
+        const isDark = document.documentElement.classList.contains('dark');
+        if (isDark) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('kequiv_theme', 'light');
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('kequiv_theme', 'dark');
+        }
+        this.updateThemeButton();
+    },
+
+    initTheme() {
+        const savedTheme = localStorage.getItem('kequiv_theme') || 'dark'; // Default to high-tech dark mode!
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        this.updateThemeButton();
+    },
+
+    updateThemeButton() {
+        const isDark = document.documentElement.classList.contains('dark');
+        document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
+            btn.innerHTML = isDark ? '<span>☀️</span>' : '<span>🌙</span>';
+            btn.title = isDark ? 'เปลี่ยนเป็นโหมดสว่าง (Light Mode)' : 'เปลี่ยนเป็นโหมดมืด (Dark Mode)';
+        });
+    },
+
+    openCms(targetTab = null) {
+        if (!this.state.currentUser) {
+            this.showLoginScreen();
+            return;
+        }
+        document.getElementById('storefront-view')?.classList.add('hidden');
+        document.getElementById('backoffice-view')?.classList.add('hidden');
+        document.getElementById('cms-view')?.classList.remove('hidden');
+
+        document.body.classList.remove('flex', 'flex-col', 'md:flex-row');
+        this.hideLoginScreen();
+        if (window.cmsModule) {
+            window.cmsModule.init();
+            if (targetTab) window.cmsModule.switchTab(targetTab);
+        }
+    },
+
     openBackoffice(targetTab = null) {
         if (!this.state.currentUser) {
             this.showLoginScreen();
             return;
         }
-        const storeEl = document.getElementById('storefront-view');
-        const backofficeEl = document.getElementById('backoffice-view');
-        if (storeEl) storeEl.classList.add('hidden');
-        if (backofficeEl) backofficeEl.classList.remove('hidden');
+        document.getElementById('storefront-view')?.classList.add('hidden');
+        document.getElementById('cms-view')?.classList.add('hidden');
+        document.getElementById('backoffice-view')?.classList.remove('hidden');
 
         document.body.classList.add('flex', 'flex-col', 'md:flex-row');
         this.hideLoginScreen();
@@ -78,10 +133,9 @@ const app = {
     },
 
     openStorefront() {
-        const storeEl = document.getElementById('storefront-view');
-        const backofficeEl = document.getElementById('backoffice-view');
-        if (backofficeEl) backofficeEl.classList.add('hidden');
-        if (storeEl) storeEl.classList.remove('hidden');
+        document.getElementById('backoffice-view')?.classList.add('hidden');
+        document.getElementById('cms-view')?.classList.add('hidden');
+        document.getElementById('storefront-view')?.classList.remove('hidden');
 
         document.body.classList.remove('flex', 'flex-col', 'md:flex-row');
         this.hideLoginScreen();
@@ -89,22 +143,61 @@ const app = {
     },
 
     updateStorefrontAuthButton() {
-        const btn = document.getElementById('store-btn-auth');
-        const mobileBtn = document.getElementById('store-mobile-btn-auth');
+        const container = document.getElementById('store-auth-container');
+        const mobileContainer = document.getElementById('store-mobile-auth-container');
+        const isDark = document.documentElement.classList.contains('dark');
+        const themeIcon = isDark ? '☀️' : '🌙';
+
         if (this.state.currentUser) {
-            const html = `<span>💼</span> <span>ระบบหลังร้าน (${this.state.currentUser.username})</span>`;
-            if (btn) {
-                btn.innerHTML = html;
-                btn.classList.add('bg-sky-700', 'text-white');
+            const html = `
+                <button type="button" onclick="app.openCms()" class="btn-paper text-xs py-1.5 px-3 flex items-center gap-1.5 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:border-sky-500" title="ระบบจัดการเนื้อหาเว็บไซต์">
+                    <span>🖥️</span> <span class="hidden sm:inline">จัดการเนื้อหาเว็บ</span>
+                </button>
+                <button type="button" onclick="app.openBackoffice()" class="btn-ocean text-xs py-1.5 px-3 flex items-center gap-1.5" title="ระบบงานขาย ออกบิล ลูกค้า">
+                    <span>📑</span> <span class="hidden sm:inline">ระบบออกบิล/งานขาย</span>
+                </button>
+                <button type="button" onclick="app.toggleTheme()" class="theme-toggle-btn p-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs hover:border-sky-500 transition" title="สลับโหมดมืด/สว่าง">
+                    ${themeIcon}
+                </button>
+            `;
+            if (container) container.innerHTML = html;
+            if (mobileContainer) {
+                mobileContainer.innerHTML = `
+                    <div class="grid grid-cols-2 gap-2 pt-2">
+                        <button type="button" onclick="app.openCms()" class="btn-paper py-2 text-xs flex items-center justify-center gap-1">
+                            <span>🖥️</span> จัดการเนื้อหาเว็บ
+                        </button>
+                        <button type="button" onclick="app.openBackoffice()" class="btn-ocean py-2 text-xs flex items-center justify-center gap-1">
+                            <span>📑</span> ระบบออกบิล
+                        </button>
+                    </div>
+                `;
             }
-            if (mobileBtn) mobileBtn.innerHTML = html;
         } else {
-            const html = `<span>🔐</span> <span>จัดการหลังร้าน</span>`;
-            if (btn) {
-                btn.innerHTML = html;
-                btn.classList.remove('bg-sky-700');
+            const html = `
+                <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" rel="noopener" class="btn-line text-xs py-2 px-3 sm:px-4 shadow-sm" title="เพิ่มเพื่อนทาง LINE">
+                    <span class="text-base">💬</span>
+                    <span class="hidden sm:inline">แอด LINE @vcv6921d</span>
+                    <span class="sm:hidden">LINE</span>
+                </a>
+                <button type="button" onclick="app.showLoginScreen()" class="btn-ocean text-xs py-2 px-3 sm:px-4 shadow-sm" title="เข้าสู่ระบบสำหรับทีมงาน">
+                    <span>🔐</span>
+                    <span class="hidden md:inline">เข้าสู่ระบบทีมงาน</span>
+                </button>
+                <button type="button" onclick="app.toggleTheme()" class="theme-toggle-btn p-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs hover:border-sky-500 transition" title="สลับโหมดมืด/สว่าง">
+                    ${themeIcon}
+                </button>
+            `;
+            if (container) container.innerHTML = html;
+            if (mobileContainer) {
+                mobileContainer.innerHTML = `
+                    <div class="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
+                        <button type="button" onclick="app.showLoginScreen()" class="w-full btn-ocean py-2 text-xs">
+                            🔐 เข้าสู่ระบบทีมงาน
+                        </button>
+                    </div>
+                `;
             }
-            if (mobileBtn) mobileBtn.innerHTML = html;
         }
     },
 

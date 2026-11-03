@@ -45,6 +45,7 @@ app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth', require('./routes/auth').router);
 app.use('/api/leads', require('./routes/leads'));
+app.use('/api/cms', require('./routes/cms'));
 
 // Version endpoint (Public)
 app.get('/api/version', (req, res) => {

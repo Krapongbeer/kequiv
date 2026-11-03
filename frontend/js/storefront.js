@@ -7,6 +7,53 @@ const storefront = {
     init() {
         console.log('Kequiv Storefront Initialized');
         this.setupEventListeners();
+        this.loadCmsData();
+    },
+
+    async loadCmsData() {
+        try {
+            const [contentRes, servicesRes, portRes] = await Promise.all([
+                api.getCmsContent().catch(() => null),
+                api.getCmsServices().catch(() => null),
+                api.getCmsPortfolio().catch(() => null)
+            ]);
+
+            if (contentRes && contentRes.data) {
+                this.refreshFromCms(contentRes.data);
+            }
+        } catch (e) {
+            console.warn('Failed to load dynamic CMS data:', e);
+        }
+    },
+
+    refreshFromCms(c) {
+        if (!c) return;
+        const bEl = document.getElementById('store-hero-badge');
+        if (bEl && c.hero_badge) bEl.textContent = c.hero_badge;
+
+        const tEl = document.getElementById('store-hero-title');
+        if (tEl && c.hero_title) tEl.innerHTML = this.escapeHtml(c.hero_title);
+
+        const subEl = document.getElementById('store-hero-subtitle');
+        if (subEl && c.hero_subtitle) subEl.textContent = c.hero_subtitle;
+
+        const dEl = document.getElementById('store-hero-desc');
+        if (dEl && c.hero_description) dEl.textContent = c.hero_description;
+
+        const pEl = document.getElementById('store-contact-phone');
+        if (pEl && c.phone) {
+            pEl.textContent = c.phone;
+            pEl.href = 'tel:' + c.phone.replace(/[^0-9]/g, '');
+        }
+
+        const lEl = document.getElementById('store-contact-line');
+        if (lEl && c.line_id) lEl.textContent = c.line_id;
+
+        const addrPEl = document.getElementById('store-contact-addr-phayao');
+        if (addrPEl && c.address_phayao) addrPEl.textContent = c.address_phayao;
+
+        const addrCEl = document.getElementById('store-contact-addr-cm');
+        if (addrCEl && c.address_cm) addrCEl.textContent = c.address_cm;
     },
 
     setupEventListeners() {

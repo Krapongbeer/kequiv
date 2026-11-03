@@ -3,10 +3,22 @@
  */
 
 module.exports = {
-    version: '2.3.0',
+    version: '2.4.0',
     releaseDate: '2026-11-03',
-    codename: 'Kequiv IT & Systems Public Storefront Edition',
+    codename: 'Dark Mode, Standalone Website CMS & Clean Typography Edition',
     changelog: [
+        {
+            version: '2.4.0',
+            date: '2026-11-03',
+            title: 'Dark/Light Mode, Standalone Website CMS & Typography Overhaul',
+            features: [
+                'ระบบ Dark Mode (โหมดมืด) และ Light Mode (โหมดสว่าง) สลับได้ทันที จดจำค่าผ่าน LocalStorage',
+                'แยก ระบบจัดการเนื้อหาเว็บ (Website CMS) ออกจากระบบงานขายและออกบิล (Billing ERP) 100%',
+                'ระบบหลังบ้าน CMS จัดการแบนเนอร์, จัดการบริการ, จัดการผลงานจริง, และกล่องข้อความ Leads จากหน้าร้าน',
+                'จัดระเบียบ Layout ใหม่ เมนูบาร์แถวเดียว (No text dropping) และปรับฟอนต์หัวข้อให้อ่านง่าย คมชัด สมดุล',
+                'ปรับโลโก้ให้เด่น ใหญ่ คมชัด ปราศจากกรอบสีขาวบังสายตา'
+            ]
+        },
         {
             version: '2.3.0',
             date: '2026-11-03',
