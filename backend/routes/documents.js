@@ -191,7 +191,6 @@ router.get('/:id', async (req, res) => {
                     *,
                     customer:customers(name, tax_id, address, phone, email),
                     project:customer_projects(project_name, site_address, contact_person),
-                    reference_doc:documents!documents_reference_document_id_fkey(code, type),
                     items:document_items(*)
                 `)
                 .eq('id', id)
@@ -199,7 +198,24 @@ router.get('/:id', async (req, res) => {
                 .single();
 
             if (error || !doc) {
+                console.error('Supabase fetch document error:', error);
                 return res.status(404).json({ success: false, error: 'ไม่พบเอกสาร' });
+            }
+
+            // If reference_document_id exists, fetch reference doc code
+            let reference_code = null;
+            let reference_type = null;
+            if (doc.reference_document_id) {
+                const { data: refDoc } = await supabase
+                    .from('documents')
+                    .select('code, type')
+                    .eq('id', doc.reference_document_id)
+                    .maybeSingle();
+
+                if (refDoc) {
+                    reference_code = refDoc.code;
+                    reference_type = refDoc.type;
+                }
             }
 
             const flattened = {
@@ -212,8 +228,8 @@ router.get('/:id', async (req, res) => {
                 project_name: doc.project ? doc.project.project_name : null,
                 project_site_address: doc.project ? doc.project.site_address : '',
                 project_contact_person: doc.project ? doc.project.contact_person : '',
-                reference_code: doc.reference_doc ? doc.reference_doc.code : null,
-                reference_type: doc.reference_doc ? doc.reference_doc.type : null,
+                reference_code,
+                reference_type,
                 items: (doc.items || []).sort((a, b) => a.sort_order - b.sort_order)
             };
 
