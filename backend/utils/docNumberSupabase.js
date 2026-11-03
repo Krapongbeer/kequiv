@@ -186,9 +186,24 @@ async function reserveBatchNumbersSupabase(supabase, docType, count, options = {
         nextNum++;
     }
 
-    // Insert reservations
+    // Insert reservations with safe explicit IDs
     if (rowsToInsert.length > 0) {
-        await supabase.from('document_reservations').insert(rowsToInsert);
+        const { data: maxRow } = await supabase
+            .from('document_reservations')
+            .select('id')
+            .order('id', { ascending: false })
+            .limit(1);
+        let nextId = (maxRow?.[0]?.id || 0) + 1;
+
+        rowsToInsert.forEach(row => {
+            row.id = nextId++;
+        });
+
+        const { error: insErr } = await supabase.from('document_reservations').insert(rowsToInsert);
+        if (insErr) {
+            console.error('reserveBatchNumbersSupabase insert error:', insErr);
+            throw new Error(insErr.message);
+        }
     }
 
     // Update sequence

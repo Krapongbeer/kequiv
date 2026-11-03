@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.0.0',
+    version: '2.1.0',
     releaseDate: '2026-11-03',
-    codename: 'Ocean Typewriter Edition',
+    codename: 'Ocean Typewriter Auto-Buffer Edition',
     changelog: [
+        {
+            version: '2.1.0',
+            date: '2026-11-03',
+            title: 'Automated Daily Reservation Buffer Pool',
+            features: [
+                'ระบบกันเลขที่บิลสำรองอัตโนมัติวันละ 5 เลข (Daily Auto-Buffer Pool)',
+                'การันตีมีช่องว่างสำหรับออกบิลย้อนหลังได้ตลอดเวลา ไม่ชนเลขใคร',
+                'ทำงานอัตโนมัติทั้งบน Vercel Cloud Serverless และ Local Machine'
+            ]
+        },
         {
             version: '2.0.0',
             date: '2026-11-03',

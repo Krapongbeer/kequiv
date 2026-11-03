@@ -11,11 +11,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const versionInfo = require('./config/version');
 const { requireAuth } = require('./middleware/auth');
+const { autoBufferMiddleware, ensureDailyBuffer } = require('./services/autoBuffer');
 
 // Middlewares
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(autoBufferMiddleware);
 
 // Trust proxy for Vercel
 app.set('trust proxy', 1);
@@ -89,6 +91,9 @@ app.use((req, res, next) => {
     next();
 });
 
+// Run Daily Auto-Buffer on startup
+ensureDailyBuffer(5).catch(err => console.error('Initial auto-buffer error:', err));
+
 // Start server when run directly (not on Vercel serverless)
 if (!process.env.VERCEL) {
     app.listen(PORT, () => {
@@ -96,6 +101,7 @@ if (!process.env.VERCEL) {
         console.log(`🚀 Kequiv Web System v${versionInfo.version} is running!`);
         console.log(`📍 URL: http://localhost:${PORT}`);
         console.log(`🔒 Security: Authentication & Rate Limiting ACTIVE`);
+        console.log(`📦 Auto-Buffer: Daily 5 Reserve Pool ACTIVE`);
         console.log(`====================================================`);
     });
 }
