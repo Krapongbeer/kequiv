@@ -1,0 +1,24 @@
+{
+  "name": "kequiv-web",
+  "version": "1.0.0",
+  "description": "Business Document & Customer Management System for Small Businesses",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "seed": "node backend/seed.js"
+  },
+  "keywords": [
+    "invoice",
+    "quotation",
+    "receipt",
+    "billing",
+    "customer-management"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "sharp": "^0.35.5"
+  }
+}

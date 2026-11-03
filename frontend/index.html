@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kequiv - ระบบจัดการเอกสารธุรกิจและลูกค้า</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        typewriter: ['"Special Elite"', '"Courier Prime"', 'Courier', 'monospace'],
+                        heading: ['"Special Elite"', '"Courier Prime"', 'monospace'],
+                        body: ['"Courier Prime"', '"Bai Jamjuree"', '"Sarabun"', 'monospace'],
+                        mono: ['"Courier Prime"', '"Bai Jamjuree"', 'monospace']
+                    },
+                    colors: {
+                        paper: {
+                            50: '#fdfbf7',
+                            100: '#f7f1e1',
+                            200: '#eee3c8',
+                            300: '#dfceaa',
+                            800: '#2b2725',
+                            900: '#1c1917'
+                        },
+                        ink: {
+                            black: '#1f1d1a',
+                            red: '#a82020',
+                            blue: '#1e3a8a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row antialiased selection:bg-amber-200 selection:text-stone-900">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col items-end max-w-sm pointer-events-auto"></div>
+
+    <!-- Sidebar Navigation: Vintage Typewriter Desk -->
+    <aside id="app-sidebar" class="w-full md:w-72 bg-[#2b2725] text-[#f5eedc] border-r-4 border-[#171514] flex flex-col shrink-0 select-none no-print shadow-2xl z-20">
+        <!-- Dual Ribbon Indicator Line -->
+        <div class="ribbon-banner"></div>
+
+        <!-- Brand Header: Enamelled Typewriter Plate -->
+        <div class="p-5 border-b-2 border-[#1c1917] bg-[#24201e]">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-lg bg-[#141211] border-2 border-[#57534e] text-amber-100 font-bold text-2xl flex items-center justify-center font-typewriter shadow-inner shrink-0">
+                    ⌨️
+                </div>
+                <div>
+                    <h1 class="font-bold text-amber-50 font-typewriter text-xl tracking-wider">KEQUIV</h1>
+                    <p id="header-company-name" class="text-xs text-stone-400 font-mono truncate max-w-[150px]">K-equiv Co., Ltd.</p>
+                </div>
+            </div>
+            <div class="mt-3 flex items-center justify-between text-[11px] font-mono border-t border-stone-800 pt-2">
+                <span class="text-stone-400">แบบฟอร์มพิมพ์ดีด</span>
+                <span class="px-2 py-0.5 bg-stone-800 text-stone-300 border border-stone-700 rounded text-[10px] font-bold">
+                    EDITION-88
+                </span>
+            </div>
+        </div>
+
+        <!-- Navigation Menu: Typewriter Keys -->
+        <nav class="p-3 space-y-2 flex-1">
+            <a href="#dashboard" data-tab="dashboard" class="nav-link nav-tab-retro active flex items-center gap-3 px-3.5 py-2.5 text-sm transition">
+                <span class="font-typewriter text-base">📊</span>
+                <span class="font-mono">1. สมุดสรุปยอด (แดชบอร์ด)</span>
+            </a>
+            <a href="#documents" data-tab="documents" class="nav-link nav-tab-retro flex items-center gap-3 px-3.5 py-2.5 text-sm transition">
+                <span class="font-typewriter text-base">📄</span>
+                <span class="font-mono">2. แฟ้มเอกสารทั้งหมด</span>
+            </a>
+            <a href="#create-doc" data-tab="create-doc" class="nav-link nav-tab-retro flex items-center gap-3 px-3.5 py-2.5 text-sm transition">
+                <span class="font-typewriter text-base">✍️</span>
+                <span class="font-mono">3. พิมพ์ดีดออกบิลใหม่</span>
+            </a>
+            <a href="#customers" data-tab="customers" class="nav-link nav-tab-retro flex items-center gap-3 px-3.5 py-2.5 text-sm transition">
+                <span class="font-typewriter text-base">👥</span>
+                <span class="font-mono">4. บัญชีลูกค้า & โครงการ</span>
+            </a>
+            <a href="#reservations" data-tab="reservations" class="nav-link nav-tab-retro flex items-center gap-3 px-3.5 py-2.5 text-sm transition">
+                <span class="font-typewriter text-base">🔢</span>
+                <span class="font-mono">5. สมุดกันเลขที่บิลย้อนหลัง</span>
+            </a>
+            <a href="#settings" data-tab="settings" class="nav-link nav-tab-retro flex items-center gap-3 px-3.5 py-2.5 text-sm transition">
+                <span class="font-typewriter text-base">⚙️</span>
+                <span class="font-mono">6. ตั้งค่าหัวกระดาษร้าน</span>
+            </a>
+        </nav>
+
+        <!-- Sidebar Mechanical Footer -->
+        <div class="p-4 border-t-2 border-[#1c1917] bg-[#24201e] text-[11px] font-mono text-stone-400">
+            <div class="flex items-center justify-between text-stone-300 font-bold mb-1">
+                <span>MODEL: TYPEWRITER-88</span>
+                <span class="text-amber-500 font-mono">● ONLINE</span>
+            </div>
+            <div class="text-[10px] text-stone-500">ระบบคุมเลขไม่ชนกัน • รองรับพิมพ์ย้อนหลัง</div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area: Paper Desk -->
+    <main id="app-content" class="flex-1 flex flex-col min-w-0 overflow-y-auto no-print">
+        <!-- Top Mechanical Bar -->
+        <header id="app-header" class="h-16 bg-[#eae0c8] border-b-2 border-[#292524] px-6 flex items-center justify-between sticky top-0 z-10 shrink-0 shadow-sm">
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-mono font-bold px-2.5 py-1 bg-[#fffdfa] border-2 border-stone-800 text-stone-900 rounded shadow-sm">
+                    🔒 ZERO-COLLISION NUMBERING
+                </span>
+                <span class="text-xs text-stone-700 hidden sm:inline font-mono">
+                    ระบบป้องกันเลขชนกัน 100% • รองรับกันเลขบิลย้อนหลัง • หลายหัวบิล
+                </span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="app.switchTab('create-doc')" class="btn-typewriter text-xs">
+                    <span>✍️</span>
+                    <span>+ พิมพ์ออกบิลใหม่</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- View Containers -->
+        <div class="p-4 md:p-8 flex-1 max-w-7xl w-full mx-auto">
+            <!-- 1. View: Dashboard -->
+            <div id="view-dashboard" class="tab-view">
+                <div id="dashboard-content"></div>
+            </div>
+
+            <!-- 2. View: Documents List -->
+            <div id="view-documents" class="tab-view hidden">
+                <div id="documents-content"></div>
+            </div>
+
+            <!-- 3. View: Create Document Form -->
+            <div id="view-create-doc" class="tab-view hidden">
+                <div id="create-doc-content"></div>
+            </div>
+
+            <!-- 4. View: Customers & Projects -->
+            <div id="view-customers" class="tab-view hidden">
+                <div id="customers-content"></div>
+            </div>
+
+            <!-- 5. View: Reserved Numbers Pool -->
+            <div id="view-reservations" class="tab-view hidden">
+                <div id="reservations-content"></div>
+            </div>
+
+            <!-- 6. View: Settings -->
+            <div id="view-settings" class="tab-view hidden">
+                <div id="settings-content"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ======================================================== -->
+    <!-- MODALS SECTION -->
+    <!-- ======================================================== -->
+
+    <!-- 1. Modal: Print & A4 View -->
+    <div id="modal-print" class="modal-container fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-2 sm:p-4">
+        <div id="print-modal-inner" class="relative bg-slate-100 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[96vh] flex flex-col overflow-hidden">
+            <!-- Print Modal Header (No Print) -->
+            <div class="no-print p-4 bg-white border-b border-slate-200 flex items-center justify-between sticky top-0 z-20">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🖨️</span>
+                    <span class="font-bold text-slate-800 text-sm font-heading">ตัวอย่างเอกสารก่อนพิมพ์ (A4 Print Preview)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.printModule.triggerPrint()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2">
+                        <span>🖨️ สั่งพิมพ์เอกสาร / บันทึก PDF</span>
+                    </button>
+                    <button class="modal-close-btn px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-xl text-xs font-bold transition">
+                        ปิดหน้าต่าง
+                    </button>
+                </div>
+            </div>
+
+            <!-- Printable Sheet Container -->
+            <div class="overflow-y-auto p-4 sm:p-8 flex-1 flex justify-center bg-slate-200/80">
+                <div id="print-sheet"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Modal: Add/Edit Customer -->
+    <div id="modal-customer" class="modal-container fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 relative border border-slate-200">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                <h3 id="modal-customer-title" class="font-bold text-slate-900 font-heading text-lg">เพิ่มข้อมูลลูกค้า</h3>
+                <button class="modal-close-btn text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+            <form id="form-customer" onsubmit="event.preventDefault(); window.customersModule.submitCustomer();" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อลูกค้า / ชื่อบริษัท <span class="text-rose-500">*</span></label>
+                    <input type="text" name="name" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">เลขประจำตัวผู้เสียภาษี (ถ้ามี)</label>
+                    <input type="text" name="tax_id" placeholder="13 หลัก" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">ที่อยู่ลูกค้า</label>
+                    <textarea name="address" rows="2" class="w-full p-2.5 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">เบอร์โทรศัพท์</label>
+                        <input type="text" name="phone" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">อีเมล</label>
+                        <input type="email" name="email" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">บันทึกช่วยจำ (หมายเหตุ)</label>
+                    <input type="text" name="note" placeholder="เช่น ลูกค้าประจำ, เครดิต 30 วัน" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none">
+                </div>
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" class="modal-close-btn px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl transition">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition">บันทึกข้อมูลลูกค้า</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. Modal: Customer Projects Manager (หลายหัวบิลต่อลูกค้า) -->
+    <div id="modal-projects" class="modal-container fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-xl w-full p-6 relative border border-slate-200">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                <div>
+                    <h3 class="font-bold text-slate-900 font-heading text-lg">จัดการโครงการ / หัวบิลย่อย</h3>
+                    <p class="text-xs text-slate-500">ลูกค้า: <span id="modal-projects-customer-name" class="font-bold text-blue-600"></span></p>
+                </div>
+                <button class="modal-close-btn text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+
+            <!-- List of existing projects -->
+            <div class="mb-5">
+                <label class="block text-xs font-bold text-slate-700 mb-2">โครงการ / หัวบิลที่มีอยู่:</label>
+                <div id="projects-modal-list" class="max-h-56 overflow-y-auto pr-1"></div>
+            </div>
+
+            <!-- Form: Add new project -->
+            <div class="pt-4 border-t border-slate-100">
+                <h4 class="text-xs font-bold text-slate-800 mb-2">+ เพิ่มโครงการ / หัวบิลย่อยใหม่</h4>
+                <form id="form-add-project" onsubmit="event.preventDefault(); window.customersModule.submitNewProjectFromModal();" class="space-y-3">
+                    <div>
+                        <input type="text" name="project_name" placeholder="ชื่อโครงการ (เช่น โครงการคอนโดสุขุมวิท, โครงการปรับปรุงอาคาร B) *" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500" required>
+                    </div>
+                    <div>
+                        <input type="text" name="site_address" placeholder="ที่อยู่หน้างาน / สถานที่ส่งของโครงการ (ถ้ามี)" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" name="contact_person" placeholder="ผู้ประสานงาน / เบอร์โทร" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                        <input type="text" name="note" placeholder="หมายเหตุโครงการ" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm transition">
+                        + บันทึกโครงการนี้
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Modal: Reserve Numbers Pool (กันเลขที่ไว้ล่วงหน้า) -->
+    <div id="modal-reserve" class="modal-container fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 relative border border-slate-200">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                <div>
+                    <h3 class="font-bold text-slate-900 font-heading text-lg">กันเลขที่เอกสารสำหรับออกบิลย้อนหลัง</h3>
+                    <p class="text-xs text-slate-500">ระบบจะล็อกเลขไว้ในคลัง และบิลปกติจะข้ามไปรันต่อ</p>
+                </div>
+                <button class="modal-close-btn text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+            <form id="form-reserve" onsubmit="event.preventDefault(); window.reservationsModule.submitReserve();" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">ประเภทเอกสารที่ต้องการกันเลข <span class="text-rose-500">*</span></label>
+                    <select name="doc_type" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none font-semibold">
+                        <option value="quotation">ใบเสนอราคา (Quotation / QT)</option>
+                        <option value="billing">ใบแจ้งหนี้ / ใบวางบิล (Billing Note / INV)</option>
+                        <option value="receipt">ใบเสร็จรับเงิน (Receipt / RE)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">จำนวนเลขที่ต้องการกันไว้ <span class="text-rose-500">*</span></label>
+                    <input type="number" name="count" value="1" min="1" max="50" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none font-mono font-bold" required>
+                    <p class="text-[11px] text-slate-400 mt-1">เช่น ระบุ 3 เลข ระบบจะกันเลข 3 ลำดับถัดไปไว้ในคลัง</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">ระบุลูกค้าล่วงหน้า (ไม่บังคับ)</label>
+                    <select id="reserve-customer-id" name="customer_id" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none">
+                        <option value="">-- ไม่ระบุ (ใช้กับลูกค้าใดก็ได้) --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">หมายเหตุการกันเลข</label>
+                    <input type="text" name="note" placeholder="เช่น กันไว้สำหรับโครงการสุขุมวิท ออกบิลย้อนหลัง" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none">
+                </div>
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" class="modal-close-btn px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl transition">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-sm transition">
+                        ✓ ยืนยันการกันเลข
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 5. Modal: Convert Document -->
+    <div id="modal-convert" class="modal-container fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 relative border border-slate-200">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                <h3 class="font-bold text-slate-900 font-heading text-lg">แปลงเป็นเอกสารขั้นถัดไป</h3>
+                <button class="modal-close-btn text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+            <div class="mb-4 text-xs text-slate-600">
+                เอกสารต้นทาง: <span id="modal-convert-source" class="font-bold text-slate-900 font-mono"></span>
+            </div>
+            <form id="form-convert" onsubmit="event.preventDefault(); window.documentsModule.submitConvert();" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">เลือกประเภทเอกสารที่ต้องการแปลงเป็น <span class="text-rose-500">*</span></label>
+                    <select id="convert-target-type" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none font-semibold text-slate-800">
+                    </select>
+                </div>
+                <div class="p-3 bg-blue-50 text-blue-800 rounded-xl text-xs border border-blue-100">
+                    💡 ระบบจะคัดลอกรายการสินค้า ยอดเงิน และชื่อโครงการทั้งหมดไปยังเอกสารใหม่ พร้อมออกเลขที่เอกสารใหม่อัตโนมัติ
+                </div>
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" class="modal-close-btn px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl transition">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition">
+                        🔄 ดำเนินการแปลงเอกสาร
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 6. Modal: Cancel Document (Void) -->
+    <div id="modal-cancel" class="modal-container fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 relative border border-rose-200">
+            <div class="flex items-center justify-between pb-4 border-b border-rose-100 mb-4">
+                <h3 class="font-bold text-rose-600 font-heading text-lg">ยืนยันการยกเลิกเอกสาร (Void)</h3>
+                <button class="modal-close-btn text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+            <div class="mb-4 text-xs text-slate-600">
+                คุณกำลังจะยกเลิกเอกสารเลขที่: <span id="modal-cancel-code" class="font-mono font-bold text-slate-900"></span>
+                <p class="text-[11px] text-rose-500 mt-1">
+                    * เมื่อยกเลิกแล้ว เอกสารจะถูกเก็บเป็นหลักฐานในระบบ และเลขที่นี้จะไม่สามารถนำกลับมาใช้ใหม่ได้
+                </p>
+            </div>
+            <form id="form-cancel" onsubmit="event.preventDefault(); window.documentsModule.submitCancel();" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">เหตุผลในการยกเลิก <span class="text-rose-500">*</span></label>
+                    <textarea id="form-cancel-reason" rows="2" class="w-full p-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-rose-400" placeholder="เช่น ลูกค้ายกเลิกคำสั่งซื้อ, ออกเอกสารผิดพลาด" required></textarea>
+                </div>
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" class="modal-close-btn px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl transition">ไม่ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-sm transition">
+                        🚫 ยืนยันยกเลิกเอกสาร
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/customers.js"></script>
+    <script src="js/reservations.js"></script>
+    <script src="js/documents.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/print.js"></script>
+</body>
+</html>

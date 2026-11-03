@@ -1,0 +1,379 @@
+/* =============================================================
+   VINTAGE TYPEWRITER & PAPER LEDGER UI THEME (สไตล์พิมพ์ดีดโบราณ)
+   ============================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=Bai+Jamjuree:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Sarabun:ital,wght@0,300;0,400;0,600;0,700&display=swap');
+
+:root {
+    --font-typewriter: 'Special Elite', 'Courier Prime', 'Courier New', monospace;
+    --font-thai-mono: 'Courier Prime', 'Bai Jamjuree', 'Sarabun', monospace;
+    
+    /* Paper & Ink Palette */
+    --paper-bg: #f5eedc;
+    --paper-card: #fdfbf7;
+    --paper-darker: #eae0c8;
+    --ink-black: #1f1d1a;
+    --ink-ribbon-red: #a82020;
+    --ink-carbon-blue: #1e3a8a;
+    --ink-faded: #57534e;
+    --border-ink: #292524;
+}
+
+body {
+    font-family: var(--font-thai-mono);
+    background-color: var(--paper-bg);
+    color: var(--ink-black);
+    background-image: 
+        radial-gradient(#d6c7a7 0.75px, transparent 0.75px),
+        radial-gradient(#d6c7a7 0.75px, var(--paper-bg) 0.75px);
+    background-size: 30px 30px;
+    background-position: 0 0, 15px 15px;
+    line-height: 1.5;
+}
+
+table, th, td {
+    word-break: normal;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading, .typewriter-font, .font-typewriter {
+    font-family: var(--font-typewriter);
+    letter-spacing: 0.5px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #eae0c8;
+}
+::-webkit-scrollbar-thumb {
+    background: #8c827a;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #57534e;
+}
+
+/* Vintage Paper Card */
+.typewriter-card {
+    background-color: var(--paper-card);
+    border: 2px solid var(--border-ink);
+    box-shadow: 4px 4px 0px rgba(41, 37, 36, 0.85);
+    position: relative;
+}
+
+/* Typewriter Keycap Button */
+.btn-typewriter {
+    font-family: var(--font-thai-mono);
+    background-color: #2b2725;
+    color: #fdfbf7;
+    border: 2px solid #1c1917;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 3px 0 #0c0a09, 0 4px 6px rgba(0,0,0,0.25);
+    transition: all 0.08s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    text-shadow: 0 1px 1px black;
+}
+.btn-typewriter:hover {
+    background-color: #383330;
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 #0c0a09, 0 2px 4px rgba(0,0,0,0.25);
+}
+.btn-typewriter:active {
+    transform: translateY(3px);
+    box-shadow: 0 0 0 #0c0a09;
+}
+
+/* Secondary Button (Paper Style) */
+.btn-paper {
+    font-family: var(--font-thai-mono);
+    background-color: #fffefb;
+    color: var(--ink-black);
+    border: 2px solid var(--border-ink);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    box-shadow: 2px 2px 0px var(--border-ink);
+    transition: all 0.08s ease-in-out;
+    cursor: pointer;
+}
+.btn-paper:hover {
+    background-color: #f5eedc;
+    transform: translateY(1px);
+    box-shadow: 1px 1px 0px var(--border-ink);
+}
+.btn-paper:active {
+    transform: translateY(2px);
+    box-shadow: 0px 0px 0px var(--border-ink);
+}
+
+/* Red Ribbon Button */
+.btn-ribbon-red {
+    background-color: var(--ink-ribbon-red) !important;
+    border-color: #701010 !important;
+    color: #fff !important;
+    box-shadow: 0 3px 0 #4a0b0b, 0 4px 6px rgba(0,0,0,0.2) !important;
+}
+
+/* Navigation Tabs (Index / File Folder Tabs) */
+.nav-tab-retro {
+    font-family: var(--font-thai-mono);
+    border: 2px solid var(--border-ink);
+    border-radius: 6px;
+    background: #eadecc;
+    color: #44403c;
+    font-weight: 600;
+    transition: all 0.15s;
+    box-shadow: 2px 2px 0px rgba(41, 37, 36, 0.4);
+}
+.nav-tab-retro:hover {
+    background: #fdfbf7;
+    color: var(--ink-black);
+}
+.nav-tab-retro.active {
+    background: #2b2725 !important;
+    color: #fdfbf7 !important;
+    box-shadow: 3px 3px 0px var(--border-ink) !important;
+}
+
+/* Typewriter Input Fields */
+input[type="text"], input[type="number"], input[type="date"], input[type="email"], select, textarea {
+    font-family: var(--font-thai-mono) !important;
+    background-color: #fffefc !important;
+    border: 2px solid var(--border-ink) !important;
+    color: var(--ink-black) !important;
+    border-radius: 4px !important;
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.08) !important;
+}
+input:focus, select:focus, textarea:focus {
+    outline: none !important;
+    border-color: #a82020 !important;
+    box-shadow: 0 0 0 2px rgba(168, 32, 32, 0.25) !important;
+}
+
+/* Vintage Rubber Stamp Effect */
+.stamp {
+    display: inline-block;
+    padding: 2px 8px;
+    font-family: var(--font-typewriter);
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 4px;
+    line-height: 1.2;
+    letter-spacing: 1px;
+}
+.stamp-paid {
+    color: #166534;
+    border: 2px solid #166534;
+    background: rgba(22, 101, 52, 0.08);
+    transform: rotate(-3deg);
+}
+.stamp-cancelled {
+    color: var(--ink-ribbon-red);
+    border: 2px dashed var(--ink-ribbon-red);
+    background: rgba(168, 32, 32, 0.08);
+    transform: rotate(4deg);
+}
+.stamp-reserved {
+    color: #6b21a8;
+    border: 2px solid #6b21a8;
+    background: rgba(107, 33, 168, 0.08);
+    transform: rotate(-2deg);
+}
+.stamp-issued {
+    color: #1e3a8a;
+    border: 2px solid #1e3a8a;
+    background: rgba(30, 58, 138, 0.08);
+}
+.stamp-draft {
+    color: #78716c;
+    border: 2px dotted #78716c;
+}
+
+/* Badges with Vintage Monospace */
+.badge-quotation {
+    background-color: #e0f2fe;
+    color: #0c4a6e;
+    border: 1.5px solid #0284c7;
+    font-family: var(--font-thai-mono);
+}
+.badge-billing {
+    background-color: #fef3c7;
+    color: #78350f;
+    border: 1.5px solid #d97706;
+    font-family: var(--font-thai-mono);
+}
+.badge-receipt {
+    background-color: #dcfce7;
+    color: #14532d;
+    border: 1.5px solid #16a34a;
+    font-family: var(--font-thai-mono);
+}
+.badge-draft {
+    background-color: #f5f5f4;
+    color: #57534e;
+    border: 1px solid #d6d3d1;
+    font-family: var(--font-thai-mono);
+}
+.badge-issued {
+    background-color: #eff6ff;
+    color: #1e3a8a;
+    border: 1px solid #bfdbfe;
+    font-family: var(--font-thai-mono);
+}
+.badge-paid {
+    background-color: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+    font-family: var(--font-thai-mono);
+}
+.badge-cancelled {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    font-family: var(--font-thai-mono);
+}
+.badge-reserved {
+    background-color: #faf5ff;
+    color: #6b21a8;
+    border: 1px solid #e9d5ff;
+    font-family: var(--font-thai-mono);
+}
+
+/* Perforated and decorative borders */
+.border-perforated {
+    border-bottom: 2px dashed #78716c;
+}
+.border-double-retro {
+    border: 4px double var(--border-ink);
+}
+
+/* Typewriter Ribbon Bar Header */
+.ribbon-banner {
+    background: linear-gradient(180deg, #1c1917 0%, #292524 50%, #7f1d1d 50%, #991b1b 100%);
+    height: 8px;
+    width: 100%;
+}
+
+/* Toast animations */
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+.toast-enter {
+    animation: slideIn 0.25s ease-out forwards;
+}
+
+/* -------------------------------------------------------------
+   A4 PRINT SPECIFIC STYLES (AUTHENTIC TYPEWRITER DOCUMENT)
+   ------------------------------------------------------------- */
+#print-sheet {
+    background: #fffdfa;
+    width: 210mm;
+    min-height: 297mm;
+    padding: 10mm 12mm;
+    margin: 0 auto;
+    box-sizing: border-box;
+    position: relative;
+    color: #171717;
+    font-family: 'Courier Prime', 'Bai Jamjuree', 'Sarabun', monospace;
+    border: 1px solid #d6d3d1;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    line-height: 1.42;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+.watermark-cancelled {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-25deg);
+    font-family: 'Special Elite', 'Courier Prime', monospace;
+    font-size: 65pt;
+    font-weight: 900;
+    color: rgba(185, 28, 28, 0.12);
+    border: 6px dashed rgba(185, 28, 28, 0.18);
+    padding: 8px 36px;
+    letter-spacing: 16px;
+    pointer-events: none;
+    z-index: 50;
+    text-transform: uppercase;
+    border-radius: 8px;
+}
+
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 8mm 10mm;
+    }
+
+    body {
+        background: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    #app-sidebar,
+    #app-header,
+    #app-content,
+    .no-print,
+    header,
+    nav,
+    aside,
+    button,
+    .modal-backdrop,
+    #toast-container {
+        display: none !important;
+    }
+
+    #print-modal {
+        display: block !important;
+        position: static !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    #print-modal-inner {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+
+    #print-sheet {
+        width: 100% !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: white !important;
+        page-break-after: avoid;
+    }
+
+    table, th, td {
+        border-color: #000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
