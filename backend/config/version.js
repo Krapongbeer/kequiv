@@ -3,10 +3,24 @@
  */
 
 module.exports = {
-    version: '2.1.0',
+    version: '2.2.0',
     releaseDate: '2026-11-03',
-    codename: 'Ocean Typewriter Auto-Buffer Edition',
+    codename: 'Mobile Responsive & Full Edit Edition',
     changelog: [
+        {
+            version: '2.2.0',
+            date: '2026-11-03',
+            title: 'Mobile Navigation, Document Edit, Line Reminder & Security',
+            features: [
+                'ระบบเมนูแถบเลื่อนบนมือถือ (Mobile Drawer & Hamburger Menu ☰)',
+                'ระบบแก้ไขเอกสาร (Edit Document) แก้ไขรายการและราคาได้โดยไม่ต้องยกเลิกบิล',
+                'ปุ่มส่งข้อความเตือนชำระเงินเข้า LINE ในคลิกเดียว (1-Click Payment Reminder)',
+                'ตัวกรองช่วงวันที่ (Date Range Filter) พร้อมปุ่มลัดเลือกเดือนนี้/เดือนที่แล้ว',
+                'ระบบเปลี่ยนรหัสผ่านเข้าใช้งาน (Change Password) ในหน้าตั้งค่า',
+                'ระบบถังขยะและกู้คืนข้อมูลลูกค้า (Customer Trash & Restore)',
+                'ปรับปรุงการพิมพ์และ Export PDF ให้พอดี 1 หน้า A4 100% ปราศจากขอบกล่อง'
+            ]
+        },
         {
             version: '2.1.0',
             date: '2026-11-03',

@@ -183,8 +183,26 @@ const app = {
         });
     },
 
+    toggleSidebar(open = null) {
+        const sidebar = document.getElementById('app-sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        if (!sidebar) return;
+
+        const isCurrentlyOpen = !sidebar.classList.contains('-translate-x-full');
+        const targetOpen = open !== null ? open : !isCurrentlyOpen;
+
+        if (targetOpen) {
+            sidebar.classList.remove('-translate-x-full');
+            if (backdrop) backdrop.classList.remove('hidden');
+        } else {
+            sidebar.classList.add('-translate-x-full');
+            if (backdrop) backdrop.classList.add('hidden');
+        }
+    },
+
     switchTab(tabName, payload = null) {
         this.state.activeTab = tabName;
+        this.toggleSidebar(false);
 
         // Update nav active states with modern Ocean styling
         document.querySelectorAll('.nav-link').forEach(link => {

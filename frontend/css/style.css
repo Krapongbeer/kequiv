@@ -291,21 +291,55 @@ h1, h2, h3, h4, h5, h6, .font-heading, .typewriter-font, .font-typewriter {
     user-select: none;
 }
 
+@page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+}
+
 @media print {
-    body {
+    html, body {
         background: white !important;
         background-image: none !important;
         margin: 0 !important;
         padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
     }
-    .no-print, header, aside, .modal-backdrop, #login-overlay {
+    .no-print, header, aside, #app-sidebar, #app-header, .modal-backdrop, #login-overlay, #sidebar-backdrop {
         display: none !important;
+    }
+    #modal-print {
+        position: static !important;
+        display: block !important;
+        background: transparent !important;
+        backdrop-filter: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        overflow: visible !important;
+    }
+    #print-modal-inner {
+        position: static !important;
+        max-width: 100% !important;
+        max-height: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: white !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    #print-modal-inner > div {
+        background: white !important;
+        padding: 0 !important;
+        overflow: visible !important;
     }
     .print-container {
         width: 100% !important;
         min-height: auto !important;
         margin: 0 !important;
-        padding: 8mm 10mm !important;
+        padding: 0 !important;
         box-shadow: none !important;
         background: white !important;
     }

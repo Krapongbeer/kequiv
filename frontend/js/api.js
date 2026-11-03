@@ -42,6 +42,7 @@ const api = {
     // Auth
     login: (username, password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
     getCurrentUser: () => request('/auth/me'),
+    changePassword: (oldPassword, newPassword) => request('/auth/change-password', { method: 'POST', body: JSON.stringify({ oldPassword, newPassword }) }),
 
     // Version
     getVersion: () => request('/version'),
@@ -92,6 +93,8 @@ const api = {
 
     // Customers
     getCustomers: (search = '') => request(`/customers?search=${encodeURIComponent(search)}`),
+    getTrashCustomers: () => request('/customers/trash'),
+    restoreCustomer: (id) => request(`/customers/${id}/restore`, { method: 'POST' }),
     getCustomer: (id) => request(`/customers/${id}`),
     createCustomer: (data) => request('/customers', { method: 'POST', body: JSON.stringify(data) }),
     updateCustomer: (id, data) => request(`/customers/${id}`, { method: 'PUT', body: JSON.stringify(data) }),

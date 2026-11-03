@@ -94,27 +94,43 @@ window.documentsModule = {
                 </div>
 
                 <!-- Search & Filters Bar -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5 font-mono">
-                    <div class="md:col-span-2 relative">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">🔍</span>
-                        <input type="text" id="doc-search-input" value="${this.filters.search || ''}" placeholder="ค้นหาเลขที่เอกสาร, ชื่อลูกค้า, โครงการ..." 
-                            class="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-sky-500"
-                            onkeyup="if(event.key === 'Enter') window.documentsModule.applySearch()">
+                <div class="space-y-3 mb-5 font-mono">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div class="md:col-span-2 relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">🔍</span>
+                            <input type="text" id="doc-search-input" value="${this.filters.search || ''}" placeholder="ค้นหาเลขที่เอกสาร, ชื่อลูกค้า, โครงการ..." 
+                                class="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-sky-500"
+                                onkeyup="if(event.key === 'Enter') window.documentsModule.applySearch()">
+                        </div>
+                        <div>
+                            <select id="doc-filter-customer" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-sky-500" onchange="window.documentsModule.applyCustomerFilter(this.value)">
+                                <option value="">-- เลือกลูกค้าทั้งหมด --</option>
+                                ${customers.map(c => `
+                                    <option value="${c.id}" ${this.filters.customer_id == c.id ? 'selected' : ''}>${c.name}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="window.documentsModule.applySearch()" class="btn-ocean flex-1 text-xs py-2">
+                                ค้นหา
+                            </button>
+                            <button onclick="window.documentsModule.resetFilters()" class="btn-paper text-xs py-2 px-3">
+                                ล้างค่า
+                            </button>
+                        </div>
                     </div>
-                    <div>
-                        <select id="doc-filter-customer" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-sky-500" onchange="window.documentsModule.applyCustomerFilter(this.value)">
-                            <option value="">-- เลือกลูกค้าทั้งหมด --</option>
-                            ${customers.map(c => `
-                                <option value="${c.id}" ${this.filters.customer_id == c.id ? 'selected' : ''}>${c.name}</option>
-                            `).join('')}
-                        </select>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="window.documentsModule.applySearch()" class="btn-ocean flex-1 text-xs py-2">
-                            ค้นหา
+
+                    <!-- Date Range Filter Row -->
+                    <div class="flex flex-wrap items-center gap-2 pt-1 text-xs text-slate-600">
+                        <span class="font-bold text-slate-700">ช่วงวันที่:</span>
+                        <input type="date" id="doc-filter-start" value="${this.filters.start_date || ''}" class="px-2.5 py-1 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-sky-500" onchange="window.documentsModule.applyDateFilter()">
+                        <span class="text-slate-400">ถึง</span>
+                        <input type="date" id="doc-filter-end" value="${this.filters.end_date || ''}" class="px-2.5 py-1 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-sky-500" onchange="window.documentsModule.applyDateFilter()">
+                        <button type="button" onclick="window.documentsModule.presetDateRange('this_month')" class="px-2.5 py-1 text-[11px] bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg text-slate-700 transition">
+                            เดือนนี้
                         </button>
-                        <button onclick="window.documentsModule.resetFilters()" class="btn-paper text-xs py-2 px-3">
-                            ล้างค่า
+                        <button type="button" onclick="window.documentsModule.presetDateRange('last_month')" class="px-2.5 py-1 text-[11px] bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg text-slate-700 transition">
+                            เดือนที่แล้ว
                         </button>
                     </div>
                 </div>
@@ -130,7 +146,7 @@ window.documentsModule = {
                                 <th class="px-3.5 py-3 whitespace-nowrap w-32">ครบกำหนด</th>
                                 <th class="px-3.5 py-3 whitespace-nowrap w-32 text-right">ยอดรวมสุทธิ</th>
                                 <th class="px-3.5 py-3 whitespace-nowrap w-32 text-center">สถานะ</th>
-                                <th class="px-3.5 py-3 whitespace-nowrap w-48 text-right">จัดการ</th>
+                                <th class="px-3.5 py-3 whitespace-nowrap w-52 text-right">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-stone-200 font-mono">
@@ -172,7 +188,17 @@ window.documentsModule = {
                                         <button onclick="window.documentsModule.shareToLine(${d.id})" class="btn-line text-xs py-1 px-2" title="แชร์สรุปบิลเข้า LINE">
                                             💬 LINE
                                         </button>
+                                        ${d.type === 'billing' && d.status === 'issued' ? `
+                                            <button onclick="window.documentsModule.sendReminderLine(${d.id})" class="btn-paper text-xs py-1 px-2 text-amber-900 border-amber-300 bg-amber-50 hover:bg-amber-100" title="ส่งข้อความเตือนชำระเงินเข้า LINE">
+                                                🔔 เตือน
+                                            </button>
+                                        ` : ''}
                                         ${d.status !== 'cancelled' ? `
+                                            ${d.status !== 'paid' ? `
+                                                <button onclick="window.documentsModule.loadEditForm(${d.id})" class="btn-paper text-xs py-1 px-2 text-sky-800 border-sky-300 hover:bg-sky-50" title="แก้ไขเอกสาร">
+                                                    ✏️ แก้ไข
+                                                </button>
+                                            ` : ''}
                                             <button onclick="window.documentsModule.openConvertModal(${d.id}, '${d.type}', '${d.code}')" class="btn-paper text-xs py-1 px-2" title="แปลงเป็นเอกสารขั้นถัดไป">
                                                 🔄 แปลง
                                             </button>
@@ -217,6 +243,71 @@ window.documentsModule = {
         this.loadList();
     },
 
+    applyDateFilter() {
+        const start = document.getElementById('doc-filter-start')?.value || '';
+        const end = document.getElementById('doc-filter-end')?.value || '';
+        this.filters.start_date = start;
+        this.filters.end_date = end;
+        this.loadList();
+    },
+
+    presetDateRange(type) {
+        const now = new Date();
+        const y = now.getFullYear();
+        if (type === 'this_month') {
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            this.filters.start_date = `${y}-${m}-01`;
+            this.filters.end_date = `${y}-${m}-31`;
+        } else if (type === 'last_month') {
+            const lastM = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const ly = lastM.getFullYear();
+            const lm = String(lastM.getMonth() + 1).padStart(2, '0');
+            this.filters.start_date = `${ly}-${lm}-01`;
+            this.filters.end_date = `${ly}-${lm}-31`;
+        }
+        this.loadList();
+    },
+
+    async sendReminderLine(docId) {
+        try {
+            app.toast('กำลังเตรียมข้อความแจ้งเตือนชำระเงิน...', 'info');
+            const res = await api.getDocument(docId);
+            const doc = res.data;
+            const company = doc.company || {};
+            const bank = (company.bank_accounts && company.bank_accounts[0]) ? company.bank_accounts[0] : null;
+
+            let msg = `🔔 [แจ้งเตือนยอดครบกำหนดชำระ] ${company.name || 'ร้านเคอีควิป'}\n\n`;
+            msg += `เรียน: ${doc.customer_name || 'ลูกค้าผู้มีอุปการคุณ'}\n`;
+            if (doc.project_name_custom || doc.project_name) {
+                msg += `โครงการ: ${doc.project_name_custom || doc.project_name}\n`;
+            }
+            msg += `เอกสารเลขที่: ${doc.code}\n`;
+            msg += `ลงวันที่: ${app.formatDateThai(doc.issue_date, true)}\n`;
+            if (doc.due_date) {
+                msg += `ครบกำหนดชำระ: ${app.formatDateThai(doc.due_date, true)}\n`;
+            }
+            msg += `ยอดเงินที่ต้องชำระ: ฿${app.formatCurrency(doc.grand_total)} บาท\n`;
+            msg += `(${app.thaiBahtText(doc.grand_total)})\n\n`;
+            if (bank) {
+                msg += `ช่องทางโอนชำระเงิน:\n`;
+                msg += `ธนาคาร: ${bank.bank}\n`;
+                msg += `เลขที่บัญชี: ${bank.account_no}\n`;
+                msg += `ชื่อบัญชี: ${bank.account_name}\n\n`;
+            }
+            msg += `เมื่อโอนชำระแล้ว กรุณาส่งสลิปหลักฐานกลับมาได้เลยครับ\nขอบพระคุณครับ 🙏`;
+
+            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(msg)}`;
+            window.open(lineUrl, '_blank');
+            app.toast('เปิดหน้าแชร์ LINE เรียบร้อยแล้ว', 'success');
+        } catch (e) {
+            app.toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+        }
+    },
+
+    loadEditForm(id) {
+        app.switchTab('create-doc', { edit_id: id });
+    },
+
     resetFilters() {
         this.filters = {
             type: 'all',
@@ -241,12 +332,55 @@ window.documentsModule = {
 
         container.innerHTML = `
             <div class="flex items-center justify-center p-16 text-slate-500">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <span class="ml-3 text-sm font-medium">กำลังเตรียมแบบฟอร์มออกเอกสาร...</span>
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div>
+                <span class="ml-3 text-sm font-medium">กำลังเตรียมแบบฟอร์ม...</span>
             </div>
         `;
 
         try {
+            // Mode A: Edit existing document
+            if (options.edit_id) {
+                const [docRes, customersRes] = await Promise.all([
+                    api.getDocument(options.edit_id),
+                    api.getCustomers()
+                ]);
+                const doc = docRes.data;
+                const customers = customersRes.data;
+
+                this.formData.items = (doc.items || []).map(it => ({
+                    product_name: it.product_name,
+                    image_url: it.image_url || '',
+                    quantity: it.quantity,
+                    unit: it.unit,
+                    unit_price: it.unit_price,
+                    discount: it.discount,
+                    discount_type: it.discount_type || 'amount',
+                    total_price: it.total_price
+                }));
+
+                this.renderCreateForm({
+                    isEdit: true,
+                    docId: doc.id,
+                    docCode: doc.code,
+                    docStatus: doc.status,
+                    type: doc.type,
+                    issue_date: doc.issue_date,
+                    due_date: doc.due_date,
+                    customers,
+                    nextCodePreview: doc.code,
+                    availableReservations: [],
+                    selectedCustomerId: doc.customer_id,
+                    selectedProjectId: doc.project_id,
+                    projectNameCustom: doc.project_name_custom,
+                    discountTotal: doc.discount_total,
+                    paymentTerms: doc.payment_terms,
+                    remark: doc.remark,
+                    useReservedCode: null
+                });
+                return;
+            }
+
+            // Mode B: Create new document
             const [customersRes, nextCodeRes, reservationsRes] = await Promise.all([
                 api.getCustomers(),
                 api.getNextCode(defaultType, defaultDate),
@@ -263,6 +397,7 @@ window.documentsModule = {
             ];
 
             this.renderCreateForm({
+                isEdit: false,
                 type: defaultType,
                 issue_date: defaultDate,
                 customers,
@@ -287,8 +422,10 @@ window.documentsModule = {
         if (!container) return;
 
         const {
-            type, issue_date, customers, nextCodePreview,
-            availableReservations, selectedCustomerId, selectedProjectId, useReservedCode
+            isEdit, docId, docCode, docStatus,
+            type, issue_date, due_date, customers, nextCodePreview,
+            availableReservations, selectedCustomerId, selectedProjectId, projectNameCustom,
+            discountTotal, paymentTerms, remark, useReservedCode
         } = ctx;
 
         container.innerHTML = `
@@ -296,9 +433,11 @@ window.documentsModule = {
                 <!-- Form Header -->
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
                     <div>
-                        <span class="text-xs font-bold text-sky-700 uppercase tracking-wider font-mono">ระบบจัดการเอกสาร (ใบเสนอราคา • ใบแจ้งหนี้ • ใบเสร็จรับเงิน)</span>
+                        <span class="text-xs font-bold text-sky-700 uppercase tracking-wider font-mono">
+                            ${isEdit ? `โหมดแก้ไขข้อมูลเอกสาร • สถานะ: ${app.getStatusBadge(docStatus)}` : 'ระบบจัดการเอกสาร (ใบเสนอราคา • ใบแจ้งหนี้ • ใบเสร็จรับเงิน)'}
+                        </span>
                         <h2 class="text-2xl font-bold text-slate-900 font-typewriter mt-1" id="form-doc-title">
-                            ✍️ ออกเอกสารใหม่
+                            ${isEdit ? `✏️ แก้ไขเอกสาร: ${docCode}` : '✍️ ออกเอกสารใหม่'}
                         </h2>
                     </div>
                     <div class="flex items-center gap-2">
@@ -309,6 +448,8 @@ window.documentsModule = {
                 </div>
 
                 <form id="doc-create-form" onsubmit="event.preventDefault(); window.documentsModule.submitDocument();" class="mt-6 space-y-6">
+                    ${isEdit ? `<input type="hidden" id="doc-edit-id" value="${docId}">` : ''}
+
                     <!-- Section 1: Document Type & Numbering Setup -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5 p-5 bg-slate-50/80 rounded-xl border border-slate-200">
                         <!-- Doc Type -->
@@ -316,53 +457,64 @@ window.documentsModule = {
                             <label class="block text-xs font-bold text-slate-800 mb-1.5 font-typewriter">
                                 ประเภทเอกสาร <span class="text-rose-600">*</span>
                             </label>
-                            <select id="doc-type-select" name="type" class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg font-bold text-slate-900 focus:outline-none focus:border-sky-500" onchange="window.documentsModule.onDocTypeChanged(this.value)">
+                            <select id="doc-type-select" name="type" ${isEdit ? 'disabled' : ''} class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg font-bold text-slate-900 focus:outline-none focus:border-sky-500 ${isEdit ? 'bg-slate-100 cursor-not-allowed text-slate-500' : ''}" onchange="window.documentsModule.onDocTypeChanged(this.value)">
                                 <option value="quotation" ${type === 'quotation' ? 'selected' : ''}>ใบเสนอราคา (Quotation / QT)</option>
                                 <option value="billing" ${type === 'billing' ? 'selected' : ''}>ใบแจ้งหนี้ / วางบิล (Invoice / INV)</option>
                                 <option value="receipt" ${type === 'receipt' ? 'selected' : ''}>ใบเสร็จรับเงิน (Receipt / RE)</option>
                             </select>
+                            ${isEdit ? `<input type="hidden" name="type" value="${type}">` : ''}
                         </div>
 
                         <!-- Code Assignment Mode (Auto / Reserved for Backdating / Custom) -->
                         <div class="md:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
                                 <span>เลขที่เอกสาร <span class="text-rose-500">*</span></span>
-                                <span class="text-[11px] text-sky-700 font-medium">มีเลขสำรองพร้อมใช้ออกย้อนหลัง</span>
+                                <span class="text-[11px] text-sky-700 font-medium">
+                                    ${isEdit ? 'เลขที่เอกสารถูกล็อกตามเดิม' : 'มีเลขสำรองพร้อมใช้ออกย้อนหลัง'}
+                                </span>
                             </label>
 
-                            <div class="space-y-2">
-                                <div class="flex items-center gap-4 text-xs">
-                                    <label class="inline-flex items-center gap-1.5 cursor-pointer">
-                                        <input type="radio" name="code_mode" value="auto" ${!useReservedCode ? 'checked' : ''} onchange="window.documentsModule.toggleCodeMode('auto')" class="text-sky-600">
-                                        <span class="font-medium text-slate-700">รันเลขอัตโนมัติ (ปัจจุบัน)</span>
-                                    </label>
-                                    <label class="inline-flex items-center gap-1.5 cursor-pointer">
-                                        <input type="radio" name="code_mode" value="reserved" ${useReservedCode ? 'checked' : ''} onchange="window.documentsModule.toggleCodeMode('reserved')" class="text-purple-600">
-                                        <span class="font-semibold text-purple-700">ใช้เลขสำรอง (สำหรับออกบิลย้อนหลัง)</span>
-                                    </label>
+                            ${isEdit ? `
+                                <div class="px-3.5 py-2.5 bg-slate-100 border border-slate-300 rounded-lg font-mono font-bold text-slate-800 text-sm flex items-center justify-between">
+                                    <span>${docCode}</span>
+                                    <span class="text-[11px] font-normal text-slate-500">🔒 ล็อกเลขเดิมไว้ ไม่สามารถเปลี่ยนเลขขณะแก้ไข</span>
                                 </div>
+                                <input type="hidden" name="code_mode" value="auto">
+                            ` : `
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-4 text-xs">
+                                        <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                                            <input type="radio" name="code_mode" value="auto" ${!useReservedCode ? 'checked' : ''} onchange="window.documentsModule.toggleCodeMode('auto')" class="text-sky-600">
+                                            <span class="font-medium text-slate-700">รันเลขอัตโนมัติ (ปัจจุบัน)</span>
+                                        </label>
+                                        <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                                            <input type="radio" name="code_mode" value="reserved" ${useReservedCode ? 'checked' : ''} onchange="window.documentsModule.toggleCodeMode('reserved')" class="text-purple-600">
+                                            <span class="font-semibold text-purple-700">ใช้เลขสำรอง (สำหรับออกบิลย้อนหลัง)</span>
+                                        </label>
+                                    </div>
 
-                                <!-- Container for Auto Code Display -->
-                                <div id="code-auto-container" class="${useReservedCode ? 'hidden' : ''}">
-                                    <div class="flex items-center gap-2">
-                                        <input type="text" id="auto-code-preview" value="${nextCodePreview}" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm font-mono font-bold text-slate-700">
-                                        <span class="text-[11px] text-slate-400 whitespace-nowrap">ระบบจะล็อกเลขนี้ตอนกดบันทึก</span>
+                                    <!-- Container for Auto Code Display -->
+                                    <div id="code-auto-container" class="${useReservedCode ? 'hidden' : ''}">
+                                        <div class="flex items-center gap-2">
+                                            <input type="text" id="auto-code-preview" value="${nextCodePreview}" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm font-mono font-bold text-slate-700">
+                                            <span class="text-[11px] text-slate-400 whitespace-nowrap">ระบบจะล็อกเลขนี้ตอนกดบันทึก</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Container for Reserved Code Dropdown -->
+                                    <div id="code-reserved-container" class="${useReservedCode ? '' : 'hidden'}">
+                                        <select id="reserved-code-select" class="w-full px-3 py-2 bg-purple-50 border border-purple-200 text-purple-950 font-mono font-bold text-sm rounded-lg focus:outline-none">
+                                            ${availableReservations.length === 0 ? `
+                                                <option value="">-- ไม่มีเลขสำรองในคลัง (ไปที่แท็บ 'คลังเลขสำรอง' เพื่อกดเพิ่มเลข) --</option>
+                                            ` : availableReservations.map(r => `
+                                                <option value="${r.code}" ${useReservedCode === r.code ? 'selected' : ''}>
+                                                    ${r.code} ${r.note ? `— [${r.note}]` : ''}
+                                                </option>
+                                            `).join('')}
+                                        </select>
                                     </div>
                                 </div>
-
-                                <!-- Container for Reserved Code Dropdown -->
-                                <div id="code-reserved-container" class="${useReservedCode ? '' : 'hidden'}">
-                                    <select id="reserved-code-select" class="w-full px-3 py-2 bg-purple-50 border border-purple-200 text-purple-950 font-mono font-bold text-sm rounded-lg focus:outline-none">
-                                        ${availableReservations.length === 0 ? `
-                                            <option value="">-- ไม่มีเลขสำรองในคลัง (ไปที่แท็บ 'คลังเลขสำรอง' เพื่อกดเพิ่มเลข) --</option>
-                                        ` : availableReservations.map(r => `
-                                            <option value="${r.code}" ${useReservedCode === r.code ? 'selected' : ''}>
-                                                ${r.code} ${r.note ? `— [${r.note}]` : ''}
-                                            </option>
-                                        `).join('')}
-                                    </select>
-                                </div>
-                            </div>
+                            `}
                         </div>
                     </div>
 
@@ -376,7 +528,7 @@ window.documentsModule = {
                                     + เพิ่มลูกค้าใหม่
                                 </button>
                             </label>
-                            <select id="doc-customer-select" name="customer_id" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none" onchange="window.documentsModule.onCustomerSelected(this.value)">
+                            <select id="doc-customer-select" name="customer_id" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none" onchange="window.documentsModule.onCustomerSelected(this.value)">
                                 <option value="">-- เลือกลูกค้า --</option>
                                 ${customers.map(c => `
                                     <option value="${c.id}" ${selectedCustomerId == c.id ? 'selected' : ''}>${c.name}</option>
@@ -384,7 +536,7 @@ window.documentsModule = {
                             </select>
 
                             <!-- Customer info snippet -->
-                            <div id="customer-info-box" class="mt-2 text-xs text-slate-500 p-3 bg-slate-50 rounded-xl border border-slate-100 hidden">
+                            <div id="customer-info-box" class="mt-2 text-xs text-slate-500 p-3 bg-slate-50 rounded-lg border border-slate-200 hidden">
                                 <div id="c-box-tax" class="font-mono text-[11px]"></div>
                                 <div id="c-box-address" class="mt-0.5"></div>
                             </div>
@@ -396,11 +548,11 @@ window.documentsModule = {
                                 <span>โครงการ / หัวบิลย่อย (แยกตามลูกค้า)</span>
                                 <span class="text-[10px] text-slate-400">สำหรับจัดกลุ่มบิล</span>
                             </label>
-                            <select id="doc-project-select" name="project_id" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none" onchange="window.documentsModule.onProjectSelected(this.value)">
+                            <select id="doc-project-select" name="project_id" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none" onchange="window.documentsModule.onProjectSelected(this.value)">
                                 <option value="">-- ใช้หัวบิลทั่วไปของลูกค้า (ไม่ระบุโครงการ) --</option>
                             </select>
                             <div class="mt-2">
-                                <input type="text" id="project-name-custom" name="project_name_custom" placeholder="หรือพิมพ์ระบุชื่อหัวบิล/โครงการที่นี่..." class="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:border-blue-500">
+                                <input type="text" id="project-name-custom" name="project_name_custom" value="${projectNameCustom || ''}" placeholder="หรือพิมพ์ระบุชื่อหัวบิล/โครงการที่นี่..." class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:border-sky-500">
                             </div>
                         </div>
 
@@ -409,7 +561,7 @@ window.documentsModule = {
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">
                                 วันที่ออกเอกสาร (ลงวันที่ย้อนหลังได้) <span class="text-rose-500">*</span>
                             </label>
-                            <input type="date" id="doc-issue-date" name="issue_date" value="${issue_date}" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none" onchange="window.documentsModule.onDateChanged(this.value)">
+                            <input type="date" id="doc-issue-date" name="issue_date" value="${issue_date}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none" onchange="window.documentsModule.onDateChanged(this.value)">
                         </div>
 
                         <!-- Due Date -->
@@ -417,7 +569,7 @@ window.documentsModule = {
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">
                                 วันที่ครบกำหนด / มีผลถึงวันที่
                             </label>
-                            <input type="date" id="doc-due-date" name="due_date" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none">
+                            <input type="date" id="doc-due-date" name="due_date" value="${due_date || ''}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none">
                         </div>
                     </div>
 
@@ -428,14 +580,14 @@ window.documentsModule = {
                                 <h3 class="text-sm font-bold text-slate-800 font-heading">รายการสินค้า / บริการ</h3>
                                 <p class="text-xs text-slate-400">ระบุจำนวน หน่วย และราคาต่อหน่วย (ระบบคำนวณอัตโนมัติ)</p>
                             </div>
-                            <button type="button" onclick="window.documentsModule.addItemRow()" class="px-3.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-xl transition">
+                            <button type="button" onclick="window.documentsModule.addItemRow()" class="px-3.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300 text-xs font-semibold rounded-lg transition">
                                 + เพิ่มแถวรายการ
                             </button>
                         </div>
 
-                        <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
                             <table class="w-full text-xs text-left">
-                                <thead class="bg-slate-50 text-slate-600 uppercase border-b border-slate-200 font-semibold">
+                                <thead class="bg-slate-50 text-slate-700 uppercase border-b border-slate-200 font-semibold">
                                     <tr>
                                         <th class="px-3 py-3 w-12 text-center">ลำดับ</th>
                                         <th class="px-3 py-3">รูปภาพ & รายการสินค้า / รายละเอียดงาน</th>
@@ -466,7 +618,7 @@ window.documentsModule = {
                                         <button type="button" onclick="window.documentsModule.insertPreset('terms', 'มัดจำ 50% ก่อนเริ่มงาน')" class="text-[11px] bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded text-slate-600 transition">+ มัดจำ 50%</button>
                                     </div>
                                 </div>
-                                <textarea id="doc-payment-terms" rows="2" class="w-full p-2.5 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none text-slate-700">${app.state.company ? app.state.company.default_terms || '' : ''}</textarea>
+                                <textarea id="doc-payment-terms" rows="2" class="w-full p-2.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none text-slate-700">${paymentTerms !== undefined ? paymentTerms : (app.state.company ? app.state.company.default_terms || '' : '')}</textarea>
                             </div>
 
                             <div>
@@ -474,7 +626,7 @@ window.documentsModule = {
                                     <label class="text-xs font-bold text-slate-700">หมายเหตุท้ายเอกสาร</label>
                                     <button type="button" onclick="window.documentsModule.insertPreset('remark', 'เอกสารนี้ออกโดยไม่มีภาษีมูลค่าเพิ่ม (ผู้ขายไม่ได้จดทะเบียน VAT)')" class="text-[11px] bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded text-slate-600 transition">+ ข้อความไม่มี VAT</button>
                                 </div>
-                                <textarea id="doc-remark" rows="2" class="w-full p-2.5 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none text-slate-700">${app.state.company ? app.state.company.default_remark || '' : ''}</textarea>
+                                <textarea id="doc-remark" rows="2" class="w-full p-2.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none text-slate-700">${remark !== undefined ? remark : (app.state.company ? app.state.company.default_remark || '' : '')}</textarea>
                             </div>
                         </div>
 
@@ -489,19 +641,19 @@ window.documentsModule = {
                                 <span>ส่วนลดท้ายบิล:</span>
                                 <div class="flex items-center gap-1 w-36">
                                     <span class="text-slate-400">฿</span>
-                                    <input type="number" id="doc-discount-total" value="0" min="0" step="0.01" class="w-full px-2 py-1 text-right text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500" oninput="window.documentsModule.recalculate()">
+                                    <input type="number" id="doc-discount-total" value="${discountTotal || 0}" min="0" step="0.01" class="w-full px-2 py-1 text-right text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-sky-500" oninput="window.documentsModule.recalculate()">
                                 </div>
                             </div>
 
                             <div class="flex items-center justify-between text-sm font-bold text-slate-900 pt-3 border-t border-slate-200">
                                 <span class="text-base font-heading">ยอดเงินรวมสุทธิ (Grand Total):</span>
-                                <span class="text-xl text-blue-700 font-heading font-bold" id="calc-grand-total">฿0.00</span>
+                                <span class="text-xl text-sky-800 font-heading font-bold" id="calc-grand-total">฿0.00</span>
                             </div>
 
                             <!-- Live Thai Baht Text -->
-                            <div class="p-3 bg-blue-50/80 rounded-xl border border-blue-100 text-xs">
-                                <span class="text-blue-700 font-bold">จำนวนเงินเป็นตัวอักษร:</span>
-                                <div class="font-semibold text-blue-950 mt-0.5" id="calc-thai-baht">ศูนย์บาทถ้วน</div>
+                            <div class="p-3 bg-sky-50 rounded-xl border border-sky-200 text-xs">
+                                <span class="text-sky-800 font-bold">จำนวนเงินเป็นตัวอักษร:</span>
+                                <div class="font-semibold text-sky-950 mt-0.5" id="calc-thai-baht">ศูนย์บาทถ้วน</div>
                             </div>
                         </div>
                     </div>
@@ -511,11 +663,13 @@ window.documentsModule = {
                         <button type="button" onclick="app.switchTab('documents')" class="btn-paper w-full md:w-auto text-xs py-2 px-4">
                             ✕ ยกเลิก
                         </button>
-                        <button type="button" onclick="window.documentsModule.submitDocument('draft')" class="btn-paper w-full md:w-auto text-xs py-2 px-4">
-                            💾 บันทึกเป็นฉบับร่าง
-                        </button>
+                        ${!isEdit ? `
+                            <button type="button" onclick="window.documentsModule.submitDocument('draft')" class="btn-paper w-full md:w-auto text-xs py-2 px-4">
+                                💾 บันทึกเป็นฉบับร่าง
+                            </button>
+                        ` : ''}
                         <button type="submit" class="btn-ocean w-full md:w-auto text-xs py-2 px-5">
-                            <span>✓ บันทึกเอกสาร & เปิดพิมพ์ A4</span>
+                            <span>${isEdit ? '💾 บันทึกการแก้ไข & พิมพ์ A4' : '✓ บันทึกเอกสาร & เปิดพิมพ์ A4'}</span>
                         </button>
                     </div>
                 </form>
@@ -842,6 +996,8 @@ window.documentsModule = {
             return;
         }
 
+        const editId = document.getElementById('doc-edit-id')?.value;
+
         const payload = {
             code_mode,
             specified_code,
@@ -859,9 +1015,15 @@ window.documentsModule = {
         };
 
         try {
-            const res = await api.createDocument(payload);
-            app.toast(res.message, 'success');
-            window.printModule.openPrint(res.data.id);
+            if (editId) {
+                const res = await api.updateDocument(editId, payload);
+                app.toast(res.message, 'success');
+                window.printModule.openPrint(editId);
+            } else {
+                const res = await api.createDocument(payload);
+                app.toast(res.message, 'success');
+                window.printModule.openPrint(res.data.id);
+            }
         } catch (err) {
             app.toast(err.message, 'error');
         }

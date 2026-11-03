@@ -101,6 +101,53 @@ router.get('/me', (req, res) => {
     }
 });
 
+// POST /api/auth/change-password
+router.post('/change-password', (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ success: false, error: 'ยังไม่ได้เข้าสู่ระบบ' });
+        }
+
+        const token = authHeader.split(' ')[1];
+        let decoded;
+        try {
+            decoded = jwt.verify(token, JWT_SECRET);
+        } catch (e) {
+            return res.status(401).json({ success: false, error: 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่' });
+        }
+
+        const { oldPassword, newPassword } = req.body;
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ success: false, error: 'กรุณากรอกรหัสผ่านเดิมและรหัสผ่านใหม่' });
+        }
+
+        if (newPassword.length < 4) {
+            return res.status(400).json({ success: false, error: 'รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 4 ตัวอักษร' });
+        }
+
+        const user = USERS.find(u => u.username.toLowerCase() === decoded.username.toLowerCase());
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'ไม่พบบัญชีผู้ใช้งาน' });
+        }
+
+        const isMatch = bcrypt.compareSync(oldPassword, user.passwordHash);
+        if (!isMatch) {
+            return res.status(400).json({ success: false, error: 'รหัสผ่านเดิมไม่ถูกต้อง' });
+        }
+
+        user.passwordHash = bcrypt.hashSync(newPassword, 10);
+
+        res.json({
+            success: true,
+            message: 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว'
+        });
+    } catch (err) {
+        console.error('Change password error:', err);
+        res.status(500).json({ success: false, error: 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน' });
+    }
+});
+
 module.exports = {
     router,
     JWT_SECRET

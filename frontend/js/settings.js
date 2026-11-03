@@ -127,7 +127,37 @@ window.settingsModule = {
                     <!-- Save Button -->
                     <div class="pt-4 border-t border-slate-200 flex justify-end">
                         <button type="submit" class="btn-ocean text-xs py-2 px-5">
-                            💾 บันทึกการตั้งค่า
+                            💾 บันทึกการตั้งค่าร้านค้า
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Change Password Card -->
+            <div class="max-w-4xl mx-auto typewriter-card rounded-xl p-6 md:p-8 font-mono bg-white mt-6">
+                <div class="pb-3 border-b border-slate-200 mb-4">
+                    <h3 class="text-base font-bold text-slate-900 font-typewriter flex items-center gap-2">
+                        <span>🔐</span> เปลี่ยนรหัสผ่านเข้าสู่ระบบ
+                    </h3>
+                    <p class="text-xs text-slate-500">สำหรับบัญชีผู้ใช้ปัจจุบันที่กำลังล็อกอินอยู่</p>
+                </div>
+
+                <form id="form-change-password" onsubmit="event.preventDefault(); window.settingsModule.submitChangePassword();" class="space-y-4 max-w-md text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">รหัสผ่านเดิม <span class="text-rose-600">*</span></label>
+                        <input type="password" id="pwd-old" placeholder="••••••••" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-sky-500 font-mono" required>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">รหัสผ่านใหม่ (อย่างน้อย 4 ตัวอักษร) <span class="text-rose-600">*</span></label>
+                        <input type="password" id="pwd-new" placeholder="••••••••" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-sky-500 font-mono" required>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">ยืนยันรหัสผ่านใหม่อีกครั้ง <span class="text-rose-600">*</span></label>
+                        <input type="password" id="pwd-confirm" placeholder="••••••••" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-sky-500 font-mono" required>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn-paper text-xs py-2 px-4 hover:border-sky-600 hover:text-sky-700">
+                            🔑 อัปเดตรหัสผ่านใหม่
                         </button>
                     </div>
                 </form>
@@ -216,6 +246,35 @@ window.settingsModule = {
             if (brandEl) brandEl.textContent = res.data.name;
 
             app.toast('บันทึกข้อมูลร้านค้าเรียบร้อยแล้ว', 'success');
+        } catch (err) {
+            app.toast(err.message, 'error');
+        }
+    },
+
+    async submitChangePassword() {
+        const oldPwd = document.getElementById('pwd-old')?.value;
+        const newPwd = document.getElementById('pwd-new')?.value;
+        const confirmPwd = document.getElementById('pwd-confirm')?.value;
+
+        if (!oldPwd || !newPwd || !confirmPwd) {
+            app.toast('กรุณากรอกรหัสผ่านให้ครบถ้วนทุกช่อง', 'warning');
+            return;
+        }
+
+        if (newPwd !== confirmPwd) {
+            app.toast('รหัสผ่านใหม่และการยืนยันไม่ตรงกัน', 'warning');
+            return;
+        }
+
+        if (newPwd.length < 4) {
+            app.toast('รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 4 ตัวอักษร', 'warning');
+            return;
+        }
+
+        try {
+            const res = await api.changePassword(oldPwd, newPwd);
+            app.toast(res.message, 'success');
+            document.getElementById('form-change-password')?.reset();
         } catch (err) {
             app.toast(err.message, 'error');
         }

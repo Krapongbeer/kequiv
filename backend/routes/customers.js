@@ -290,6 +290,56 @@ router.put('/:id', async (req, res) => {
     }
 });
 
+// GET all deleted customers (Trash)
+router.get('/trash', async (req, res) => {
+    try {
+        if (isSupabaseConfigured && supabase) {
+            const { data, error } = await supabase
+                .from('customers')
+                .select('*')
+                .not('deleted_at', 'is', null)
+                .order('deleted_at', { ascending: false });
+
+            if (error) throw new Error(error.message);
+            return res.json({ success: true, data: data || [] });
+        }
+
+        const list = db.prepare('SELECT * FROM customers WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC').all();
+        res.json({ success: true, data: list });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// POST restore deleted customer
+router.post('/:id/restore', async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        if (isSupabaseConfigured && supabase) {
+            const { error } = await supabase
+                .from('customers')
+                .update({ deleted_at: null })
+                .eq('id', id);
+
+            if (error) throw new Error(error.message);
+
+            await supabase
+                .from('customer_projects')
+                .update({ deleted_at: null })
+                .eq('customer_id', id);
+
+            return res.json({ success: true, message: 'กู้คืนข้อมูลลูกค้าเรียบร้อยแล้ว' });
+        }
+
+        db.prepare('UPDATE customers SET deleted_at = NULL WHERE id = ?').run(id);
+        db.prepare('UPDATE customer_projects SET deleted_at = NULL WHERE customer_id = ?').run(id);
+        res.json({ success: true, message: 'กู้คืนข้อมูลลูกค้าเรียบร้อยแล้ว' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // DELETE customer (Soft delete)
 router.delete('/:id', async (req, res) => {
     try {

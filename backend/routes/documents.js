@@ -460,6 +460,162 @@ router.post('/', async (req, res) => {
     }
 });
 
+// PUT update existing document
+router.put('/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const {
+            customer_id, project_id = null, project_name_custom = '',
+            issue_date, due_date = null,
+            items = [],
+            discount_total = 0,
+            status,
+            remark = '', payment_terms = ''
+        } = req.body;
+
+        if (!customer_id) {
+            return res.status(400).json({ success: false, error: 'กรุณาเลือกลูกค้า' });
+        }
+        if (!issue_date) {
+            return res.status(400).json({ success: false, error: 'กรุณาระบุวันที่ออกเอกสาร' });
+        }
+        if (!Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ success: false, error: 'กรุณาระบุรายการสินค้าอย่างน้อย 1 รายการ' });
+        }
+
+        const totals = calculateItemsTotal(items, discount_total);
+
+        if (isSupabaseConfigured && supabase) {
+            // Check existing
+            const { data: existingDoc, error: fErr } = await supabase
+                .from('documents')
+                .select('id, code, type, status')
+                .eq('id', id)
+                .is('deleted_at', null)
+                .maybeSingle();
+
+            if (fErr || !existingDoc) {
+                return res.status(404).json({ success: false, error: 'ไม่พบเอกสารที่ต้องการแก้ไข' });
+            }
+
+            if (existingDoc.status === 'cancelled') {
+                return res.status(400).json({ success: false, error: 'ไม่สามารถแก้ไขเอกสารที่ถูกยกเลิกแล้วได้' });
+            }
+
+            // Update document header
+            const { error: uErr } = await supabase
+                .from('documents')
+                .update({
+                    customer_id,
+                    project_id: project_id || null,
+                    project_name_custom,
+                    issue_date,
+                    due_date: due_date || null,
+                    subtotal: totals.subtotal,
+                    discount_total: totals.discount_total,
+                    grand_total: totals.grand_total,
+                    status: status || existingDoc.status,
+                    remark,
+                    payment_terms,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', id);
+
+            if (uErr) throw new Error(uErr.message);
+
+            // Replace items
+            await supabase.from('document_items').delete().eq('document_id', id);
+
+            // Fetch max id for sequence safety
+            const { data: maxItemRow } = await supabase
+                .from('document_items')
+                .select('id')
+                .order('id', { ascending: false })
+                .limit(1);
+
+            let nextItemId = (maxItemRow && maxItemRow.length > 0) ? (Number(maxItemRow[0].id) + 1) : 1;
+
+            const rowsToInsert = items.map((it, idx) => ({
+                id: nextItemId++,
+                document_id: id,
+                sort_order: idx + 1,
+                product_name: it.product_name,
+                image_url: it.image_url || '',
+                quantity: it.quantity || 1,
+                unit: it.unit || 'ชิ้น',
+                unit_price: it.unit_price || 0,
+                discount: it.discount || 0,
+                discount_type: it.discount_type || 'amount',
+                total_price: it.total_price || 0
+            }));
+
+            if (rowsToInsert.length > 0) {
+                const { error: iErr } = await supabase.from('document_items').insert(rowsToInsert);
+                if (iErr) throw new Error(iErr.message);
+            }
+
+            return res.json({
+                success: true,
+                message: 'แก้ไขเอกสารเรียบร้อยแล้ว',
+                data: { id, code: existingDoc.code }
+            });
+        }
+
+        // SQLite Fallback
+        const existingDoc = db.prepare('SELECT id, code, status FROM documents WHERE id = ? AND deleted_at IS NULL').get(id);
+        if (!existingDoc) {
+            return res.status(404).json({ success: false, error: 'ไม่พบเอกสารที่ต้องการแก้ไข' });
+        }
+        if (existingDoc.status === 'cancelled') {
+            return res.status(400).json({ success: false, error: 'ไม่สามารถแก้ไขเอกสารที่ถูกยกเลิกแล้วได้' });
+        }
+
+        db.exec('BEGIN TRANSACTION');
+        try {
+            db.prepare(`
+                UPDATE documents SET
+                    customer_id = ?, project_id = ?, project_name_custom = ?,
+                    issue_date = ?, due_date = ?, subtotal = ?, discount_total = ?,
+                    grand_total = ?, status = ?, remark = ?, payment_terms = ?,
+                    updated_at = datetime('now', 'localtime')
+                WHERE id = ?
+            `).run(
+                customer_id, project_id, project_name_custom,
+                issue_date, due_date, totals.subtotal, totals.discount_total,
+                totals.grand_total, status || existingDoc.status, remark, payment_terms,
+                id
+            );
+
+            db.prepare('DELETE FROM document_items WHERE document_id = ?').run(id);
+
+            const insertItem = db.prepare(`
+                INSERT INTO document_items (document_id, sort_order, product_name, image_url, quantity, unit, unit_price, discount, discount_type, total_price)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+
+            items.forEach((it, idx) => {
+                insertItem.run(
+                    id, idx + 1, it.product_name, it.image_url || '',
+                    it.quantity || 1, it.unit || 'ชิ้น', it.unit_price || 0,
+                    it.discount || 0, it.discount_type || 'amount', it.total_price || 0
+                );
+            });
+
+            db.exec('COMMIT');
+            res.json({
+                success: true,
+                message: 'แก้ไขเอกสารเรียบร้อยแล้ว',
+                data: { id, code: existingDoc.code }
+            });
+        } catch (e) {
+            db.exec('ROLLBACK');
+            throw e;
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // POST convert document
 router.post('/:id/convert', async (req, res) => {
     try {

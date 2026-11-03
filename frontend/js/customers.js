@@ -6,6 +6,7 @@
 window.customersModule = {
     searchQuery: '',
     selectedCustomerId: null,
+    viewMode: 'active', // 'active' | 'trash'
 
     async loadList() {
         const container = document.getElementById('customers-content');
@@ -15,14 +16,19 @@ window.customersModule = {
             <div class="flex items-center justify-center p-12 text-slate-500 font-mono">
                 <div class="text-center">
                     <div class="animate-spin text-3xl mb-2">⚙️</div>
-                    <div>กำลังโหลดข้อมูลลูกค้า...</div>
+                    <div>กำลังโหลดข้อมูล...</div>
                 </div>
             </div>
         `;
 
         try {
-            const res = await api.getCustomers(this.searchQuery);
-            this.render(res.data);
+            if (this.viewMode === 'trash') {
+                const res = await api.getTrashCustomers();
+                this.render(res.data);
+            } else {
+                const res = await api.getCustomers(this.searchQuery);
+                this.render(res.data);
+            }
         } catch (err) {
             container.innerHTML = `
                 <div class="p-6 typewriter-card border-rose-300 text-rose-800 font-mono bg-rose-50/50">
@@ -33,9 +39,16 @@ window.customersModule = {
         }
     },
 
+    toggleViewMode() {
+        this.viewMode = this.viewMode === 'trash' ? 'active' : 'trash';
+        this.loadList();
+    },
+
     render(customers) {
         const container = document.getElementById('customers-content');
         if (!container) return;
+
+        const isTrash = this.viewMode === 'trash';
 
         container.innerHTML = `
             <div class="typewriter-card rounded-xl p-6 font-mono bg-white">
@@ -43,35 +56,45 @@ window.customersModule = {
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
                     <div>
                         <h2 class="text-xl font-bold text-slate-900 font-typewriter flex items-center gap-2">
-                            <span>👥</span> ข้อมูลลูกค้าและโครงการ
+                            <span>${isTrash ? '🗑️' : '👥'}</span>
+                            <span>${isTrash ? 'ถังขยะลูกค้า (ข้อมูลที่ถูกลบ)' : 'ข้อมูลลูกค้าและโครงการ'}</span>
                         </h2>
                         <p class="text-xs text-slate-500 mt-1">
-                            ลูกค้า 1 ราย สามารถสร้างได้หลายโครงการ/สาขา เพื่อแยกจัดกลุ่มบิลและสถานที่ส่งของ
+                            ${isTrash ? 'สามารถกดกู้คืนลูกค้ารายที่ต้องการกลับมาใช้งานได้' : 'ลูกค้า 1 ราย สามารถสร้างได้หลายโครงการ/สาขา เพื่อแยกจัดกลุ่มบิลและสถานที่ส่งของ'}
                         </p>
                     </div>
-                    <button onclick="window.customersModule.openCustomerModal()" class="btn-ocean text-xs py-2 px-3.5">
-                        <span>+ เพิ่มลูกค้าใหม่</span>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="window.customersModule.toggleViewMode()" class="btn-paper text-xs py-2 px-3">
+                            ${isTrash ? '← กลับหน้ารายชื่อปกติ' : '🗑️ ดูถังขยะ'}
+                        </button>
+                        ${!isTrash ? `
+                            <button onclick="window.customersModule.openCustomerModal()" class="btn-ocean text-xs py-2 px-3.5">
+                                <span>+ เพิ่มลูกค้าใหม่</span>
+                            </button>
+                        ` : ''}
+                    </div>
                 </div>
 
-                <!-- Search Box -->
-                <div class="my-4 flex items-center justify-between gap-3">
-                    <div class="relative flex-1 max-w-md">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">🔍</span>
-                        <input type="text" id="customer-search-input" value="${this.searchQuery}" placeholder="ค้นหาชื่อลูกค้า, เบอร์โทร, เลขผู้เสียภาษี..." 
-                            class="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-sky-500"
-                            onkeyup="if(event.key === 'Enter') window.customersModule.search(this.value)">
+                ${!isTrash ? `
+                    <!-- Search Box -->
+                    <div class="my-4 flex items-center justify-between gap-3">
+                        <div class="relative flex-1 max-w-md">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">🔍</span>
+                            <input type="text" id="customer-search-input" value="${this.searchQuery}" placeholder="ค้นหาชื่อลูกค้า, เบอร์โทร, เลขผู้เสียภาษี..." 
+                                class="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-sky-500"
+                                onkeyup="if(event.key === 'Enter') window.customersModule.search(this.value)">
+                        </div>
+                        <button onclick="window.customersModule.search(document.getElementById('customer-search-input').value)" class="btn-ocean text-xs py-2 px-4">
+                            ค้นหา
+                        </button>
                     </div>
-                    <button onclick="window.customersModule.search(document.getElementById('customer-search-input').value)" class="btn-ocean text-xs py-2 px-4">
-                        ค้นหา
-                    </button>
-                </div>
+                ` : ''}
 
                 <!-- Customer Cards -->
-                <div class="space-y-3">
+                <div class="space-y-3 ${isTrash ? 'mt-4' : ''}">
                     ${customers.length === 0 ? `
                         <div class="text-center py-12 text-slate-400 font-mono">
-                            ไม่พบข้อมูลลูกค้าที่ตรงกับการค้นหา
+                            ${isTrash ? 'ไม่มีข้อมูลในถังขยะ' : 'ไม่พบข้อมูลลูกค้าที่ตรงกับการค้นหา'}
                         </div>
                     ` : customers.map(c => `
                         <div class="border border-slate-200 rounded-xl p-4 bg-white hover:bg-slate-50/70 transition shadow-xs">
@@ -81,6 +104,7 @@ window.customersModule = {
                                     <div class="flex items-center gap-2.5">
                                         <h3 class="font-bold text-slate-900 text-base font-typewriter">${c.name}</h3>
                                         ${c.tax_id ? `<span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-[10px] font-bold border border-slate-300 font-mono">เลขผู้เสียภาษี: ${c.tax_id}</span>` : ''}
+                                        ${isTrash ? `<span class="px-2 py-0.5 bg-rose-50 text-rose-700 rounded text-[10px] font-bold border border-rose-300">ลบเมื่อ: ${app.formatDateThai(c.deleted_at)}</span>` : ''}
                                     </div>
                                     <p class="text-xs text-slate-600 mt-1">${c.address || 'ไม่ได้ระบุที่อยู่'}</p>
                                     
@@ -93,37 +117,45 @@ window.customersModule = {
 
                                 <!-- Actions -->
                                 <div class="flex flex-wrap items-center gap-2 self-start">
-                                    <button onclick="app.switchTab('create-doc', { customer_id: ${c.id} })" class="btn-ocean text-xs py-1.5 px-3">
-                                        + ออกบิล
-                                    </button>
-                                    <button onclick="window.customersModule.openProjectsModal(${c.id})" class="btn-paper text-xs py-1.5 px-3 bg-sky-50 text-sky-900 border-sky-300 hover:bg-sky-100">
-                                        📌 แฟ้มโครงการ (${c.projects ? c.projects.length : 0})
-                                    </button>
-                                    <button onclick="window.customersModule.openEditCustomer(${c.id})" class="btn-paper text-xs py-1.5 px-2.5">
-                                        ✏️ แก้ไข
-                                    </button>
-                                    <button onclick="window.customersModule.deleteCustomer(${c.id}, '${c.name}')" class="btn-paper text-xs py-1.5 px-2 text-rose-700 border-rose-300 hover:bg-rose-50" title="ลบลูกค้ารายนี้">
-                                        🗑️
-                                    </button>
+                                    ${isTrash ? `
+                                        <button onclick="window.customersModule.restoreCustomer(${c.id}, '${c.name}')" class="btn-ocean text-xs py-1.5 px-3">
+                                            ♻️ กู้คืนข้อมูล
+                                        </button>
+                                    ` : `
+                                        <button onclick="app.switchTab('create-doc', { customer_id: ${c.id} })" class="btn-ocean text-xs py-1.5 px-3">
+                                            + ออกบิล
+                                        </button>
+                                        <button onclick="window.customersModule.openProjectsModal(${c.id})" class="btn-paper text-xs py-1.5 px-3 bg-sky-50 text-sky-900 border-sky-300 hover:bg-sky-100">
+                                            📌 แฟ้มโครงการ (${c.projects ? c.projects.length : 0})
+                                        </button>
+                                        <button onclick="window.customersModule.openEditCustomer(${c.id})" class="btn-paper text-xs py-1.5 px-2.5">
+                                            ✏️ แก้ไข
+                                        </button>
+                                        <button onclick="window.customersModule.deleteCustomer(${c.id}, '${c.name}')" class="btn-paper text-xs py-1.5 px-2 text-rose-700 border-rose-300 hover:bg-rose-50" title="ลบลูกค้ารายนี้">
+                                            🗑️
+                                        </button>
+                                    `}
                                 </div>
                             </div>
 
-                            <!-- Projects pill list -->
-                            <div class="mt-3 pt-2.5 border-t border-slate-100 flex flex-wrap items-center gap-2 text-xs">
-                                <span class="text-[11px] font-bold text-slate-400">โครงการ / สาขา:</span>
-                                ${c.projects && c.projects.length > 0 ? c.projects.map(p => `
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-[11px]">
-                                        <span>📌</span>
-                                        <strong>${p.project_name}</strong>
-                                        ${p.contact_person ? `<span class="text-slate-400 text-[10px]">(${p.contact_person})</span>` : ''}
-                                    </span>
-                                `).join('') : `
-                                    <span class="text-slate-400 text-[11px]">ใช้หัวบิลทั่วไป (ไม่มีโครงการย่อย)</span>
-                                `}
-                                <button onclick="window.customersModule.openAddProjectPrompt(${c.id})" class="text-xs font-bold text-sky-700 hover:underline ml-1">
-                                    + เพิ่มโครงการ
-                                </button>
-                            </div>
+                            ${!isTrash ? `
+                                <!-- Projects pill list -->
+                                <div class="mt-3 pt-2.5 border-t border-slate-100 flex flex-wrap items-center gap-2 text-xs">
+                                    <span class="text-[11px] font-bold text-slate-400">โครงการ / สาขา:</span>
+                                    ${c.projects && c.projects.length > 0 ? c.projects.map(p => `
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-[11px]">
+                                            <span>📌</span>
+                                            <strong>${p.project_name}</strong>
+                                            ${p.contact_person ? `<span class="text-slate-400 text-[10px]">(${p.contact_person})</span>` : ''}
+                                        </span>
+                                    `).join('') : `
+                                        <span class="text-slate-400 text-[11px]">ใช้หัวบิลทั่วไป (ไม่มีโครงการย่อย)</span>
+                                    `}
+                                    <button onclick="window.customersModule.openAddProjectPrompt(${c.id})" class="text-xs font-bold text-sky-700 hover:underline ml-1">
+                                        + เพิ่มโครงการ
+                                    </button>
+                                </div>
+                            ` : ''}
                         </div>
                     `).join('')}
                 </div>
@@ -208,7 +240,17 @@ window.customersModule = {
 
         try {
             await api.deleteCustomer(id);
-            app.toast('ลบข้อมูลลูกค้าเรียบร้อยแล้ว', 'success');
+            app.toast('ลบข้อมูลลูกค้าเรียบร้อยแล้ว (สามารถกู้คืนได้จากเมนูถังขยะ)', 'success');
+            this.loadList();
+        } catch (err) {
+            app.toast(err.message, 'error');
+        }
+    },
+
+    async restoreCustomer(id, name) {
+        try {
+            await api.restoreCustomer(id);
+            app.toast(`กู้คืนข้อมูลลูกค้า "${name}" เรียบร้อยแล้ว`, 'success');
             this.loadList();
         } catch (err) {
             app.toast(err.message, 'error');
