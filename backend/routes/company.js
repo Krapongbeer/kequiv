@@ -1,10 +1,37 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { supabase, isSupabaseConfigured } = require('../supabase');
 
 // GET company profile
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
     try {
+        if (isSupabaseConfigured && supabase) {
+            const { data, error } = await supabase
+                .from('company_profile')
+                .select('*')
+                .eq('id', 1)
+                .single();
+
+            if (error && error.code !== 'PGRST116') {
+                console.error('Supabase get company error:', error);
+            }
+
+            if (data) {
+                let bank_accounts = [];
+                if (data.bank_info) {
+                    try {
+                        bank_accounts = typeof data.bank_info === 'string' ? JSON.parse(data.bank_info) : data.bank_info;
+                    } catch (e) {
+                        bank_accounts = [];
+                    }
+                }
+                data.bank_accounts = bank_accounts;
+                return res.json({ success: true, data });
+            }
+        }
+
+        // SQLite Fallback
         const row = db.prepare('SELECT * FROM company_profile WHERE id = 1').get();
         if (row && row.bank_info) {
             try {
@@ -20,7 +47,7 @@ router.get('/', (req, res) => {
 });
 
 // PUT update company profile
-router.put('/', (req, res) => {
+router.put('/', async (req, res) => {
     try {
         const {
             name, tax_id, address, phone, email, line_id,
@@ -30,6 +57,46 @@ router.put('/', (req, res) => {
 
         const bankInfoStr = JSON.stringify(bank_accounts || []);
 
+        if (isSupabaseConfigured && supabase) {
+            const updatePayload = {
+                updated_at: new Date().toISOString()
+            };
+            if (name !== undefined) updatePayload.name = name;
+            if (tax_id !== undefined) updatePayload.tax_id = tax_id;
+            if (address !== undefined) updatePayload.address = address;
+            if (phone !== undefined) updatePayload.phone = phone;
+            if (email !== undefined) updatePayload.email = email;
+            if (line_id !== undefined) updatePayload.line_id = line_id;
+            if (bank_accounts !== undefined) updatePayload.bank_info = bankInfoStr;
+            if (logo_url !== undefined) updatePayload.logo_url = logo_url;
+            if (signature_url !== undefined) updatePayload.signature_url = signature_url;
+            if (default_terms !== undefined) updatePayload.default_terms = default_terms;
+            if (default_remark !== undefined) updatePayload.default_remark = default_remark;
+            if (year_format !== undefined) updatePayload.year_format = year_format;
+
+            const { data, error } = await supabase
+                .from('company_profile')
+                .update(updatePayload)
+                .eq('id', 1)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Supabase update company error:', error);
+                throw new Error(error.message);
+            }
+
+            if (data) {
+                try {
+                    data.bank_accounts = typeof data.bank_info === 'string' ? JSON.parse(data.bank_info) : data.bank_info;
+                } catch (e) {
+                    data.bank_accounts = [];
+                }
+                return res.json({ success: true, data });
+            }
+        }
+
+        // SQLite Fallback
         db.prepare(`
             UPDATE company_profile SET
                 name = COALESCE(?, name),

@@ -2,11 +2,47 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { reserveBatchNumbers } = require('../utils/docNumber');
+const { reserveBatchNumbersSupabase } = require('../utils/docNumberSupabase');
+const { supabase, isSupabaseConfigured } = require('../supabase');
 
 // GET all reservations
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const { doc_type, status } = req.query;
+
+        if (isSupabaseConfigured && supabase) {
+            let query = supabase
+                .from('document_reservations')
+                .select(`
+                    *,
+                    customer:customers(name),
+                    project:customer_projects(project_name)
+                `)
+                .order('code', { ascending: true })
+                .order('id', { ascending: false });
+
+            if (doc_type) {
+                query = query.eq('doc_type', doc_type);
+            }
+            if (status && status !== 'all') {
+                query = query.eq('status', status);
+            } else if (!status) {
+                query = query.eq('status', 'reserved');
+            }
+
+            const { data, error } = await query;
+            if (error) throw new Error(error.message);
+
+            const result = (data || []).map(r => ({
+                ...r,
+                customer_name: r.customer ? r.customer.name : null,
+                project_name: r.project ? r.project.project_name : null
+            }));
+
+            return res.json({ success: true, data: result });
+        }
+
+        // SQLite Fallback
         let query = `
             SELECT r.*, 
                    c.name as customer_name,
@@ -26,7 +62,6 @@ router.get('/', (req, res) => {
             query += ' AND r.status = ?';
             params.push(status);
         } else if (!status) {
-            // Default to 'reserved' (available)
             query += " AND r.status = 'reserved'";
         }
 
@@ -40,7 +75,7 @@ router.get('/', (req, res) => {
 });
 
 // POST reserve batch numbers
-router.post('/batch', (req, res) => {
+router.post('/batch', async (req, res) => {
     try {
         const { doc_type, count = 1, note = '', customer_id = null, project_id = null, year_month = null } = req.body;
 
@@ -53,6 +88,22 @@ router.post('/batch', (req, res) => {
             return res.status(400).json({ success: false, error: 'จำนวนเลขที่ต้องการกันต้องอยู่ระหว่าง 1 ถึง 100' });
         }
 
+        if (isSupabaseConfigured && supabase) {
+            const codes = await reserveBatchNumbersSupabase(supabase, doc_type, numCount, {
+                note,
+                customer_id: customer_id ? parseInt(customer_id, 10) : null,
+                project_id: project_id ? parseInt(project_id, 10) : null,
+                yearMonth: year_month
+            });
+
+            return res.json({
+                success: true,
+                message: `กันเลขที่ ${doc_type} สำเร็จจำนวน ${codes.length} เลข`,
+                codes
+            });
+        }
+
+        // SQLite Fallback
         const codes = reserveBatchNumbers(db, doc_type, numCount, {
             note,
             customer_id: customer_id ? parseInt(customer_id, 10) : null,
@@ -71,9 +122,34 @@ router.post('/batch', (req, res) => {
 });
 
 // DELETE cancel a reservation (if still 'reserved')
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
     try {
-        const row = db.prepare('SELECT * FROM document_reservations WHERE id = ?').get(req.params.id);
+        const id = req.params.id;
+
+        if (isSupabaseConfigured && supabase) {
+            const { data: row, error } = await supabase
+                .from('document_reservations')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error || !row) {
+                return res.status(404).json({ success: false, error: 'ไม่พบรายการกันเลขนี้' });
+            }
+            if (row.status === 'used') {
+                return res.status(400).json({ success: false, error: 'เลขนี้ถูกนำไปออกเอกสารแล้ว ไม่สามารถยกเลิกได้' });
+            }
+
+            await supabase
+                .from('document_reservations')
+                .update({ status: 'cancelled' })
+                .eq('id', id);
+
+            return res.json({ success: true, message: 'ยกเลิกการกันเลขเรียบร้อยแล้ว' });
+        }
+
+        // SQLite Fallback
+        const row = db.prepare('SELECT * FROM document_reservations WHERE id = ?').get(id);
         if (!row) {
             return res.status(404).json({ success: false, error: 'ไม่พบรายการกันเลขนี้' });
         }
@@ -81,7 +157,7 @@ router.delete('/:id', (req, res) => {
             return res.status(400).json({ success: false, error: 'เลขนี้ถูกนำไปออกเอกสารแล้ว ไม่สามารถยกเลิกได้' });
         }
 
-        db.prepare("UPDATE document_reservations SET status = 'cancelled' WHERE id = ?").run(req.params.id);
+        db.prepare("UPDATE document_reservations SET status = 'cancelled' WHERE id = ?").run(id);
         res.json({ success: true, message: 'ยกเลิกการกันเลขเรียบร้อยแล้ว' });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });

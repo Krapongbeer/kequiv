@@ -2,12 +2,66 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { getNextDocumentCode, commitDocumentCode } = require('../utils/docNumber');
+const { getNextDocumentCodeSupabase, commitDocumentCodeSupabase } = require('../utils/docNumberSupabase');
 const { thaiBahtText } = require('../utils/thaiBahtText');
+const { supabase, isSupabaseConfigured } = require('../supabase');
+
+// Helper to calculate totals from items
+function calculateItemsTotal(items, docDiscountTotal = 0) {
+    let subtotal = 0;
+    const processedItems = items.map((item, index) => {
+        const qty = parseFloat(item.quantity) || 0;
+        const price = parseFloat(item.unit_price) || 0;
+        const disc = parseFloat(item.discount) || 0;
+        const discType = item.discount_type || 'amount';
+
+        let rowDiscount = 0;
+        const rawTotal = qty * price;
+        if (discType === 'percent') {
+            rowDiscount = (rawTotal * disc) / 100;
+        } else {
+            rowDiscount = disc;
+        }
+
+        const total = Math.max(0, rawTotal - rowDiscount);
+        subtotal += total;
+
+        return {
+            sort_order: index + 1,
+            product_name: (item.product_name || '').trim(),
+            image_url: (item.image_url || '').trim(),
+            quantity: qty,
+            unit: (item.unit || 'ชิ้น').trim(),
+            unit_price: price,
+            discount: disc,
+            discount_type: discType,
+            total_price: total
+        };
+    });
+
+    const docDiscount = parseFloat(docDiscountTotal) || 0;
+    const vat_amount = 0.00; // ร้านไม่มี VAT
+    const grand_total = Math.max(0, subtotal - docDiscount);
+
+    return {
+        processedItems,
+        subtotal,
+        discount_total: docDiscount,
+        vat_amount,
+        grand_total
+    };
+}
 
 // GET next code preview
-router.get('/next-code', (req, res) => {
+router.get('/next-code', async (req, res) => {
     try {
         const { type = 'quotation', date = new Date().toISOString() } = req.query;
+
+        if (isSupabaseConfigured && supabase) {
+            const result = await getNextDocumentCodeSupabase(supabase, type, date);
+            return res.json({ success: true, data: result });
+        }
+
         const result = getNextDocumentCode(db, type, date);
         res.json({ success: true, data: result });
     } catch (err) {
@@ -16,13 +70,63 @@ router.get('/next-code', (req, res) => {
 });
 
 // GET all documents with filter
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const {
             type, status, customer_id, project_id,
             search, start_date, end_date, limit = 100, offset = 0
         } = req.query;
 
+        if (isSupabaseConfigured && supabase) {
+            let query = supabase
+                .from('documents')
+                .select(`
+                    *,
+                    customer:customers(name, phone),
+                    project:customer_projects(project_name)
+                `)
+                .is('deleted_at', null)
+                .order('issue_date', { ascending: false })
+                .order('id', { ascending: false })
+                .range(parseInt(offset, 10), parseInt(offset, 10) + parseInt(limit, 10) - 1);
+
+            if (type && type !== 'all') {
+                query = query.eq('type', type);
+            }
+            if (status && status !== 'all') {
+                query = query.eq('status', status);
+            }
+            if (customer_id) {
+                query = query.eq('customer_id', customer_id);
+            }
+            if (project_id) {
+                query = query.eq('project_id', project_id);
+            }
+            if (start_date) {
+                query = query.gte('issue_date', start_date);
+            }
+            if (end_date) {
+                query = query.lte('issue_date', end_date);
+            }
+            if (search && search.trim()) {
+                const s = search.trim();
+                query = query.or(`code.ilike.%${s}%,project_name_custom.ilike.%${s}%`);
+            }
+
+            const { data, error } = await query;
+            if (error) throw new Error(error.message);
+
+            const result = (data || []).map(d => ({
+                ...d,
+                customer_name: d.customer ? d.customer.name : '-',
+                customer_phone: d.customer ? d.customer.phone : '',
+                project_name: d.project ? d.project.project_name : null
+            }));
+
+            return res.json({ success: true, data: result });
+        }
+
+        // SQLite Fallback
         let query = `
             SELECT d.*, 
                    c.name as customer_name,
@@ -76,8 +180,60 @@ router.get('/', (req, res) => {
 });
 
 // GET single document by ID with full details & printable data
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
+        const id = req.params.id;
+
+        if (isSupabaseConfigured && supabase) {
+            const { data: doc, error } = await supabase
+                .from('documents')
+                .select(`
+                    *,
+                    customer:customers(name, tax_id, address, phone, email),
+                    project:customer_projects(project_name, site_address, contact_person),
+                    reference_doc:documents!documents_reference_document_id_fkey(code, type),
+                    items:document_items(*)
+                `)
+                .eq('id', id)
+                .is('deleted_at', null)
+                .single();
+
+            if (error || !doc) {
+                return res.status(404).json({ success: false, error: 'ไม่พบเอกสาร' });
+            }
+
+            const flattened = {
+                ...doc,
+                customer_name: doc.customer ? doc.customer.name : '-',
+                customer_tax_id: doc.customer ? doc.customer.tax_id : '',
+                customer_address: doc.customer ? doc.customer.address : '',
+                customer_phone: doc.customer ? doc.customer.phone : '',
+                customer_email: doc.customer ? doc.customer.email : '',
+                project_name: doc.project ? doc.project.project_name : null,
+                project_site_address: doc.project ? doc.project.site_address : '',
+                project_contact_person: doc.project ? doc.project.contact_person : '',
+                reference_code: doc.reference_doc ? doc.reference_doc.code : null,
+                reference_type: doc.reference_doc ? doc.reference_doc.type : null,
+                items: (doc.items || []).sort((a, b) => a.sort_order - b.sort_order)
+            };
+
+            flattened.grand_total_thai = thaiBahtText(flattened.grand_total);
+
+            // Attach company info
+            const { data: comp } = await supabase.from('company_profile').select('*').eq('id', 1).single();
+            if (comp) {
+                try {
+                    comp.bank_accounts = typeof comp.bank_info === 'string' ? JSON.parse(comp.bank_info) : (comp.bank_info || []);
+                } catch (e) {
+                    comp.bank_accounts = [];
+                }
+                flattened.company = comp;
+            }
+
+            return res.json({ success: true, data: flattened });
+        }
+
+        // SQLite Fallback
         const doc = db.prepare(`
             SELECT d.*, 
                    c.name as customer_name,
@@ -95,23 +251,20 @@ router.get('/:id', (req, res) => {
             LEFT JOIN customer_projects p ON p.id = d.project_id
             LEFT JOIN documents ref ON ref.id = d.reference_document_id
             WHERE d.id = ? AND d.deleted_at IS NULL
-        `).get(req.params.id);
+        `).get(id);
 
         if (!doc) {
             return res.status(404).json({ success: false, error: 'ไม่พบเอกสาร' });
         }
 
-        // Get document items
         doc.items = db.prepare(`
             SELECT * FROM document_items 
             WHERE document_id = ? 
             ORDER BY sort_order ASC, id ASC
         `).all(doc.id);
 
-        // Compute Thai Baht Text
         doc.grand_total_thai = thaiBahtText(doc.grand_total);
 
-        // Attach company info for printing
         const company = db.prepare('SELECT * FROM company_profile WHERE id = 1').get();
         if (company && company.bank_info) {
             try {
@@ -128,58 +281,11 @@ router.get('/:id', (req, res) => {
     }
 });
 
-// Helper to calculate totals from items
-function calculateItemsTotal(items, docDiscountTotal = 0) {
-    let subtotal = 0;
-    const processedItems = items.map((item, index) => {
-        const qty = parseFloat(item.quantity) || 0;
-        const price = parseFloat(item.unit_price) || 0;
-        const disc = parseFloat(item.discount) || 0;
-        const discType = item.discount_type || 'amount';
-
-        let rowDiscount = 0;
-        const rawTotal = qty * price;
-        if (discType === 'percent') {
-            rowDiscount = (rawTotal * disc) / 100;
-        } else {
-            rowDiscount = disc;
-        }
-
-        const total = Math.max(0, rawTotal - rowDiscount);
-        subtotal += total;
-
-        return {
-            sort_order: index + 1,
-            product_name: (item.product_name || '').trim(),
-            image_url: (item.image_url || '').trim(),
-            quantity: qty,
-            unit: (item.unit || 'ชิ้น').trim(),
-            unit_price: price,
-            discount: disc,
-            discount_type: discType,
-            total_price: total
-        };
-    });
-
-    const docDiscount = parseFloat(docDiscountTotal) || 0;
-    // No VAT: vat_amount = 0
-    const vat_amount = 0.00;
-    const grand_total = Math.max(0, subtotal - docDiscount);
-
-    return {
-        processedItems,
-        subtotal,
-        discount_total: docDiscount,
-        vat_amount,
-        grand_total
-    };
-}
-
 // POST create document
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     try {
         const {
-            code_mode = 'auto', // 'auto', 'reserved', 'custom'
+            code_mode = 'auto',
             specified_code = null,
             type, customer_id, project_id = null, project_name_custom = '',
             issue_date, due_date = null,
@@ -203,9 +309,9 @@ router.post('/', (req, res) => {
             return res.status(400).json({ success: false, error: 'กรุณาเพิ่มรายการสินค้าอย่างน้อย 1 รายการ' });
         }
 
-        db.exec('BEGIN TRANSACTION');
-        try {
-            // Determine document code
+        const totals = calculateItemsTotal(items, discount_total);
+
+        if (isSupabaseConfigured && supabase) {
             let finalCode;
             if (code_mode === 'reserved' || code_mode === 'custom') {
                 if (!specified_code || !specified_code.trim()) {
@@ -213,22 +319,87 @@ router.post('/', (req, res) => {
                 }
                 const cleanCode = specified_code.trim();
 
-                // Check collision in existing documents
-                const existingDoc = db.prepare('SELECT id FROM documents WHERE code = ? AND deleted_at IS NULL').get(cleanCode);
+                const { data: existingDoc } = await supabase
+                    .from('documents')
+                    .select('id')
+                    .eq('code', cleanCode)
+                    .is('deleted_at', null)
+                    .maybeSingle();
+
                 if (existingDoc) {
                     throw new Error(`เลขที่เอกสาร ${cleanCode} ถูกใช้งานไปแล้ว ไม่สามารถใช้ซ้ำได้`);
                 }
 
+                finalCode = await commitDocumentCodeSupabase(supabase, type, issue_date, cleanCode);
+            } else {
+                finalCode = await commitDocumentCodeSupabase(supabase, type, issue_date);
+            }
+
+            const { data: newDoc, error: docErr } = await supabase
+                .from('documents')
+                .insert({
+                    code: finalCode,
+                    type,
+                    customer_id: parseInt(customer_id, 10),
+                    project_id: project_id ? parseInt(project_id, 10) : null,
+                    project_name_custom: project_name_custom || '',
+                    reference_document_id: reference_document_id ? parseInt(reference_document_id, 10) : null,
+                    issue_date,
+                    due_date: due_date || null,
+                    subtotal: totals.subtotal,
+                    discount_total: totals.discount_total,
+                    vat_amount: 0,
+                    grand_total: totals.grand_total,
+                    status,
+                    remark: remark || '',
+                    payment_terms: payment_terms || ''
+                })
+                .select()
+                .single();
+
+            if (docErr) throw new Error(docErr.message);
+
+            const itemRows = totals.processedItems.map(it => ({
+                document_id: newDoc.id,
+                sort_order: it.sort_order,
+                product_name: it.product_name,
+                image_url: it.image_url || '',
+                quantity: it.quantity,
+                unit: it.unit,
+                unit_price: it.unit_price,
+                discount: it.discount,
+                discount_type: it.discount_type,
+                total_price: it.total_price
+            }));
+
+            const { error: itemErr } = await supabase.from('document_items').insert(itemRows);
+            if (itemErr) throw new Error(itemErr.message);
+
+            return res.json({
+                success: true,
+                message: 'บันทึกเอกสารเรียบร้อยแล้ว',
+                data: { id: newDoc.id, code: finalCode }
+            });
+        }
+
+        // SQLite Fallback
+        db.exec('BEGIN TRANSACTION');
+        try {
+            let finalCode;
+            if (code_mode === 'reserved' || code_mode === 'custom') {
+                if (!specified_code || !specified_code.trim()) {
+                    throw new Error('กรุณาระบุเลขที่เอกสารที่ต้องการใช้');
+                }
+                const cleanCode = specified_code.trim();
+                const existingDoc = db.prepare('SELECT id FROM documents WHERE code = ? AND deleted_at IS NULL').get(cleanCode);
+                if (existingDoc) {
+                    throw new Error(`เลขที่เอกสาร ${cleanCode} ถูกใช้งานไปแล้ว ไม่สามารถใช้ซ้ำได้`);
+                }
                 finalCode = commitDocumentCode(db, type, issue_date, cleanCode);
             } else {
-                // Auto generate
                 finalCode = commitDocumentCode(db, type, issue_date);
             }
 
-            // Calculate totals
-            const totals = calculateItemsTotal(items, discount_total);
-
-            // Insert document header
             const insertDoc = db.prepare(`
                 INSERT INTO documents (
                     code, type, customer_id, project_id, project_name_custom, reference_document_id,
@@ -244,7 +415,6 @@ router.post('/', (req, res) => {
             );
             const docId = result.lastInsertRowid;
 
-            // Insert items
             const insertItem = db.prepare(`
                 INSERT INTO document_items (
                     document_id, sort_order, product_name, image_url, quantity, unit, unit_price, discount, discount_type, total_price
@@ -274,93 +444,82 @@ router.post('/', (req, res) => {
     }
 });
 
-// PUT update document
-router.put('/:id', (req, res) => {
+// POST convert document
+router.post('/:id/convert', async (req, res) => {
     try {
-        const docId = req.params.id;
-        const existing = db.prepare('SELECT * FROM documents WHERE id = ? AND deleted_at IS NULL').get(docId);
-        if (!existing) {
-            return res.status(404).json({ success: false, error: 'ไม่พบเอกสาร' });
-        }
-        if (existing.status === 'cancelled') {
-            return res.status(400).json({ success: false, error: 'เอกสารที่ถูกยกเลิกแล้วไม่สามารถแก้ไขได้' });
-        }
-
-        const {
-            customer_id, project_id = null, project_name_custom = '',
-            issue_date, due_date = null,
-            items = [],
-            discount_total = 0,
-            status,
-            remark = '', payment_terms = ''
-        } = req.body;
-
-        db.exec('BEGIN TRANSACTION');
-        try {
-            const totals = calculateItemsTotal(items, discount_total);
-
-            // Update document header
-            db.prepare(`
-                UPDATE documents SET
-                    customer_id = COALESCE(?, customer_id),
-                    project_id = ?,
-                    project_name_custom = ?,
-                    issue_date = COALESCE(?, issue_date),
-                    due_date = ?,
-                    subtotal = ?,
-                    discount_total = ?,
-                    vat_amount = 0,
-                    grand_total = ?,
-                    status = COALESCE(?, status),
-                    remark = ?,
-                    payment_terms = ?,
-                    updated_at = datetime('now')
-                WHERE id = ?
-            `).run(
-                customer_id, project_id || null, project_name_custom || '',
-                issue_date, due_date || null,
-                totals.subtotal, totals.discount_total, totals.grand_total,
-                status, remark || '', payment_terms || '',
-                docId
-            );
-
-            // Re-insert items
-            db.prepare('DELETE FROM document_items WHERE document_id = ?').run(docId);
-            const insertItem = db.prepare(`
-                INSERT INTO document_items (
-                    document_id, sort_order, product_name, image_url, quantity, unit, unit_price, discount, discount_type, total_price
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `);
-
-            for (const item of totals.processedItems) {
-                insertItem.run(
-                    docId, item.sort_order, item.product_name, item.image_url || '', item.quantity, item.unit,
-                    item.unit_price, item.discount, item.discount_type, item.total_price
-                );
-            }
-
-            db.exec('COMMIT');
-            res.json({ success: true, message: 'แก้ไขเอกสารเรียบร้อยแล้ว' });
-        } catch (e) {
-            db.exec('ROLLBACK');
-            throw e;
-        }
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
-
-// POST convert document (e.g. Quotation -> Billing Note, Billing Note -> Receipt)
-router.post('/:id/convert', (req, res) => {
-    try {
-        const sourceDoc = db.prepare('SELECT * FROM documents WHERE id = ? AND deleted_at IS NULL').get(req.params.id);
-        if (!sourceDoc) {
-            return res.status(404).json({ success: false, error: 'ไม่พบเอกสารต้นทาง' });
-        }
-
+        const id = req.params.id;
         const { target_type, issue_date = new Date().toISOString().slice(0, 10), due_date = null } = req.body;
+
         if (!['quotation', 'billing', 'receipt'].includes(target_type)) {
             return res.status(400).json({ success: false, error: 'ประเภทเอกสารปลายทางไม่ถูกต้อง' });
+        }
+
+        if (isSupabaseConfigured && supabase) {
+            const { data: sourceDoc, error: sErr } = await supabase
+                .from('documents')
+                .select('*, items:document_items(*)')
+                .eq('id', id)
+                .is('deleted_at', null)
+                .single();
+
+            if (sErr || !sourceDoc) {
+                return res.status(404).json({ success: false, error: 'ไม่พบเอกสารต้นทาง' });
+            }
+
+            const newCode = await commitDocumentCodeSupabase(supabase, target_type, issue_date);
+
+            const { data: newDoc, error: nErr } = await supabase
+                .from('documents')
+                .insert({
+                    code: newCode,
+                    type: target_type,
+                    customer_id: sourceDoc.customer_id,
+                    project_id: sourceDoc.project_id,
+                    project_name_custom: sourceDoc.project_name_custom,
+                    reference_document_id: sourceDoc.id,
+                    issue_date,
+                    due_date: due_date || null,
+                    subtotal: sourceDoc.subtotal,
+                    discount_total: sourceDoc.discount_total,
+                    vat_amount: 0,
+                    grand_total: sourceDoc.grand_total,
+                    status: 'issued',
+                    remark: `อ้างอิงจากเอกสาร ${sourceDoc.code}\n${sourceDoc.remark || ''}`.trim(),
+                    payment_terms: sourceDoc.payment_terms || ''
+                })
+                .select()
+                .single();
+
+            if (nErr) throw new Error(nErr.message);
+
+            const itemsToInsert = (sourceDoc.items || []).map(it => ({
+                document_id: newDoc.id,
+                sort_order: it.sort_order,
+                product_name: it.product_name,
+                image_url: it.image_url || '',
+                quantity: it.quantity,
+                unit: it.unit,
+                unit_price: it.unit_price,
+                discount: it.discount,
+                discount_type: it.discount_type,
+                total_price: it.total_price
+            }));
+
+            if (itemsToInsert.length > 0) {
+                await supabase.from('document_items').insert(itemsToInsert);
+            }
+
+            return res.json({
+                success: true,
+                message: `แปลงเป็น ${target_type} สำเร็จ (เลขที่ ${newCode})`,
+                data: { id: newDoc.id, code: newCode }
+            });
+        }
+
+        // SQLite Fallback
+        const sourceDoc = db.prepare('SELECT * FROM documents WHERE id = ? AND deleted_at IS NULL').get(id);
+        if (!sourceDoc) {
+            return res.status(404).json({ success: false, error: 'ไม่พบเอกสารต้นทาง' });
         }
 
         const items = db.prepare('SELECT * FROM document_items WHERE document_id = ? ORDER BY sort_order ASC').all(sourceDoc.id);
@@ -415,71 +574,42 @@ router.post('/:id/convert', (req, res) => {
     }
 });
 
-// POST duplicate document
-router.post('/:id/duplicate', (req, res) => {
+// POST cancel (Void) document
+router.post('/:id/cancel', async (req, res) => {
     try {
-        const sourceDoc = db.prepare('SELECT * FROM documents WHERE id = ? AND deleted_at IS NULL').get(req.params.id);
-        if (!sourceDoc) {
-            return res.status(404).json({ success: false, error: 'ไม่พบเอกสารต้นฉบับ' });
-        }
+        const id = req.params.id;
+        const { reason = '' } = req.body;
 
-        const items = db.prepare('SELECT * FROM document_items WHERE document_id = ? ORDER BY sort_order ASC').all(sourceDoc.id);
-        const today = new Date().toISOString().slice(0, 10);
+        if (isSupabaseConfigured && supabase) {
+            const { data: doc, error } = await supabase
+                .from('documents')
+                .select('*')
+                .eq('id', id)
+                .is('deleted_at', null)
+                .single();
 
-        db.exec('BEGIN TRANSACTION');
-        try {
-            const newCode = commitDocumentCode(db, sourceDoc.type, today);
-
-            const insertDoc = db.prepare(`
-                INSERT INTO documents (
-                    code, type, customer_id, project_id, project_name_custom, reference_document_id,
-                    issue_date, due_date, subtotal, discount_total, vat_amount, grand_total,
-                    status, remark, payment_terms
-                ) VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, 0, ?, 'draft', ?, ?)
-            `);
-
-            const result = insertDoc.run(
-                newCode, sourceDoc.type, sourceDoc.customer_id, sourceDoc.project_id, sourceDoc.project_name_custom,
-                today, sourceDoc.due_date,
-                sourceDoc.subtotal, sourceDoc.discount_total, sourceDoc.grand_total,
-                sourceDoc.remark || '', sourceDoc.payment_terms || ''
-            );
-            const newDocId = result.lastInsertRowid;
-
-            const insertItem = db.prepare(`
-                INSERT INTO document_items (
-                    document_id, sort_order, product_name, image_url, quantity, unit, unit_price, discount, discount_type, total_price
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `);
-
-            for (const it of items) {
-                insertItem.run(
-                    newDocId, it.sort_order, it.product_name, it.image_url || '', it.quantity, it.unit,
-                    it.unit_price, it.discount, it.discount_type, it.total_price
-                );
+            if (error || !doc) {
+                return res.status(404).json({ success: false, error: 'ไม่พบเอกสาร' });
+            }
+            if (doc.status === 'cancelled') {
+                return res.status(400).json({ success: false, error: 'เอกสารนี้ถูกยกเลิกไปแล้ว' });
             }
 
-            db.exec('COMMIT');
+            await supabase
+                .from('documents')
+                .update({
+                    status: 'cancelled',
+                    cancel_reason: reason || 'ยกเลิกตามคำขอ',
+                    cancelled_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', id);
 
-            res.json({
-                success: true,
-                message: `คัดลอกเอกสารสำเร็จ (เลขที่ใหม่ ${newCode})`,
-                data: { id: newDocId, code: newCode }
-            });
-        } catch (e) {
-            db.exec('ROLLBACK');
-            throw e;
+            return res.json({ success: true, message: `ยกเลิกเอกสาร ${doc.code} เรียบร้อยแล้ว` });
         }
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
 
-// POST cancel (Void) document
-router.post('/:id/cancel', (req, res) => {
-    try {
-        const { reason = '' } = req.body;
-        const doc = db.prepare('SELECT * FROM documents WHERE id = ? AND deleted_at IS NULL').get(req.params.id);
+        // SQLite Fallback
+        const doc = db.prepare('SELECT * FROM documents WHERE id = ? AND deleted_at IS NULL').get(id);
         if (!doc) {
             return res.status(404).json({ success: false, error: 'ไม่พบเอกสาร' });
         }
@@ -494,7 +624,7 @@ router.post('/:id/cancel', (req, res) => {
                 cancelled_at = datetime('now'),
                 updated_at = datetime('now')
             WHERE id = ?
-        `).run(reason || 'ยกเลิกตามคำขอ', req.params.id);
+        `).run(reason || 'ยกเลิกตามคำขอ', id);
 
         res.json({ success: true, message: `ยกเลิกเอกสาร ${doc.code} เรียบร้อยแล้ว` });
     } catch (err) {
@@ -503,14 +633,30 @@ router.post('/:id/cancel', (req, res) => {
 });
 
 // POST mark as paid
-router.post('/:id/mark-paid', (req, res) => {
+router.post('/:id/mark-paid', async (req, res) => {
     try {
+        const id = req.params.id;
+
+        if (isSupabaseConfigured && supabase) {
+            await supabase
+                .from('documents')
+                .update({
+                    status: 'paid',
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', id)
+                .is('deleted_at', null);
+
+            return res.json({ success: true, message: 'บันทึกสถานะชำระเงินแล้ว' });
+        }
+
+        // SQLite Fallback
         db.prepare(`
             UPDATE documents SET
                 status = 'paid',
                 updated_at = datetime('now')
             WHERE id = ? AND deleted_at IS NULL
-        `).run(req.params.id);
+        `).run(id);
 
         res.json({ success: true, message: 'บันทึกสถานะชำระเงินแล้ว' });
     } catch (err) {
@@ -519,9 +665,21 @@ router.post('/:id/mark-paid', (req, res) => {
 });
 
 // DELETE soft delete document
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
     try {
-        db.prepare("UPDATE documents SET deleted_at = datetime('now') WHERE id = ?").run(req.params.id);
+        const id = req.params.id;
+
+        if (isSupabaseConfigured && supabase) {
+            await supabase
+                .from('documents')
+                .update({ deleted_at: new Date().toISOString() })
+                .eq('id', id);
+
+            return res.json({ success: true, message: 'ลบเอกสารเรียบร้อยแล้ว' });
+        }
+
+        // SQLite Fallback
+        db.prepare("UPDATE documents SET deleted_at = datetime('now') WHERE id = ?").run(id);
         res.json({ success: true, message: 'ลบเอกสารเรียบร้อยแล้ว' });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
