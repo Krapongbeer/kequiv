@@ -37,16 +37,13 @@ router.post('/login', (req, res) => {
             });
         }
 
+        // Constant-time execution to prevent username enumeration via timing analysis
+        const DUMMY_HASH = '$2a$10$wK1Vf0r34p/kequivDummyHashSecuritySalt2026';
         const user = USERS.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
-            });
-        }
+        const hashToVerify = user ? user.passwordHash : DUMMY_HASH;
+        const isMatch = bcrypt.compareSync(password, hashToVerify);
 
-        const isMatch = bcrypt.compareSync(password, user.passwordHash);
-        if (!isMatch) {
+        if (!user || !isMatch) {
             return res.status(401).json({
                 success: false,
                 error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'

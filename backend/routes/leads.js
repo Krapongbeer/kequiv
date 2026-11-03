@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { supabase, isSupabaseConfigured } = require('../supabase');
 const { requireAuth } = require('../middleware/auth');
 
 function sanitizeText(str, maxLength = 500) {
@@ -46,6 +47,21 @@ router.post('/', (req, res) => {
             location,
             details
         );
+
+        // Async mirror to Supabase Cloud if configured
+        if (isSupabaseConfigured && supabase) {
+            supabase.from('leads').insert({
+                name,
+                phone,
+                line_id,
+                service_type,
+                location,
+                details,
+                status: 'pending'
+            }).then(({ error }) => {
+                if (error) console.warn('Supabase lead mirror notice:', error.message);
+            }).catch(err => console.warn('Supabase lead mirror catch:', err.message));
+        }
 
         res.json({
             success: true,
