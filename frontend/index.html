@@ -78,7 +78,7 @@
                         ชื่อผู้ใช้งาน (Username):
                     </label>
                     <input type="text" id="login-username" required autocomplete="username"
-                        placeholder="phongphana หรือ ampui"
+                        placeholder="ระบุชื่อผู้ใช้งาน"
                         class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 font-mono">
                 </div>
 
@@ -96,19 +96,9 @@
                     <span>เข้าสู่ระบบ</span>
                 </button>
 
-                <!-- Quick Account Selector Helpers -->
+                <!-- Secure Authentication Notice -->
                 <div class="mt-4 pt-3 border-t border-slate-200 text-center">
-                    <p class="text-[11px] text-slate-400 mb-2 font-mono">เลือกบัญชีเข้าใช้งานด่วน:</p>
-                    <div class="flex items-center justify-center gap-2">
-                        <button type="button" onclick="app.quickFillLogin('phongphana', 'plakrapong')"
-                            class="px-3 py-1 text-[11px] bg-sky-50 border border-sky-300 text-sky-900 rounded-lg font-mono hover:bg-sky-100 transition">
-                            👤 phongphana (ผู้ดูแล)
-                        </button>
-                        <button type="button" onclick="app.quickFillLogin('ampui', 'plaakrapong')"
-                            class="px-3 py-1 text-[11px] bg-slate-100 border border-slate-300 text-slate-800 rounded-lg font-mono hover:bg-slate-200 transition">
-                            👤 ampui (เจ้าหน้าที่)
-                        </button>
-                    </div>
+                    <p class="text-[11px] text-slate-400 font-mono">🔒 ระบบรักษาความปลอดภัยและยืนยันตัวตนเจ้าหน้าที่</p>
                 </div>
             </form>
         </div>
@@ -135,7 +125,7 @@
                 </a>
 
                 <!-- Desktop Navigation Menu (Single line, No text falling) -->
-                <nav class="hidden lg:flex items-center gap-1 xl:gap-2 font-mono text-xs font-bold text-slate-700 dark:text-slate-200">
+                <nav class="hidden xl:flex items-center gap-1 xl:gap-2 font-mono text-xs font-bold text-slate-700 dark:text-slate-200">
                     <a href="#cctv" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">กล้องวงจรปิด</a>
                     <a href="#network" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">ไอที-เน็ตเวิร์ก</a>
                     <a href="#systems" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">ระบบไฟฟ้า & อาคาร</a>
@@ -164,14 +154,14 @@
                     </div>
 
                     <!-- Mobile Hamburger -->
-                    <button id="store-mobile-toggle" class="lg:hidden p-2 text-slate-700 dark:text-slate-200 hover:text-sky-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition" title="เมนู">
+                    <button id="store-mobile-toggle" class="xl:hidden p-2 text-slate-700 dark:text-slate-200 hover:text-sky-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition" title="เมนู">
                         <span class="text-2xl leading-none">☰</span>
                     </button>
                 </div>
             </div>
 
             <!-- Mobile Navigation Drawer Menu -->
-            <div id="store-mobile-menu" class="hidden lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b1329] px-4 py-4 space-y-2 font-mono text-xs shadow-lg">
+            <div id="store-mobile-menu" class="hidden xl:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b1329] px-4 py-4 space-y-2 font-mono text-xs shadow-lg">
                 <a href="#cctv" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold">📹 1. ระบบกล้องวงจรปิด (CCTV)</a>
                 <a href="#network" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold">💻 2. งานไอทีและเน็ตเวิร์ก (IT & Network)</a>
                 <a href="#systems" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold">⚡ 3. งานระบบไฟฟ้าและอาคาร (Systems)</a>
@@ -1016,7 +1006,7 @@
                         <!-- Trust Badges -->
                         <div class="p-4 rounded-2xl bg-slate-50 dark:bg-[#0d162d] border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 space-y-1.5">
                             <div><strong>เลขประจำตัวผู้เสียภาษี:</strong> 3560500055866</div>
-                            <div><strong>รูปแบบกิจการ:</strong> กิจการการค้าที่ได้รับการจดทะเบียนพาณิชย์ถูกต้อง (ผู้ขายไม่ได้จดทะเบียนภาษีมูลค่าเพิ่ม Non-VAT)</div>
+                            <div><strong>รูปแบบกิจการ:</strong> กิจการการค้าจดทะเบียนพาณิชย์และ SME-GP ถูกต้องตามกฎหมาย</div>
                         </div>
 
                         <!-- Branches -->
@@ -1083,7 +1073,7 @@
                 </div>
                 <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500 text-center sm:text-left">
                     <div class="flex items-center gap-2 mb-1"><img src="img/dbd-registered.png" alt="DBD Registered" class="h-6 w-auto object-contain"><span class="text-[10px] text-purple-400 font-bold">จดทะเบียนพาณิชย์อิเล็กทรอนิกส์ DBD Registered</span></div>
-                    <p>© 2026 ร้านเคอีควิป Kequiv. สงวนลิขสิทธิ์ทั้งหมด (Non-VAT Business)</p>
+                    <p>© 2026 ร้านเคอีควิป (Kequiv). สงวนลิขสิทธิ์ทั้งหมด</p>
                     <p>พะเยา (สำนักงานใหญ่) & เชียงใหม่ (สาขา 2)</p>
                 </div>
             </div>
@@ -1412,7 +1402,7 @@
                         <span class="text-[10px] text-slate-500">3 พ.ย. 2026</span>
                     </div>
                     <ul class="list-disc list-inside space-y-1 text-slate-600 text-[11px]">
-                        <li>ระบบเข้าสู่ระบบด้วยรหัสผ่าน (phongphana & ampui)</li>
+                        <li>ระบบเข้าสู่ระบบด้วยรหัสผ่านและการยืนยันตัวตน 2 ระดับสิทธิ์</li>
                         <li>สีโทน Ocean Cyan ตามโลโก้ พร้อมฟอนต์พิมพ์ดีด</li>
                         <li>ส่งออกรายงาน Excel/CSV และแชร์เข้า LINE ในคลิกเดียว</li>
                     </ul>

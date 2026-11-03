@@ -1,0 +1,24 @@
+name: Supabase Keep-Alive Heartbeat
+
+on:
+  schedule:
+    # Run every 3 days at 06:00 UTC (13:00 Asia/Bangkok)
+    - cron: '0 6 */3 * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase via Production API
+        run: |
+          echo "Sending Keep-Alive Heartbeat to Kequiv Production API..."
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" "https://kequiv.vercel.app/api/health/ping")
+          echo "$RESPONSE"
+          
+          STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS" | cut -d':' -f2)
+          if [ "$STATUS" = "200" ]; then
+            echo "✅ Supabase Heartbeat Succeeded! Project inactivity timer reset."
+          else
+            echo "⚠️ Non-200 status received: $STATUS (check endpoint logs)"
+          fi

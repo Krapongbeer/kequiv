@@ -3,17 +3,33 @@ const router = express.Router();
 const db = require('../db');
 const { requireAuth } = require('../middleware/auth');
 
+function sanitizeText(str, maxLength = 500) {
+    if (!str || typeof str !== 'string') return '';
+    // Strip tags and enforce maxLength to prevent injection attacks
+    return str
+        .replace(/<[^>]*>?/gm, '')
+        .trim()
+        .slice(0, maxLength);
+}
+
 /**
  * POST /api/leads - Public inquiry from website
  */
 router.post('/', (req, res) => {
     try {
-        const { name, phone, line_id, service_type, location, details } = req.body;
+        let { name, phone, line_id, service_type, location, details } = req.body;
 
-        if (!name || !name.trim()) {
+        name = sanitizeText(name, 100);
+        phone = sanitizeText(phone, 40);
+        line_id = sanitizeText(line_id, 80);
+        service_type = sanitizeText(service_type, 100);
+        location = sanitizeText(location, 200);
+        details = sanitizeText(details, 2000);
+
+        if (!name) {
             return res.status(400).json({ success: false, error: 'กรุณาระบุชื่อผู้ติดต่อ' });
         }
-        if (!phone || !phone.trim()) {
+        if (!phone) {
             return res.status(400).json({ success: false, error: 'กรุณาระบุเบอร์โทรศัพท์' });
         }
 
@@ -23,12 +39,12 @@ router.post('/', (req, res) => {
         `);
 
         const result = stmt.run(
-            name.trim(),
-            phone.trim(),
-            (line_id || '').trim(),
-            (service_type || '').trim(),
-            (location || '').trim(),
-            (details || '').trim()
+            name,
+            phone,
+            line_id,
+            service_type,
+            location,
+            details
         );
 
         res.json({

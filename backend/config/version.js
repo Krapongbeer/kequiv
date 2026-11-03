@@ -3,10 +3,25 @@
  */
 
 module.exports = {
-    version: '2.5.0',
+    version: '2.6.0',
     releaseDate: '2026-11-03',
-    codename: 'Verified Accreditations, DBD Registered & THAI SME-GP Edition',
+    codename: 'Cybersecurity Hardening, Zero-Credential Exposure, Supabase Keep-Alive Heartbeat & Non-VAT Cleansing',
     changelog: [
+        {
+            version: '2.6.0',
+            date: '2026-11-03',
+            title: 'Cybersecurity Hardening, Supabase Auto-Pause Prevention & Clean Wording',
+            features: [
+                'ลบชื่อผู้ใช้และรหัสผ่านออกจากหน้าเว็บ 100% (ลบ Quick Fill Login & Credentials Leak)',
+                'ปิดการแสดง Username บนปุ่มระบบหลังร้านหน้าร้านสาธารณะเพื่อความปลอดภัยสูงสุด',
+                'ติดตั้ง Security HTTP Headers ป้องกัน Clickjacking (X-Frame-Options), XSS และ MIME Sniffing',
+                'ปิด Express Server Signature (disable x-powered-by)',
+                'เพิ่ม Rate Limiter ป้องกัน Bot สแปมฟอร์มขอใบเสนอราคา (/api/leads) และสุ่มรหัสผ่าน (/api/auth/login)',
+                'เพิ่มระบบ Sanitize Input ตัดแท็กโค้ดอันตราย (XSS/Script Injection) จากฟอร์มติดต่อ',
+                'ลบคำว่า "ไม่จดแวท" และ "Non-VAT" ออกจากทุกจุดของเว็บไซต์และเอกสาร เปลี่ยนเป็น "ราคาสุทธิ"',
+                'ระบบ Supabase Keep-Alive Heartbeat ป้องกันฐานข้อมูลหลับ/ดาวน์เมื่อไม่มีคนเข้าเกิน 7 วัน (ทำงานทั้ง In-App 24h Timer และ GitHub Actions Cron 3 วัน)'
+            ]
+        },
         {
             version: '2.5.0',
             date: '2026-11-03',

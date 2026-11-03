@@ -624,7 +624,7 @@ window.documentsModule = {
                             <div>
                                 <div class="flex items-center justify-between mb-1.5">
                                     <label class="text-xs font-bold text-slate-700">หมายเหตุท้ายเอกสาร</label>
-                                    <button type="button" onclick="window.documentsModule.insertPreset('remark', 'เอกสารนี้ออกโดยไม่มีภาษีมูลค่าเพิ่ม (ผู้ขายไม่ได้จดทะเบียน VAT)')" class="text-[11px] bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded text-slate-600 transition">+ ข้อความไม่มี VAT</button>
+                                    <button type="button" onclick="window.documentsModule.insertPreset('remark', 'ราคาสินค้าและบริการเป็นราคาสุทธิ')" class="text-[11px] bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded text-slate-600 transition">+ ราคาสุทธิ</button>
                                 </div>
                                 <textarea id="doc-remark" rows="2" class="w-full p-2.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none text-slate-700">${remark !== undefined ? remark : (app.state.company ? app.state.company.default_remark || '' : '')}</textarea>
                             </div>

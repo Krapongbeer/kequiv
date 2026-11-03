@@ -156,6 +156,9 @@ const app = {
                 <button type="button" onclick="app.openBackoffice()" class="btn-ocean text-xs py-1.5 px-3 flex items-center gap-1.5" title="ระบบงานขาย ออกบิล ลูกค้า">
                     <span>📑</span> <span class="hidden sm:inline">ระบบออกบิล/งานขาย</span>
                 </button>
+                <button type="button" onclick="app.logout()" class="p-1.5 rounded-lg border border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs transition" title="ออกจากระบบ">
+                    🚪
+                </button>
                 <button type="button" onclick="app.toggleTheme()" class="theme-toggle-btn p-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs hover:border-sky-500 transition" title="สลับโหมดมืด/สว่าง">
                     ${themeIcon}
                 </button>
@@ -171,6 +174,9 @@ const app = {
                             <span>📑</span> ระบบออกบิล
                         </button>
                     </div>
+                    <button type="button" onclick="app.logout()" class="w-full mt-2 py-2 text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-lg">
+                        🚪 ออกจากระบบทีมงาน
+                    </button>
                 `;
             }
         } else {
@@ -217,15 +223,6 @@ const app = {
         if (overlay) {
             overlay.classList.add('hidden');
         }
-    },
-
-    quickFillLogin(username, password) {
-        const uEl = document.getElementById('login-username');
-        const pEl = document.getElementById('login-password');
-        if (uEl) uEl.value = username;
-        if (pEl) pEl.value = password;
-        const errEl = document.getElementById('login-error-alert');
-        if (errEl) errEl.classList.add('hidden');
     },
 
     async handleLogin() {
