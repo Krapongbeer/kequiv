@@ -21,28 +21,90 @@ const app = {
     },
 
     async init() {
-        console.log('Kequiv v2.0 Initializing...');
+        console.log('Kequiv v2.3 Initializing...');
 
-        // Check authentication state
+        // Initialize Storefront if loaded
+        if (window.storefront && typeof window.storefront.init === 'function') {
+            window.storefront.init();
+        }
+
+        // Check authentication state in background
         const token = localStorage.getItem('kequiv_token');
-        if (!token) {
+        if (token) {
+            try {
+                const userRes = await api.getCurrentUser();
+                this.state.currentUser = userRes.user;
+                this.updateUserUI(this.state.currentUser);
+                await this.loadInitialData();
+                this.setupEventListeners();
+            } catch (err) {
+                console.warn('Session verification failed, cleared session:', err.message);
+                localStorage.removeItem('kequiv_token');
+                localStorage.removeItem('kequiv_user');
+                this.state.currentUser = null;
+            }
+        }
+
+        this.updateStorefrontAuthButton();
+
+        // Check hash navigation
+        const hash = window.location.hash || '';
+        const backofficeTabs = ['#dashboard', '#documents', '#create-doc', '#customers', '#reservations', '#settings'];
+        if (hash.startsWith('#backoffice') || backofficeTabs.includes(hash)) {
+            if (this.state.currentUser) {
+                const target = hash.replace('#backoffice-', '').replace('#backoffice', '') || 'dashboard';
+                this.openBackoffice(backofficeTabs.includes(hash) ? hash.replace('#', '') : target);
+            } else {
+                this.openStorefront();
+            }
+        } else {
+            this.openStorefront();
+        }
+    },
+
+    openBackoffice(targetTab = null) {
+        if (!this.state.currentUser) {
             this.showLoginScreen();
             return;
         }
+        const storeEl = document.getElementById('storefront-view');
+        const backofficeEl = document.getElementById('backoffice-view');
+        if (storeEl) storeEl.classList.add('hidden');
+        if (backofficeEl) backofficeEl.classList.remove('hidden');
 
-        try {
-            // Verify session with backend
-            const userRes = await api.getCurrentUser();
-            this.state.currentUser = userRes.user;
-            this.updateUserUI(this.state.currentUser);
-            this.hideLoginScreen();
+        document.body.classList.add('flex', 'flex-col', 'md:flex-row');
+        this.hideLoginScreen();
+        this.switchTab(targetTab || this.state.activeTab || 'dashboard');
+    },
 
-            await this.loadInitialData();
-            this.setupEventListeners();
-            this.switchTab('dashboard');
-        } catch (err) {
-            console.warn('Session verification failed, requesting login:', err.message);
-            this.showLoginScreen();
+    openStorefront() {
+        const storeEl = document.getElementById('storefront-view');
+        const backofficeEl = document.getElementById('backoffice-view');
+        if (backofficeEl) backofficeEl.classList.add('hidden');
+        if (storeEl) storeEl.classList.remove('hidden');
+
+        document.body.classList.remove('flex', 'flex-col', 'md:flex-row');
+        this.hideLoginScreen();
+        this.updateStorefrontAuthButton();
+    },
+
+    updateStorefrontAuthButton() {
+        const btn = document.getElementById('store-btn-auth');
+        const mobileBtn = document.getElementById('store-mobile-btn-auth');
+        if (this.state.currentUser) {
+            const html = `<span>💼</span> <span>ระบบหลังร้าน (${this.state.currentUser.username})</span>`;
+            if (btn) {
+                btn.innerHTML = html;
+                btn.classList.add('bg-sky-700', 'text-white');
+            }
+            if (mobileBtn) mobileBtn.innerHTML = html;
+        } else {
+            const html = `<span>🔐</span> <span>จัดการหลังร้าน</span>`;
+            if (btn) {
+                btn.innerHTML = html;
+                btn.classList.remove('bg-sky-700');
+            }
+            if (mobileBtn) mobileBtn.innerHTML = html;
         }
     },
 
@@ -107,7 +169,7 @@ const app = {
             // Initialize app data
             await this.loadInitialData();
             this.setupEventListeners();
-            this.switchTab('dashboard');
+            this.openBackoffice('dashboard');
         } catch (err) {
             console.error('Login error:', err);
             if (errAlert) {
@@ -127,7 +189,7 @@ const app = {
         localStorage.removeItem('kequiv_user');
         this.state.currentUser = null;
         this.toast('ออกจากระบบเรียบร้อยแล้ว', 'info');
-        this.showLoginScreen();
+        this.openStorefront();
     },
 
     updateUserUI(user) {

@@ -137,6 +137,38 @@ function runTests() {
     }
     console.log(`  ✓ Item with thumbnail image saved and verified: "${savedItem.product_name}" -> ${savedItem.image_url}`);
 
+    console.log('\n--- 8. Testing Website Leads & Storefront Inquiries ---');
+    const leadStmt = db.prepare(`
+        INSERT INTO leads (name, phone, line_id, service_type, location, details, status)
+        VALUES (?, ?, ?, ?, ?, ?, 'pending')
+    `);
+    const leadRes = leadStmt.run(
+        'คุณประสิทธิ์ (โรงแรมพะเยาเลครีสอร์ต)',
+        '089-999-8888',
+        'prasit_hotel',
+        'กล้องวงจรปิด CCTV, ไอที & เน็ตเวิร์ก Wi-Fi LAN',
+        'อ.เมือง จ.พะเยา',
+        'ต้องการติดกล้อง 16 จุด และวางระบบ Wi-Fi 24 ห้องพัก'
+    );
+    const newLeadId = Number(leadRes.lastInsertRowid);
+    const savedLead = db.prepare('SELECT * FROM leads WHERE id = ?').get(newLeadId);
+    if (!savedLead || savedLead.phone !== '089-999-8888') {
+        throw new Error('Failed to save website lead');
+    }
+    console.log(`  ✓ Website lead received: "${savedLead.name}" (${savedLead.service_type})`);
+
+    // Convert lead to customer
+    const convCust = db.prepare(`
+        INSERT INTO customers (name, phone, address, note)
+        VALUES (?, ?, ?, ?)
+    `).run(savedLead.name, savedLead.phone, savedLead.location, `[จากหน้าร้าน] ${savedLead.details}`);
+    db.prepare("UPDATE leads SET status = 'converted' WHERE id = ?").run(newLeadId);
+    const updatedLead = db.prepare('SELECT status FROM leads WHERE id = ?').get(newLeadId);
+    if (updatedLead.status !== 'converted') {
+        throw new Error('Failed to convert lead status');
+    }
+    console.log(`  ✓ Lead converted to customer #${convCust.lastInsertRowid} with status "converted"`);
+
     console.log('\n=============================================');
     console.log('🎉 ALL INTEGRATION & BUSINESS RULES VERIFIED!');
     console.log('=============================================');

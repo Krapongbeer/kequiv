@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kequiv v2.2 - ระบบจัดการเอกสารธุรกิจและลูกค้า</title>
+    <title>เคอีควิป KEQUIV - ระบบไอที กล้องวงจรปิด และงานระบบครบวงจร</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
@@ -35,7 +35,7 @@
         }
     </script>
 </head>
-<body class="min-h-screen flex flex-col md:flex-row antialiased selection:bg-cyan-200 selection:text-slate-900 bg-slate-50 text-slate-900">
+<body class="min-h-screen antialiased selection:bg-cyan-200 selection:text-slate-900 bg-slate-50 text-slate-900">
 
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col items-end max-w-sm pointer-events-auto"></div>
@@ -46,6 +46,7 @@
     <div id="login-overlay" class="fixed inset-0 z-[9000] flex items-center justify-center p-4 transition-opacity duration-300 hidden">
         <div class="typewriter-card bg-white max-w-md w-full p-6 sm:p-8 rounded-2xl shadow-2xl border-2 border-slate-300 relative">
             <div class="ribbon-banner absolute -top-0.5 left-0 right-0 rounded-t-xl"></div>
+            <button type="button" onclick="app.hideLoginScreen()" class="absolute top-3 right-3 text-slate-400 hover:text-slate-700 text-xs font-mono px-2 py-1 rounded-lg hover:bg-slate-100 transition z-10" title="กลับสู่หน้าร้าน">✕ ปิด</button>
 
             <div class="text-center pt-2 mb-6">
                 <div class="inline-flex items-center justify-center p-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm mb-3">
@@ -112,6 +113,884 @@
         </div>
     </div>
 
+        <!-- ======================================================== -->
+    <!-- PUBLIC STOREFRONT VIEW (เคอีควิป Kequiv IT & Systems)    -->
+    <!-- ======================================================== -->
+    <div id="storefront-view" class="w-full min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-cyan-200">
+        
+        <!-- Storefront Navbar -->
+        <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+                <!-- Brand Logo & Title -->
+                <a href="#hero" class="flex items-center gap-3 group">
+                    <div class="w-12 h-12 rounded-xl bg-white p-1 border border-slate-200 shadow-xs flex items-center justify-center shrink-0 group-hover:border-sky-500 transition">
+                        <img src="img/logo.png" alt="Kequiv Logo" class="max-h-full max-w-full object-contain">
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl font-bold font-typewriter tracking-wider text-slate-900 group-hover:text-sky-600 transition">KEQUIV</span>
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 font-bold border border-sky-300">IT & SYSTEMS</span>
+                        </div>
+                        <p class="text-xs font-mono text-slate-500 hidden sm:block">เคอีควิป • กล้องวงจรปิด • ไอทีเน็ตเวิร์ก • งานระบบ</p>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden lg:flex items-center gap-6 font-mono text-xs font-bold text-slate-700">
+                    <a href="#cctv" class="hover:text-sky-600 transition flex items-center gap-1.5 py-1">
+                        <span>📹</span> <span>กล้องวงจรปิด</span>
+                    </a>
+                    <a href="#network" class="hover:text-sky-600 transition flex items-center gap-1.5 py-1">
+                        <span>💻</span> <span>ไอที-เน็ตเวิร์ก</span>
+                    </a>
+                    <a href="#systems" class="hover:text-sky-600 transition flex items-center gap-1.5 py-1">
+                        <span>⚡</span> <span>งานระบบไฟฟ้า</span>
+                    </a>
+                    <a href="#services" class="hover:text-sky-600 transition flex items-center gap-1.5 py-1">
+                        <span>🛠️</span> <span>บริการอื่นๆ</span>
+                    </a>
+                    <a href="#portfolio" class="hover:text-sky-600 transition flex items-center gap-1.5 py-1">
+                        <span>🏆</span> <span>ผลงาน</span>
+                    </a>
+                    <a href="#quote-request" class="hover:text-sky-600 transition flex items-center gap-1.5 py-1">
+                        <span>📋</span> <span>ขอใบเสนอราคา</span>
+                    </a>
+                    <a href="#contact" class="hover:text-sky-600 transition flex items-center gap-1.5 py-1">
+                        <span>📍</span> <span>ติดต่อเรา</span>
+                    </a>
+                </nav>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" rel="noopener" class="btn-line text-xs py-2 px-3 sm:px-4 shadow-sm" title="เพิ่มเพื่อนทาง LINE">
+                        <span class="text-base">💬</span>
+                        <span class="hidden sm:inline">แอด LINE @vcv6921d</span>
+                        <span class="sm:hidden">LINE</span>
+                    </a>
+                    <button id="store-btn-auth" onclick="app.openBackoffice()" class="btn-ocean text-xs py-2 px-3 sm:px-4 shadow-sm" title="เข้าสู่ระบบจัดการเอกสารสำหรับทีมงาน">
+                        <span>🔐</span>
+                        <span class="hidden md:inline">จัดการหลังร้าน</span>
+                    </button>
+                    <!-- Mobile Hamburger -->
+                    <button id="store-mobile-toggle" class="lg:hidden p-2 text-slate-700 hover:text-sky-600 hover:bg-slate-100 rounded-lg transition" title="เมนู">
+                        <span class="text-2xl leading-none">☰</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation Drawer Menu -->
+            <div id="store-mobile-menu" class="hidden lg:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-2 font-mono text-xs shadow-lg">
+                <a href="#cctv" class="block py-2 px-3 rounded-lg hover:bg-slate-100 text-slate-800 font-bold">📹 1. ระบบกล้องวงจรปิด (CCTV)</a>
+                <a href="#network" class="block py-2 px-3 rounded-lg hover:bg-slate-100 text-slate-800 font-bold">💻 2. งานไอทีและเน็ตเวิร์ก (IT & Network)</a>
+                <a href="#systems" class="block py-2 px-3 rounded-lg hover:bg-slate-100 text-slate-800 font-bold">⚡ 3. งานระบบไฟฟ้าและอาคาร (Systems)</a>
+                <a href="#services" class="block py-2 px-3 rounded-lg hover:bg-slate-100 text-slate-800 font-bold">🛠️ 4. บริการเสริมและงานอื่นๆ (Other Services)</a>
+                <a href="#portfolio" class="block py-2 px-3 rounded-lg hover:bg-slate-100 text-slate-800 font-bold">🏆 5. ผลงานการติดตั้งจริง (Portfolio)</a>
+                <a href="#quote-request" class="block py-2 px-3 rounded-lg hover:bg-slate-100 text-slate-800 font-bold">📋 6. ขอใบเสนอราคาออนไลน์ (Get Quote)</a>
+                <a href="#contact" class="block py-2 px-3 rounded-lg hover:bg-slate-100 text-slate-800 font-bold">📍 7. ข้อมูลร้านและ LINE OA (@vcv6921d)</a>
+                <div class="pt-2 border-t border-slate-100">
+                    <button id="store-mobile-btn-auth" onclick="app.openBackoffice()" class="w-full btn-ocean py-2 text-xs">
+                        🔐 จัดการหลังร้าน (พนักงาน)
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- ======================================================== -->
+        <!-- 1. HERO SECTION -->
+        <!-- ======================================================== -->
+        <section id="hero" class="relative overflow-hidden bg-gradient-to-b from-sky-50/70 via-slate-50 to-white pt-12 pb-16 sm:pt-20 sm:pb-24 border-b border-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="text-center max-w-3xl mx-auto">
+                    <!-- Badges -->
+                    <div class="inline-flex flex-wrap items-center justify-center gap-2 mb-6 font-mono text-[11px] sm:text-xs">
+                        <span class="px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-bold border border-sky-300 flex items-center gap-1.5 shadow-2xs">
+                            <span>⚡</span> ผู้เชี่ยวชาญ พะเยา - เชียงใหม่ และทั่วภาคเหนือ
+                        </span>
+                        <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 flex items-center gap-1.5 shadow-2xs">
+                            <span>🛡️</span> มาตรฐานวิศวกรรม • มีประกันงานติดตั้ง
+                        </span>
+                    </div>
+
+                    <!-- Main Headline -->
+                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-bold font-typewriter text-slate-900 tracking-tight leading-tight mb-6">
+                        เคอีควิป <span class="text-sky-600">KEQUIV</span><br>
+                        <span class="text-2xl sm:text-4xl text-slate-800 font-sans font-extrabold">งานไอที • กล้องวงจรปิด • งานระบบ</span>
+                    </h1>
+
+                    <p class="text-sm sm:text-base text-slate-600 font-mono leading-relaxed mb-8 max-w-2xl mx-auto">
+                        ศูนย์รวมบริการรับเหมาและติดตั้งระบบกล้องวงจรปิดคมชัดสูง 2K/4K ดูผ่านมือถือ 24 ชม., วางระบบเครือข่ายเน็ตเวิร์ก LAN / Fiber Optic / Wi-Fi ความเร็วสูง และงานระบบไฟฟ้า ตู้ควบคุม MDB โดยทีมช่างผู้ชำนาญการ พร้อมออกใบเสนอราคามาตรฐาน
+                    </p>
+
+                    <!-- CTAs -->
+                    <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 font-mono">
+                        <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" rel="noopener" class="btn-line text-sm py-3 px-6 shadow-md">
+                            <span class="text-lg">💬</span>
+                            <span>แอด LINE ปรึกษาช่าง: @vcv6921d</span>
+                        </a>
+                        <a href="#quote-request" class="btn-ocean text-sm py-3 px-6 shadow-md">
+                            <span>📋</span>
+                            <span>ขอใบเสนอราคาด่วน / นัดดูหน้างาน</span>
+                        </a>
+                        <a href="tel:0914802472" class="btn-paper text-sm py-3 px-5 border border-slate-300 shadow-xs hover:border-sky-500">
+                            <span>📞</span>
+                            <span>โทร: 091-480-2472</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 4 Trust Highlight Strip -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-16 font-mono">
+                    <div class="typewriter-card p-5 bg-white border-l-4 border-l-sky-500">
+                        <div class="text-2xl mb-2">📹</div>
+                        <h4 class="font-bold text-slate-900 text-sm mb-1 font-typewriter">กล้องวงจรปิด AI 24 ชม.</h4>
+                        <p class="text-xs text-slate-500">ภาพสีแม้ในที่มืด คมชัดระดับ 2K/4K ดูผ่านมือถือฟรีทุกที่</p>
+                    </div>
+                    <div class="typewriter-card p-5 bg-white border-l-4 border-l-cyan-500">
+                        <div class="text-2xl mb-2">💻</div>
+                        <h4 class="font-bold text-slate-900 text-sm mb-1 font-typewriter">ไอที & Fiber Optic</h4>
+                        <p class="text-xs text-slate-500">เดินสาย LAN, ฟิวชั่นสไปลซ์ใยแก้ว, จัดสายตู้แร็คมาตรฐาน</p>
+                    </div>
+                    <div class="typewriter-card p-5 bg-white border-l-4 border-l-amber-500">
+                        <div class="text-2xl mb-2">⚡</div>
+                        <h4 class="font-bold text-slate-900 text-sm mb-1 font-typewriter">งานระบบไฟฟ้า & MDB</h4>
+                        <p class="text-xs text-slate-500">ประกอบตู้คอนโทรล, เดินท่อร้อยสาย EMT/IMC ปลอดภัยสูง</p>
+                    </div>
+                    <div class="typewriter-card p-5 bg-white border-l-4 border-l-emerald-500">
+                        <div class="text-2xl mb-2">📑</div>
+                        <h4 class="font-bold text-slate-900 text-sm mb-1 font-typewriter">เอกสารมาตรฐาน ตรวจสอบได้</h4>
+                        <p class="text-xs text-slate-500">มีใบเสนอราคา ใบแจ้งหนี้ ใบเสร็จรับเงิน ชัดเจน รวดเร็ว</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 2. CORE PILLAR 1: CCTV & SECURITY SOLUTIONS -->
+        <!-- ======================================================== -->
+        <section id="cctv" class="py-16 sm:py-20 bg-white border-b border-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-12">
+                    <span class="inline-block text-[11px] font-mono font-bold px-3 py-1 bg-sky-100 text-sky-800 rounded-full border border-sky-300 mb-3">
+                        CORE SOLUTION 01
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-bold font-typewriter text-slate-900 mb-4">
+                        ระบบกล้องวงจรปิดและความปลอดภัย (CCTV & Security)
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-600 font-mono">
+                        ติดตั้งกล้องวงจรปิดคุณภาพสูงเพื่อปกป้องทรัพย์สิน ครอบคลุมทั้งบ้านพักอาศัย ร้านค้า สำนักงาน โรงงาน และไร่สวน
+                    </p>
+                </div>
+
+                <!-- CCTV Services Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-mono">
+                    <!-- CCTV 1 -->
+                    <div class="store-service-card bg-slate-50 p-6 rounded-2xl">
+                        <div class="w-12 h-12 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center text-2xl mb-4 shadow-2xs">
+                            🔍
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2 font-typewriter">กล้อง IP Camera & HD 2K/4K</h3>
+                        <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+                            ความละเอียดสูงพิเศษ คมชัดทุกการเคลื่อนไหว ซูมมองเห็นป้ายทะเบียนรถและใบหน้าผู้บุกรุกได้อย่างแม่นยำ
+                        </p>
+                        <ul class="text-[11px] text-slate-500 space-y-1.5 border-t border-slate-200 pt-3">
+                            <li>✓ เลนส์มุมกว้าง ครอบคลุมจุดสำคัญ</li>
+                            <li>✓ รองรับระบบตรวจจับใบหน้า AI</li>
+                        </ul>
+                    </div>
+
+                    <!-- CCTV 2 -->
+                    <div class="store-service-card bg-slate-50 p-6 rounded-2xl">
+                        <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl mb-4 shadow-2xs">
+                            🌙
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2 font-typewriter">กล้องกลางคืนภาพสี 24 ชั่วโมง</h3>
+                        <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+                            เทคโนโลยี Full-color / ColorVu มองเห็นภาพสีสว่างสดใสตลอด 24 ชม. แม้ในที่มืดสนิท ไม่พลาดสีเสื้อผ้าหรือสีรถ
+                        </p>
+                        <ul class="text-[11px] text-slate-500 space-y-1.5 border-t border-slate-200 pt-3">
+                            <li>✓ ไฟส่องสว่างอัจฉริยะแบบ Warm Light</li>
+                            <li>✓ ภาพสีคมชัดไร้จุดมืดรบกวน</li>
+                        </ul>
+                    </div>
+
+                    <!-- CCTV 3 -->
+                    <div class="store-service-card bg-slate-50 p-6 rounded-2xl">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl mb-4 shadow-2xs">
+                            ☀️
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2 font-typewriter">กล้องวงจรปิดโซลาร์เซลล์ (Solar 4G)</h3>
+                        <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+                            สำหรับสวน ไร่ ฟาร์ม หรือไซต์งานก่อสร้างที่ไม่มีไฟฟ้าหรืออินเทอร์เน็ต ใช้พลังงานแสงอาทิตย์และซิม 4G ดูออนไลน์ได้ทันที
+                        </p>
+                        <ul class="text-[11px] text-slate-500 space-y-1.5 border-t border-slate-200 pt-3">
+                            <li>✓ แบตเตอรี่สำรองไฟใช้งานต่อเนื่อง 3-5 วัน</li>
+                            <li>✓ กันน้ำกันฝุ่นมาตรฐาน IP66/IP67</li>
+                        </ul>
+                    </div>
+
+                    <!-- CCTV 4 -->
+                    <div class="store-service-card bg-slate-50 p-6 rounded-2xl">
+                        <div class="w-12 h-12 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center text-2xl mb-4 shadow-2xs">
+                            📱
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2 font-typewriter">ระบบบันทึก NVR & ดูผ่านมือถือ</h3>
+                        <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+                            ติดตั้งเครื่องบันทึก NVR/DVR ฮาร์ดดิสก์เกรดกล้องวงจรปิด เซ็ตอประบบคลาวด์ดูย้อนหลังผ่านสมาร์ตโฟน ฟรีตลอดอายุการใช้งาน
+                        </p>
+                        <ul class="text-[11px] text-slate-500 space-y-1.5 border-t border-slate-200 pt-3">
+                            <li>✓ ดูพร้อมกันได้หลายเครื่อง ทั้ง iOS/Android</li>
+                            <li>✓ แจ้งเตือนบุกรุกเข้ามือถือทันที (Notification)</li>
+                        </ul>
+                    </div>
+
+                    <!-- CCTV 5 -->
+                    <div class="store-service-card bg-slate-50 p-6 rounded-2xl">
+                        <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-2xl mb-4 shadow-2xs">
+                            🚪
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2 font-typewriter">ระบบ Access Control & ประตูดิจิทัล</h3>
+                        <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+                            ระบบควบคุมการเข้า-ออกอาคาร สแกนใบหน้า ทาบคีย์การ์ด สแกนลายนิ้วมือ ประตูดิจิทัลล็อก และไม้กั้นรถยนต์อัตโนมัติ
+                        </p>
+                        <ul class="text-[11px] text-slate-500 space-y-1.5 border-t border-slate-200 pt-3">
+                            <li>✓ บันทึกเวลาเข้า-ออกงานแม่นยำ</li>
+                            <li>✓ ระบบปลดล็อกไฟฟ้าปลอดภัยสูง</li>
+                        </ul>
+                    </div>
+
+                    <!-- CCTV 6 (Consultation CTA Card) -->
+                    <div class="p-6 rounded-2xl bg-gradient-to-br from-sky-900 to-slate-900 text-white flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-sky-400">⚡ ปรึกษาและประเมินราคาฟรี</span>
+                            <h3 class="font-bold text-white text-lg mt-1 mb-2 font-typewriter">ต้องการติดตั้งกี่จุด?</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                ทีมช่างเคอีควิปพร้อมให้คำปรึกษาจัดชุดกล้องวงจรปิดที่เหมาะกับขนาดพื้นที่และงบประมาณของคุณ
+                            </p>
+                        </div>
+                        <div class="pt-6 space-y-2">
+                            <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" rel="noopener" class="btn-line w-full text-xs py-2.5">
+                                <span>💬</span> ปรึกษาจัดชุดกล้องทาง LINE
+                            </a>
+                            <a href="#quote-request" class="btn-paper w-full text-xs py-2 text-center block text-slate-800">
+                                📋 ขอใบเสนอราคาออนไลน์
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 3. CORE PILLAR 2: IT INFRASTRUCTURE & NETWORK SOLUTIONS  -->
+        <!-- ======================================================== -->
+        <section id="network" class="py-16 sm:py-20 bg-slate-50 border-b border-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-12">
+                    <span class="inline-block text-[11px] font-mono font-bold px-3 py-1 bg-cyan-100 text-cyan-800 rounded-full border border-cyan-300 mb-3">
+                        CORE SOLUTION 02
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-bold font-typewriter text-slate-900 mb-4">
+                        งานระบบไอทีและเครือข่ายเน็ตเวิร์ก (IT & Network)
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-600 font-mono">
+                        วางรากฐานโครงข่ายอินเทอร์เน็ตที่เสถียร สปีดเต็มพิกัด รองรับการเติบโตขององค์กรและอุปกรณ์ IoT ทุกชนิด
+                    </p>
+                </div>
+
+                <!-- Network Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-mono">
+                    <!-- Net 1 -->
+                    <div class="store-service-card bg-white p-6 rounded-2xl shadow-xs">
+                        <div class="w-12 h-12 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center text-2xl mb-4">
+                            🔌
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2 font-typewriter">เดินสายสัญญาณ LAN (Cat6/Cat6A)</h3>
+                        <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                            เดินสายแลนภายในและภายนอกอาคารด้วยสายทองแดงแท้ 100% มาตรฐาน มอก. เดินท่อร้อยสายเรียบร้อย พร้อมทดสอบสัญญาณทุกจุด
+                        </p>
+                        <div class="text-[11px] text-slate-500 border-t border-slate-100 pt-2.5">
+                            รองรับสปีด 1Gbps / 10Gbps ไม่สะดุด
+                        </div>
+                    </div>
+
+                    <!-- Net 2 -->
+                    <div class="store-service-card bg-white p-6 rounded-2xl shadow-xs">
+                        <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-2xl mb-4">
+                            💡
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2 font-typewriter">สายใยแก้วนำแสง (Fiber Optic)</h3>
+                        <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                            เชื่อมต่อโครงข่ายระหว่างอาคารระยะไกลด้วยสาย Fiber Optic พร้อมบริการฟิวชั่นสไปลซ์ (Fusion Splicing) เข้าหัวมาตรฐานวิศวกรรม
+                        </p>
+                        <div class="text-[11px] text-slate-500 border-t border-slate-100 pt-2.5">
+                            สัญญาณแรง ไม่มีปัญหาคลื่นรบกวน
+                        </div>
+                    </div>
+
+                    <!-- Net 3 -->
+                    <div class="store-service-card bg-white p-6 rounded-2xl shadow-xs">
+                        <div class="w-12 h-12 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center text-2xl mb-4">
+                            📶
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2 font-typewriter">ระบบกระจายสัญญาณ Wi-Fi ครอบคลุม</h3>
+                        <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                            ติดตั้ง Access Point ระดับ Enterprise แบบ Mesh / Seamless Roaming สัญญาณแรงทั่วบ้าน อาคาร สำนักงาน โรงแรม รีสอร์ต ไม่มีจุดอับ
+                        </p>
+                        <div class="text-[11px] text-slate-500 border-t border-slate-100 pt-2.5">
+                            เดินไปทั่วพื้นที่ สัญญาณไม่หลุด ไม่ต้องต่อใหม่
+                        </div>
+                    </div>
+
+                    <!-- Net 4 -->
+                    <div class="store-service-card bg-white p-6 rounded-2xl shadow-xs">
+                        <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center text-2xl mb-4">
+                            🗄️
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2 font-typewriter">จัดระเบียบตู้แร็ค (Server & Rack)</h3>
+                        <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                            ประกอบตู้แร็ค เข้าหัว Patch Panel จัดเรียงสาย Patch Cord อย่างเป็นระเบียบ ติดป้าย Label ทุกจุด ง่ายต่อการตรวจสอบและซ่อมบำรุง
+                        </p>
+                        <div class="text-[11px] text-slate-500 border-t border-slate-100 pt-2.5">
+                            ระบายความร้อนได้ดี ป้องกันสายหักงอ
+                        </div>
+                    </div>
+
+                    <!-- Net 5 -->
+                    <div class="store-service-card bg-white p-6 rounded-2xl shadow-xs">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-2xl mb-4">
+                            💾
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2 font-typewriter">ระบบสำรองข้อมูล NAS & IT Support</h3>
+                        <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                            วางระบบ Server จัดเก็บข้อมูลกลางสำหรับองค์กร ป้องกัน Ransomware และบริการดูแลระบบไอทีสำนักงานรายครั้งและรายเดือน
+                        </p>
+                        <div class="text-[11px] text-slate-500 border-t border-slate-100 pt-2.5">
+                            แชร์ไฟล์งานสะดวกรวดเร็ว สำรองข้อมูลอัตโนมัติ
+                        </div>
+                    </div>
+
+                    <!-- Net 6 -->
+                    <div class="store-service-card bg-white p-6 rounded-2xl shadow-xs">
+                        <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-2xl mb-4">
+                            🛡️
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2 font-typewriter">ระบบ Router & Firewall ความปลอดภัย</h3>
+                        <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                            ตั้งค่า Load Balance รวมความเร็วเน็ตหลายเส้น, แบ่งแยกวงเน็ตเวิร์ก VLAN (แขก / พนักงาน / กล้อง) เพื่อความปลอดภัยสูงสุด
+                        </p>
+                        <div class="text-[11px] text-slate-500 border-t border-slate-100 pt-2.5">
+                            ป้องกันการบุกรุกและควบคุมการใช้งานเน็ต
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 4. CORE PILLAR 3: ELECTRICAL & BUILDING SYSTEMS          -->
+        <!-- ======================================================== -->
+        <section id="systems" class="py-16 sm:py-20 bg-white border-b border-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-12">
+                    <span class="inline-block text-[11px] font-mono font-bold px-3 py-1 bg-amber-100 text-amber-800 rounded-full border border-amber-300 mb-3">
+                        CORE SOLUTION 03
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-bold font-typewriter text-slate-900 mb-4">
+                        งานระบบไฟฟ้าและระบบอาคาร (Electrical & Systems)
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-600 font-mono">
+                        ติดตั้งงานระบบไฟฟ้าตามมาตรฐานการไฟฟ้า ปลอดภัย คงทน พร้อมระบบควบคุมอัจฉริยะ Smart Home
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 font-mono">
+                    <!-- Sys 1 -->
+                    <div class="store-service-card bg-slate-50 p-5 rounded-2xl">
+                        <div class="text-3xl mb-3">⚡</div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-2 font-typewriter">ตู้คอนโทรล & ตู้ MDB</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            ออกแบบ ประกอบ และติดตั้งตู้สวิตช์บอร์ด MDB, ตู้คอนซูเมอร์ยูนิต, ตู้ควบคุมปั๊มน้ำ มอเตอร์ และระบบไฟฟ้าโรงงาน
+                        </p>
+                    </div>
+
+                    <!-- Sys 2 -->
+                    <div class="store-service-card bg-slate-50 p-5 rounded-2xl">
+                        <div class="text-3xl mb-3">🔩</div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-2 font-typewriter">เดินท่อร้อยสาย EMT / IMC</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            งานเดินท่อเหล็ก EMT, ท่อหนา IMC และท่อ PVC ป้องกันหนูกัดสายไฟ สวยงาม ได้มาตรฐานวิศวกรรมความปลอดภัย
+                        </p>
+                    </div>
+
+                    <!-- Sys 3 -->
+                    <div class="store-service-card bg-slate-50 p-5 rounded-2xl">
+                        <div class="text-3xl mb-3">🏠</div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-2 font-typewriter">ระบบสมาร์ทโฮม (Smart Home)</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            สั่งการเปิด-ปิดไฟ แอร์ ผ้าม่าน ประตูรั่ว ผ่านมือถือ และตั้งเวลาทำงานอัตโนมัติ สะดวกสบายและประหยัดพลังงาน
+                        </p>
+                    </div>
+
+                    <!-- Sys 4 -->
+                    <div class="store-service-card bg-slate-50 p-5 rounded-2xl">
+                        <div class="text-3xl mb-3">🚨</div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-2 font-typewriter">ไฟฉุกเฉิน & ป้ายหนีไฟ</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            ติดตั้งระบบไฟฉุกเฉิน (Emergency Light) ป้ายไฟทางออก และระบบสัญญาณเตือนภัยตามมาตรฐานอาคารควบคุม
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 5. OTHER SERVICES: COMPREHENSIVE CONTRACTING             -->
+        <!-- ======================================================== -->
+        <section id="services" class="py-16 sm:py-20 bg-slate-100/70 border-b border-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-12">
+                    <span class="inline-block text-[11px] font-mono font-bold px-3 py-1 bg-slate-200 text-slate-800 rounded-full border border-slate-300 mb-3">
+                        COMPREHENSIVE SERVICES
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-bold font-typewriter text-slate-900 mb-4">
+                        บริการอื่นๆ ที่รับทำครบวงจร (Other Services)
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-600 font-mono">
+                        เคอีควิปมีทีมช่างสหวิชาชีพ พร้อมดูแลงานช่าง งานโครงสร้าง และจัดส่งอุปกรณ์ จบได้ในที่เดียว
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 font-mono">
+                    <!-- Other 1 -->
+                    <div class="typewriter-card p-6 bg-white rounded-2xl">
+                        <div class="text-3xl mb-3">💎</div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-2 font-typewriter">ติดตั้งโคมไฟแชนเดอเลียร์</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            บริการติดตั้งโคมระย้าคริสตัล โถงสูง 5-8 เมตร พร้อมนั่งร้านมาตรฐานและระบบยึดเหนี่ยวแข็งแรง ปลอดภัย 100%
+                        </p>
+                    </div>
+
+                    <!-- Other 2 -->
+                    <div class="typewriter-card p-6 bg-white rounded-2xl">
+                        <div class="text-3xl mb-3">🔄</div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-2 font-typewriter">รีโนเวทระบบไฟและระบบเดิม</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            ตรวจเช็คสายไฟเก่า เบรกเกอร์ตัดบ่อย รื้อถอนระบบเดิมที่ไม่ปลอดภัย และปรับปรุงใหม่ให้ได้มาตรฐาน
+                        </p>
+                    </div>
+
+                    <!-- Other 3 -->
+                    <div class="typewriter-card p-6 bg-white rounded-2xl">
+                        <div class="text-3xl mb-3">🏗️</div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-2 font-typewriter">โครงสร้างเหล็ก & โรงจอดรถ</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            รับทำโครงสร้างเหล็ก งานหลังคาโรงจอดรถ งานต่อเติมห้อง และงานช่างโครงสร้างมาตรฐานวิศวกรรม
+                        </p>
+                    </div>
+
+                    <!-- Other 4 -->
+                    <div class="typewriter-card p-6 bg-white rounded-2xl">
+                        <div class="text-3xl mb-3">📦</div>
+                        <h3 class="font-bold text-slate-900 text-sm mb-2 font-typewriter">ขายส่ง-ปลีก อุปกรณ์ไอที/ไฟฟ้า</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            จัดจำหน่ายสายไฟ THW, VAF, สาย LAN, ท่อร้อยสาย, เบรกเกอร์, กล้องวงจรปิด และอุปกรณ์ติดตั้งราคาช่าง
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 6. PORTFOLIO & RECENT PROJECTS                           -->
+        <!-- ======================================================== -->
+        <section id="portfolio" class="py-16 sm:py-20 bg-white border-b border-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-10">
+                    <span class="inline-block text-[11px] font-mono font-bold px-3 py-1 bg-sky-100 text-sky-800 rounded-full border border-sky-300 mb-3">
+                        PROVEN TRACK RECORD
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-bold font-typewriter text-slate-900 mb-4">
+                        ผลงานการติดตั้งจริง (Project Showcase)
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-600 font-mono">
+                        ผลงานความไว้วางใจจากลูกค้าบ้านพัก สำนักงาน รีสอร์ต และโรงงาน ในพื้นที่พะเยา เชียงใหม่ และภาคเหนือ
+                    </p>
+                </div>
+
+                <!-- Category Filters -->
+                <div class="flex flex-wrap items-center justify-center gap-2 mb-10 font-mono text-xs">
+                    <button type="button" onclick="storefront.filterPortfolio('all', this)" class="portfolio-filter-btn px-4 py-2 rounded-lg font-bold transition bg-sky-600 text-white shadow-md">
+                        ทั้งหมด
+                    </button>
+                    <button type="button" onclick="storefront.filterPortfolio('cctv', this)" class="portfolio-filter-btn px-4 py-2 rounded-lg font-bold transition bg-white text-slate-700 border border-slate-200 hover:bg-slate-100">
+                        📹 กล้องวงจรปิด
+                    </button>
+                    <button type="button" onclick="storefront.filterPortfolio('network', this)" class="portfolio-filter-btn px-4 py-2 rounded-lg font-bold transition bg-white text-slate-700 border border-slate-200 hover:bg-slate-100">
+                        💻 ไอที & ตู้แร็ค
+                    </button>
+                    <button type="button" onclick="storefront.filterPortfolio('electrical', this)" class="portfolio-filter-btn px-4 py-2 rounded-lg font-bold transition bg-white text-slate-700 border border-slate-200 hover:bg-slate-100">
+                        ⚡ งานระบบไฟฟ้า & MDB
+                    </button>
+                </div>
+
+                <!-- Projects Grid -->
+                <div id="portfolio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-mono">
+                    <!-- Project 1 -->
+                    <div class="portfolio-card typewriter-card overflow-hidden bg-white rounded-2xl border border-slate-200" data-category="cctv">
+                        <div class="h-44 bg-gradient-to-tr from-sky-900 via-slate-800 to-sky-700 p-4 flex flex-col justify-between text-white relative">
+                            <span class="text-xs px-2.5 py-1 bg-white/20 backdrop-blur-xs rounded-full self-start font-bold">กล้องวงจรปิด IP 4K</span>
+                            <div>
+                                <span class="text-xs text-sky-300">📍 สำนักงานเอกชน อ.เมือง จ.เชียงใหม่</span>
+                                <h4 class="font-bold text-base font-typewriter">ติดตั้งกล้องวงจรปิด 16 จุด</h4>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                                ติดตั้งกล้อง IP Camera ความคมชัด 4K มองเห็นภาพสี 24 ชม. พร้อมระบบแจ้งเตือนเข้ามือถือผู้บริหารและเจ้าหน้าที่ รปภ.
+                            </p>
+                            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                                <span>สถานะ: ส่งมอบงาน 100%</span>
+                                <span class="text-emerald-600 font-bold">✓ ตรวจรับเรียบร้อย</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project 2 -->
+                    <div class="portfolio-card typewriter-card overflow-hidden bg-white rounded-2xl border border-slate-200" data-category="network">
+                        <div class="h-44 bg-gradient-to-tr from-cyan-900 via-slate-800 to-teal-800 p-4 flex flex-col justify-between text-white relative">
+                            <span class="text-xs px-2.5 py-1 bg-white/20 backdrop-blur-xs rounded-full self-start font-bold">IT Infrastructure</span>
+                            <div>
+                                <span class="text-xs text-cyan-300">📍 บริษัทขนส่ง อ.ดอกคำใต้ จ.พะเยา</span>
+                                <h4 class="font-bold text-base font-typewriter">ตู้แร็ค Server & Fiber Optic ข้ามตึก</h4>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                                วางระบบเครือข่ายเชื่อมต่อระหว่าง 2 อาคารด้วย Fiber Optic ฟิวชั่นสไปลซ์ พร้อมจัดระเบียบตู้แร็ค Server 42U เรียบร้อย
+                            </p>
+                            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                                <span>ความเร็ว: 10 Gbps Backbone</span>
+                                <span class="text-emerald-600 font-bold">✓ สัญญาณเสถียร</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project 3 -->
+                    <div class="portfolio-card typewriter-card overflow-hidden bg-white rounded-2xl border border-slate-200" data-category="electrical">
+                        <div class="h-44 bg-gradient-to-tr from-amber-900 via-slate-800 to-orange-800 p-4 flex flex-col justify-between text-white relative">
+                            <span class="text-xs px-2.5 py-1 bg-white/20 backdrop-blur-xs rounded-full self-start font-bold">Electrical & MDB</span>
+                            <div>
+                                <span class="text-xs text-amber-300">📍 โรงงานแปรรูปเกษตร จ.ลำพูน</span>
+                                <h4 class="font-bold text-base font-typewriter">ประกอบตู้ MDB & เดินท่อร้อยสาย EMT</h4>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                                ประกอบตู้เมนสวิตช์บอร์ด MDB ควบคุมระบบไฟฟ้าเครื่องจักร พร้อมเดินท่อเหล็ก EMT ป้องกันอุบัติเหตุและไฟฟ้าลัดวงจร
+                            </p>
+                            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                                <span>มาตรฐาน: การไฟฟ้าส่วนภูมิภาค</span>
+                                <span class="text-emerald-600 font-bold">✓ ผ่านการทดสอบโหลด</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project 4 -->
+                    <div class="portfolio-card typewriter-card overflow-hidden bg-white rounded-2xl border border-slate-200" data-category="cctv">
+                        <div class="h-44 bg-gradient-to-tr from-emerald-950 via-slate-800 to-teal-900 p-4 flex flex-col justify-between text-white relative">
+                            <span class="text-xs px-2.5 py-1 bg-white/20 backdrop-blur-xs rounded-full self-start font-bold">Solar CCTV 4G</span>
+                            <div>
+                                <span class="text-xs text-emerald-300">📍 ฟาร์มเกษตร อ.แม่ใจ จ.พะเยา</span>
+                                <h4 class="font-bold text-base font-typewriter">กล้องโซลาร์เซลล์พื้นที่ห่างไกล</h4>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                                ติดตั้งกล้องวงจรปิดพลังงานแสงอาทิตย์ 4 จุดในสวนผลไม้ ตรวจจับความเคลื่อนไหว ส่องไฟอัตโนมัติ ดูผ่านมือถือไร้สาย 100%
+                            </p>
+                            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                                <span>ระบบ: พลังงานแสงอาทิตย์ 100%</span>
+                                <span class="text-emerald-600 font-bold">✓ ใช้งานต่อเนื่อง</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project 5 -->
+                    <div class="portfolio-card typewriter-card overflow-hidden bg-white rounded-2xl border border-slate-200" data-category="network">
+                        <div class="h-44 bg-gradient-to-tr from-sky-950 via-slate-800 to-blue-900 p-4 flex flex-col justify-between text-white relative">
+                            <span class="text-xs px-2.5 py-1 bg-white/20 backdrop-blur-xs rounded-full self-start font-bold">Wi-Fi Roaming AP</span>
+                            <div>
+                                <span class="text-xs text-sky-300">📍 รีสอร์ต อ.หางดง จ.เชียงใหม่</span>
+                                <h4 class="font-bold text-base font-typewriter">วางระบบ Wi-Fi คลุมพื้นที่ 30 ห้องพัก</h4>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                                ออกแบบวางระบบ Access Point แบบ Seamless Roaming เดินไปไหนสัญญาณไม่สะดุด พร้อมระบบล็อกอินหน้าเว็บสำหรับแขก (Captive Portal)
+                            </p>
+                            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                                <span>อุปกรณ์: Enterprise Grade</span>
+                                <span class="text-emerald-600 font-bold">✓ สัญญาณเต็ม 100%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project 6 -->
+                    <div class="portfolio-card typewriter-card overflow-hidden bg-white rounded-2xl border border-slate-200" data-category="electrical">
+                        <div class="h-44 bg-gradient-to-tr from-purple-950 via-slate-800 to-indigo-900 p-4 flex flex-col justify-between text-white relative">
+                            <span class="text-xs px-2.5 py-1 bg-white/20 backdrop-blur-xs rounded-full self-start font-bold">Chandelier & Lighting</span>
+                            <div>
+                                <span class="text-xs text-purple-300">📍 บ้านพักอาศัย อ.เมือง จ.พะเยา</span>
+                                <h4 class="font-bold text-base font-typewriter">ติดตั้งโคมระย้าคริสตัลโถงสูง 6 เมตร</h4>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                                บริการติดตั้งโคมไฟแชนเดอเลียร์ระย้าคริสตัลขนาดใหญ่ เสริมคานเหล็กรับน้ำหนัก และระบบสวิตช์หรี่ไฟ (Dimmer) ประณีตสวยงาม
+                            </p>
+                            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                                <span>ความปลอดภัย: เสริมโครงสร้างเหล็ก</span>
+                                <span class="text-emerald-600 font-bold">✓ ปลอดภัย แข็งแรง</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 7. ONLINE QUOTATION / SITE SURVEY REQUEST FORM           -->
+        <!-- ======================================================== -->
+        <section id="quote-request" class="py-16 sm:py-20 bg-slate-50 border-b border-slate-200">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="typewriter-card bg-white p-6 sm:p-10 rounded-2xl shadow-xl border-2 border-slate-300 relative">
+                    <div class="ribbon-banner absolute -top-0.5 left-0 right-0 rounded-t-xl"></div>
+                    
+                    <div class="text-center mb-8 pt-2">
+                        <span class="inline-block text-[11px] font-mono font-bold px-3 py-1 bg-sky-100 text-sky-800 rounded-full border border-sky-300 mb-2">
+                            ONLINE REQUEST
+                        </span>
+                        <h2 class="text-2xl sm:text-3xl font-bold font-typewriter text-slate-900 mb-2">
+                            ขอใบเสนอราคาด่วน / นัดสำรวจหน้างาน
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-600 font-mono">
+                            กรอกข้อมูลเบื้องต้น ทีมงานวิศวกรเคอีควิปจะติดต่อกลับพร้อมประเมินราคาอย่างรวดเร็ว (ไม่มีค่าใช้จ่ายในการประเมิน)
+                        </p>
+                    </div>
+
+                    <form id="form-quote-request" class="space-y-4 font-mono">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">
+                                    ชื่อผู้ติดต่อ / หน่วยงาน / บริษัท <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" id="quote-name" required placeholder="เช่น คุณสมชาย / หจก.พะเยาคอนสตรัคชั่น"
+                                    class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">
+                                    เบอร์โทรศัพท์ติดต่อกลับ <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="tel" id="quote-phone" required placeholder="เช่น 081-234-5678"
+                                    class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 bg-white">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">
+                                    LINE ID (สำหรับส่งใบเสนอราคา)
+                                </label>
+                                <input type="text" id="quote-line" placeholder="เช่น somchai_line หรือเบอร์โทร"
+                                    class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">
+                                    สถานที่หน้างาน (อำเภอ / จังหวัด)
+                                </label>
+                                <input type="text" id="quote-location" placeholder="เช่น อ.เมือง จ.เชียงใหม่ หรือ อ.ดอกคำใต้ จ.พะเยา"
+                                    class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 bg-white">
+                            </div>
+                        </div>
+
+                        <!-- Service Type Checkboxes -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-2">
+                                หมวดหมู่งานที่สนใจ (เลือกได้มากกว่า 1 ข้อ):
+                            </label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-sky-50 transition cursor-pointer">
+                                    <input type="checkbox" name="quote-service" value="กล้องวงจรปิด CCTV" checked class="w-4 h-4 text-sky-600 rounded">
+                                    <span>📹 ระบบกล้องวงจรปิด (CCTV)</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-sky-50 transition cursor-pointer">
+                                    <input type="checkbox" name="quote-service" value="ไอที & เน็ตเวิร์ก Wi-Fi LAN" class="w-4 h-4 text-sky-600 rounded">
+                                    <span>💻 วางระบบไอที / Wi-Fi / LAN / Fiber Optic</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-sky-50 transition cursor-pointer">
+                                    <input type="checkbox" name="quote-service" value="ระบบไฟฟ้า ตู้ MDB ท่อร้อยสาย" class="w-4 h-4 text-sky-600 rounded">
+                                    <span>⚡ งานระบบไฟฟ้า / ตู้ MDB / ท่อร้อยสาย</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-sky-50 transition cursor-pointer">
+                                    <input type="checkbox" name="quote-service" value="งานติดตั้งแชนเดอเลียร์ / งานอื่นๆ" class="w-4 h-4 text-sky-600 rounded">
+                                    <span>🛠️ ติดตั้งแชนเดอเลียร์ / โรงจอดรถ / งานอื่นๆ</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Details Textarea -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">
+                                รายละเอียดงานเพิ่มเติม / จำนวนจุดโดยประมาณ
+                            </label>
+                            <textarea id="quote-details" rows="3" placeholder="เช่น ต้องการติดกล้อง 8 จุด สำหรับบ้าน 2 ชั้น หรือ ต้องการวางระบบ Wi-Fi คอนโด..."
+                                class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 bg-white"></textarea>
+                        </div>
+
+                        <button type="submit" id="btn-submit-lead" class="btn-ocean w-full py-3 text-sm font-bold shadow-md mt-2">
+                            <span>🚀</span>
+                            <span>ส่งคำขอใบเสนอราคา / นัดสำรวจหน้างาน</span>
+                        </button>
+
+                        <div class="text-center pt-2">
+                            <p class="text-[11px] text-slate-400">
+                                หรือสามารถทักแชทส่งรูปหน้างานด่วนมาที่ LINE: <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" class="text-emerald-600 font-bold hover:underline">@vcv6921d</a> ได้ทันที
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 8. CONTACT & LINE OFFICIAL ACCOUNT HUB                   -->
+        <!-- ======================================================== -->
+        <section id="contact" class="py-16 sm:py-20 bg-white border-b border-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    
+                    <!-- Left: LINE OA Card -->
+                    <div class="lg:col-span-5 bg-gradient-to-b from-[#06C755]/10 via-emerald-50/50 to-white p-6 sm:p-8 rounded-3xl border-2 border-emerald-300 text-center shadow-lg relative">
+                        <span class="inline-block px-3 py-1 rounded-full bg-emerald-600 text-white text-[11px] font-mono font-bold mb-3 shadow-xs">
+                            OFFICIAL LINE ACCOUNT
+                        </span>
+                        <h3 class="text-xl sm:text-2xl font-bold font-typewriter text-slate-900 mb-1">
+                            เพิ่มเพื่อนทาง LINE ร้านเคอีควิป
+                        </h3>
+                        <p class="text-xs font-mono text-slate-600 mb-6">
+                            สแกน QR Code หรือกดปุ่มด้านล่างเพื่อแชทปรึกษาช่างได้ทันที
+                        </p>
+
+                        <!-- Real QR Code Image -->
+                        <div class="inline-block p-3 bg-white rounded-2xl shadow-md border-2 border-emerald-400 mb-4">
+                            <img src="img/line-qr.png" alt="LINE Official QR Code @vcv6921d" class="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-xl">
+                        </div>
+
+                        <div class="font-mono mb-4">
+                            <span class="text-xs text-slate-500">LINE ID:</span>
+                            <span class="text-base font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-lg ml-1">@vcv6921d</span>
+                        </div>
+
+                        <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" rel="noopener" class="btn-line w-full py-3 text-sm font-bold shadow-md">
+                            <span class="text-lg">💬</span>
+                            <span>คลิกที่นี่เพื่อเพิ่มเพื่อน LINE ทันที</span>
+                        </a>
+                    </div>
+
+                    <!-- Right: Office Locations & Credentials -->
+                    <div class="lg:col-span-7 font-mono space-y-6">
+                        <div>
+                            <span class="text-xs font-bold text-sky-600 tracking-wider uppercase">COMPANY PROFILE</span>
+                            <h2 class="text-2xl sm:text-3xl font-bold font-typewriter text-slate-900 mt-1 mb-2">
+                                ร้านเคอีควิป (Kequiv)
+                            </h2>
+                            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                                ผู้ให้บริการด้านระบบไอที กล้องวงจรปิด และวิศวกรรมระบบอาคาร พร้อมทีมช่างผู้ชำนาญการและอุปกรณ์มาตรฐานสากล
+                            </p>
+                        </div>
+
+                        <!-- Trust Badges -->
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1.5">
+                            <div><strong>เลขประจำตัวผู้เสียภาษี:</strong> 3560500055866</div>
+                            <div><strong>รูปแบบกิจการ:</strong> กิจการการค้าที่ได้รับการจดทะเบียนพาณิชย์ถูกต้อง (ผู้ขายไม่ได้จดทะเบียนภาษีมูลค่าเพิ่ม Non-VAT)</div>
+                        </div>
+
+                        <!-- Branches -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Phayao Head Office -->
+                            <div class="p-4 rounded-xl border border-slate-200 bg-white">
+                                <div class="flex items-center gap-2 mb-1 text-slate-900 font-bold text-xs">
+                                    <span class="text-sky-600">🏢</span> (สำนักงานใหญ่ - พะเยา)
+                                </div>
+                                <p class="text-xs text-slate-500 leading-relaxed">
+                                    172 หมู่ 9 ต.ดอนศรีชุม อ.ดอกคำใต้ จ.พะเยา 56120
+                                </p>
+                            </div>
+
+                            <!-- Chiang Mai Branch -->
+                            <div class="p-4 rounded-xl border border-slate-200 bg-white">
+                                <div class="flex items-center gap-2 mb-1 text-slate-900 font-bold text-xs">
+                                    <span class="text-sky-600">🏢</span> (สาขาเชียงใหม่)
+                                </div>
+                                <p class="text-xs text-slate-500 leading-relaxed">
+                                    9 หมู่ 1 เดอะฮิลปาร์คคอนโด 2 ต.ช้างเผือก อ.เมือง จ.เชียงใหม่ 50300
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Contact Channels -->
+                        <div class="p-4 rounded-xl bg-sky-50/70 border border-sky-200 text-xs text-slate-800 space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-base text-sky-600">📞</span>
+                                <span><strong>เบอร์โทรศัพท์:</strong> <a href="tel:0914802472" class="text-sky-700 font-bold hover:underline">091-480-2472</a></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-base text-sky-600">✉️</span>
+                                <span><strong>อีเมล:</strong> <a href="mailto:kequiv@hotmail.com" class="text-sky-700 hover:underline">kequiv@hotmail.com</a></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-base text-sky-600">⏰</span>
+                                <span><strong>เวลาทำการ:</strong> จันทร์ - เสาร์ 08:30 - 17:30 น. (บริการฉุกเฉิน 24 ชม.)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Storefront Footer -->
+        <footer class="bg-slate-900 text-slate-400 font-mono text-xs py-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-800 text-center md:text-left">
+                    <div class="flex items-center gap-3">
+                        <img src="img/logo.png" alt="Logo" class="w-8 h-8 object-contain rounded bg-white p-0.5">
+                        <span class="text-white font-bold font-typewriter text-base">KEQUIV เคอีควิป</span>
+                        <span class="text-[11px] text-slate-500">| IT & System Solutions</span>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-center gap-4 text-[11px]">
+                        <a href="#cctv" class="hover:text-white transition">กล้องวงจรปิด</a>
+                        <a href="#network" class="hover:text-white transition">ไอที-เน็ตเวิร์ก</a>
+                        <a href="#systems" class="hover:text-white transition">งานระบบไฟฟ้า</a>
+                        <a href="#services" class="hover:text-white transition">บริการอื่นๆ</a>
+                        <a href="#portfolio" class="hover:text-white transition">ผลงาน</a>
+                        <a href="#quote-request" class="hover:text-white transition">ขอใบเสนอราคา</a>
+                        <button onclick="app.openBackoffice()" class="text-sky-400 hover:text-sky-300 font-bold transition">🔐 สำหรับทีมงาน: เข้าสู่ระบบจัดการ</button>
+                    </div>
+                </div>
+                <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500 text-center sm:text-left">
+                    <p>© 2026 ร้านเคอีควิป Kequiv. สงวนลิขสิทธิ์ทั้งหมด (Non-VAT Business)</p>
+                    <p>ระบบรันเลขบิลอัจฉริยะ • พะเยา & เชียงใหม่</p>
+                </div>
+            </div>
+        </footer>
+
+    </div> <!-- /#storefront-view -->
+
+
+    <!-- ======================================================== -->
+    <!-- BACK-OFFICE MANAGEMENT PORTAL                           -->
+    <!-- ======================================================== -->
+    <div id="backoffice-view" class="w-full min-h-screen flex flex-col md:flex-row hidden">
     <!-- Mobile Sidebar Backdrop Overlay -->
     <div id="sidebar-backdrop" onclick="app.toggleSidebar(false)" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 hidden md:hidden"></div>
 
@@ -143,6 +1022,14 @@
                     <span>⚡ v2.2.0</span>
                 </span>
             </div>
+        </div>
+
+        <!-- View Storefront Link -->
+        <div class="px-3 pt-2 pb-1">
+            <button onclick="app.openStorefront()" class="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-sky-950/70 hover:bg-sky-900 text-sky-200 border border-sky-700/60 transition text-xs font-bold shadow-sm">
+                <span>🌐</span>
+                <span>ดูหน้าร้าน (Storefront)</span>
+            </button>
         </div>
 
         <!-- Navigation Menu -->
@@ -212,6 +1099,9 @@
 
             <!-- Quick Action Buttons -->
             <div class="flex items-center gap-2 font-mono">
+                <button onclick="app.openStorefront()" class="btn-paper text-xs py-1.5 px-3 flex items-center gap-1.5" title="ดูหน้าร้าน">
+                    <span>🌐</span> <span class="hidden sm:inline">ดูหน้าร้าน</span>
+                </button>
                 <button onclick="api.exportBackup()" class="btn-paper text-xs py-1.5 hidden md:inline-flex" title="ดาวน์โหลดสำรองข้อมูลทั้งหมดลงเครื่อง">
                     <span>💾</span> สำรองข้อมูล
                 </button>
@@ -257,6 +1147,7 @@
             </div>
         </div>
     </main>
+    </div> <!-- /#backoffice-view -->
 
     <!-- ======================================================== -->
     <!-- MODALS SECTION -->
@@ -551,8 +1442,43 @@
         </div>
     </div>
 
+    
+    <!-- Modal: Lead Success / Quotation Submitted -->
+    <div id="modal-lead-success" class="modal-container fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 font-mono">
+        <div class="typewriter-card bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center border-2 border-emerald-300 relative">
+            <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl shadow-xs">
+                ✓
+            </div>
+            <h3 class="text-xl font-bold font-typewriter text-slate-900 mb-1">
+                ส่งคำขอใบเสนอราคาสำเร็จ!
+            </h3>
+            <p class="text-xs text-slate-600 mb-4">
+                ทีมงานเคอีควิปได้รับข้อมูลแล้ว และจะติดต่อกลับโดยเร็วที่สุด
+            </p>
+            <div id="lead-success-summary" class="mb-4 text-left"></div>
+            <div class="space-y-2">
+                <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" rel="noopener" class="btn-line w-full py-2.5 text-xs font-bold shadow-md">
+                    <span>💬</span>
+                    <span>แชทแจ้งช่างทันทีผ่าน LINE OA (@vcv6921d)</span>
+                </a>
+                <button type="button" onclick="storefront.closeLeadSuccessModal()" class="btn-paper w-full py-2 text-xs">
+                    ปิดหน้าต่างนี้
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating LINE OA Quick Contact Widget -->
+    <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" rel="noopener" class="line-floating-btn" title="ติดต่อร้านทาง LINE @vcv6921d">
+        <span class="pulse-ring"></span>
+        <span class="text-xl">💬</span>
+        <span class="hidden sm:inline">ปรึกษาช่าง LINE @vcv6921d</span>
+    </a>
+
+
     <!-- Application Scripts -->
     <script src="js/api.js"></script>
+    <script src="js/storefront.js"></script>
     <script src="js/app.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="js/customers.js"></script>

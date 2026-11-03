@@ -108,6 +108,19 @@ CREATE TABLE IF NOT EXISTS document_items (
     total_price REAL NOT NULL DEFAULT 0
 );
 
+-- 8. Website Leads / Inquiries (คำขอใบเสนอราคาและติดต่อจากหน้าร้าน)
+CREATE TABLE IF NOT EXISTS leads (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    line_id TEXT DEFAULT '',
+    service_type TEXT DEFAULT '',
+    location TEXT DEFAULT '',
+    details TEXT DEFAULT '',
+    status TEXT DEFAULT 'pending', -- 'pending', 'contacted', 'converted', 'closed'
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes for performance & integrity
 CREATE INDEX IF NOT EXISTS idx_customers_deleted ON customers(deleted_at);
 CREATE INDEX IF NOT EXISTS idx_projects_customer ON customer_projects(customer_id, deleted_at);
@@ -116,3 +129,4 @@ CREATE INDEX IF NOT EXISTS idx_docs_customer ON documents(customer_id, deleted_a
 CREATE INDEX IF NOT EXISTS idx_docs_issue_date ON documents(issue_date);
 CREATE INDEX IF NOT EXISTS idx_doc_items_doc ON document_items(document_id, sort_order);
 CREATE INDEX IF NOT EXISTS idx_reservations_type_status ON document_reservations(doc_type, status);
+CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status, created_at);

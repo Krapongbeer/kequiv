@@ -3,10 +3,23 @@
  */
 
 module.exports = {
-    version: '2.2.0',
+    version: '2.3.0',
     releaseDate: '2026-11-03',
-    codename: 'Mobile Responsive & Full Edit Edition',
+    codename: 'Kequiv IT & Systems Public Storefront Edition',
     changelog: [
+        {
+            version: '2.3.0',
+            date: '2026-11-03',
+            title: 'Kequiv IT, CCTV & Systems Storefront with LINE OA Hub',
+            features: [
+                'เว็บไซต์หน้าร้านอย่างเป็นทางการ (Kequiv Official Storefront)',
+                'ชู 3 เสาหลัก: ระบบกล้องวงจรปิด (CCTV) • ไอทีและเน็ตเวิร์ก (IT & Network) • งานระบบไฟฟ้า (Electrical & MDB)',
+                'ระบบขอใบเสนอราคาและนัดสำรวจหน้างานออนไลน์ (Quick Quotation & Leads)',
+                'เชื่อมต่อ LINE OA ร้าน @vcv6921d พร้อม QR Code และปุ่มลอยติดต่อด่วน',
+                'แกลเลอรีผลงานติดตั้งจริง (Project Showcase) พร้อมตัวกรองหมวดหมู่',
+                'การสลับไปมาระหว่างหน้าร้านสาธารณะ (Storefront) และระบบจัดการหลังร้าน (Back-office) อย่างราบรื่น'
+            ]
+        },
         {
             version: '2.2.0',
             date: '2026-11-03',

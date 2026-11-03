@@ -134,5 +134,12 @@ const api = {
     uploadImage: (base64Data, type = 'item') => request('/upload', { method: 'POST', body: JSON.stringify({ image: base64Data, type }) }),
 
     // Presets
-    getPresets: () => request('/presets')
+    getPresets: () => request('/presets'),
+
+    // Website Leads / Inquiries
+    submitLead: (data) => request('/leads', { method: 'POST', body: JSON.stringify(data) }),
+    getLeads: () => request('/leads'),
+    updateLeadStatus: (id, status) => request(`/leads/${id}`, { method: 'PUT', body: JSON.stringify({ status }) }),
+    deleteLead: (id) => request(`/leads/${id}`, { method: 'DELETE' }),
+    convertLeadToCustomer: (id) => request(`/leads/${id}/convert`, { method: 'POST' })
 };
