@@ -141,6 +141,7 @@
                     <a href="#systems" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">ระบบไฟฟ้า & อาคาร</a>
                     <a href="#services" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">บริการอื่นๆ</a>
                     <a href="#portfolio" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">ผลงานจริง</a>
+                    <a href="#credentials" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap text-emerald-600 dark:text-emerald-400 font-bold">ใบรับรอง & DBD</a>
                     <a href="#quote-request" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">ขอใบเสนอราคา</a>
                     <a href="#contact" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">ติดต่อร้าน</a>
                 </nav>
@@ -726,7 +727,142 @@
             </div>
         </section>
 
+                <!-- ======================================================== -->
+        <!-- 6.5 ACCREDITATIONS & VERIFIED BUSINESS CREDENTIALS      -->
+        <!-- DBD Registered & THAI SME-GP (สสว.)                      -->
         <!-- ======================================================== -->
+        <section id="credentials" class="py-16 sm:py-20 bg-slate-100/90 dark:bg-[#070d1e] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-12">
+                    <span class="inline-block text-[11px] font-mono font-bold px-3.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-500/30 mb-3">
+                        VERIFIED BUSINESS CREDENTIALS
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-heading font-extrabold text-slate-900 dark:text-white mb-3 text-center break-words max-w-4xl mx-auto leading-normal">
+                        มาตรฐานและเอกสารรับรองความน่าเชื่อถือทางธุรกิจ
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-mono">
+                        เคอีควิปดำเนินธุรกิจถูกต้องตามกฎหมาย ได้รับการขึ้นทะเบียนผู้ประกอบการภาครัฐ (สสว.) และจดทะเบียนพาณิชย์อิเล็กทรอนิกส์ DBD Registered ตรวจสอบได้ 100%
+                    </p>
+                </div>
+
+                <!-- 3 Credentials Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
+                    
+                    <!-- Credential 1: THAI SME-GP -->
+                    <div class="store-service-card p-6 rounded-2xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-2.5 py-1 rounded-md bg-sky-500/10 text-sky-700 dark:text-sky-300 font-bold border border-sky-500/30 text-[10px]">
+                                    สสว. THAI SME-GP
+                                </span>
+                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ มีผลถึง 30 มิ.ย. 2570</span>
+                            </div>
+
+                            <div class="w-full h-44 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 mb-4 bg-slate-50 dark:bg-slate-900 relative group cursor-pointer" onclick="storefront.openCertModal('sme-gp')">
+                                <img src="img/cert-sme-gp.png" alt="หนังสือรับรอง THAI SME-GP" class="w-full h-full object-cover object-top group-hover:scale-105 transition duration-300">
+                                <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white font-bold gap-1 text-xs">
+                                    <span>🔍 คลิกดูฉบับเต็ม</span>
+                                </div>
+                            </div>
+
+                            <h3 class="font-bold text-slate-900 dark:text-white text-sm mb-1 font-heading">
+                                หนังสือรับรองผู้ประกอบการ SME ภาครัฐ
+                            </h3>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
+                                เลขที่: <strong>30256/2569</strong> • สำนักงานส่งเสริมวิสาหกิจขนาดกลางและขนาดย่อม
+                            </p>
+                            <p class="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+                                ได้รับการขึ้นบัญชีรายการพัสดุและรายชื่อผู้ประกอบการ SME เพื่อการจัดซื้อจัดจ้างภาครัฐ (THAI SME-GP) สามารถรับงานราชการและเอกชนได้ทั่วประเทศ
+                            </p>
+                        </div>
+
+                        <div class="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800">
+                            <button type="button" onclick="storefront.openCertModal('sme-gp')" class="btn-paper w-full py-2 text-xs flex items-center justify-center gap-1.5 text-sky-600 dark:text-sky-400">
+                                <span>📜</span> <span>เปิดดูหนังสือรับรอง สสว.</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Credential 2: Commercial Registration -->
+                    <div class="store-service-card p-6 rounded-2xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30 text-[10px]">
+                                    ใบทะเบียนพาณิชย์
+                                </span>
+                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ จดทะเบียนตั้งแต่ปี 2560</span>
+                            </div>
+
+                            <div class="w-full h-44 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 mb-4 bg-slate-50 dark:bg-slate-900 relative group cursor-pointer" onclick="storefront.openCertModal('commercial')">
+                                <img src="img/cert-commercial.png" alt="ใบทะเบียนพาณิชย์" class="w-full h-full object-cover object-top group-hover:scale-105 transition duration-300">
+                                <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white font-bold gap-1 text-xs">
+                                    <span>🔍 คลิกดูฉบับเต็ม</span>
+                                </div>
+                            </div>
+
+                            <h3 class="font-bold text-slate-900 dark:text-white text-sm mb-1 font-heading">
+                                ใบสำคัญทะเบียนพาณิชย์ (ท.พ.)
+                            </h3>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
+                                ทะเบียนเลขที่: <strong>3560500055866</strong> • เทศบาลเมืองดอกคำใต้
+                            </p>
+                            <p class="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+                                จดทะเบียนถูกต้องตาม พ.ร.บ.ทะเบียนพาณิชย์ พ.ศ. 2499 ประกอบพาณิชยกิจจำหน่ายอุปกรณ์คอมพิวเตอร์ เซิร์ฟเวอร์ เน็ตเวิร์ก กล้องวงจรปิด และระบบไอที
+                            </p>
+                        </div>
+
+                        <div class="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800">
+                            <button type="button" onclick="storefront.openCertModal('commercial')" class="btn-paper w-full py-2 text-xs flex items-center justify-center gap-1.5 text-amber-600 dark:text-amber-400">
+                                <span>📜</span> <span>เปิดดูใบทะเบียนพาณิชย์</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Credential 3: DBD Registered -->
+                    <div class="store-service-card p-6 rounded-2xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-700 dark:text-purple-300 font-bold border border-purple-500/30 text-[10px]">
+                                    DBD REGISTERED
+                                </span>
+                                <span class="text-[10px] text-purple-600 dark:text-purple-400 font-bold">พาณิชย์อิเล็กทรอนิกส์</span>
+                            </div>
+
+                            <div class="w-full h-44 rounded-xl border border-slate-200 dark:border-slate-700 mb-4 bg-white dark:bg-slate-900/80 p-4 flex flex-col items-center justify-center text-center">
+                                <img src="img/dbd-registered.png" alt="DBD Registered Logo" class="h-16 w-auto object-contain mb-2 filter drop-shadow">
+                                <span class="font-bold text-xs text-slate-800 dark:text-slate-200">เครื่องหมายรับรอง DBD Registered</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">กองพาณิชย์อิเล็กทรอนิกส์ กรมพัฒนาธุรกิจการค้า</span>
+                            </div>
+
+                            <h3 class="font-bold text-slate-900 dark:text-white text-sm mb-1 font-heading">
+                                ทะเบียนพาณิชย์อิเล็กทรอนิกส์
+                            </h3>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
+                                เว็บไซต์: <strong>www.kequiv.lnwshop.com</strong> (คำขอเลขที่ 5600360000053)
+                            </p>
+                            <p class="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+                                ได้รับการจดทะเบียนพาณิชย์อิเล็กทรอนิกส์ เพื่อยืนยันตัวตนของผู้ประกอบการร้านค้าออนไลน์ เพิ่มความมั่นใจ ปลอดภัย และโปร่งใสในการติดต่อสั่งซื้อ
+                            </p>
+                        </div>
+
+                        <div class="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800">
+                            <a href="https://dbdregistered.dbd.go.th" target="_blank" rel="noopener" class="btn-paper w-full py-2 text-xs flex items-center justify-center gap-1.5 text-purple-600 dark:text-purple-400">
+                                <span>🛡️</span> <span>ข้อมูลรับรองกรมพัฒนาธุรกิจการค้า</span>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Privacy & PDPA Note -->
+                <div class="mt-6 p-3 rounded-xl bg-slate-200/60 dark:bg-slate-900/50 text-[11px] font-mono text-slate-500 dark:text-slate-400 text-center flex items-center justify-center gap-2">
+                    <span>🛡️</span>
+                    <span><strong>หมายเหตุความปลอดภัย:</strong> เอกสารที่แสดงบนเว็บไซต์นี้ได้รับการลบลายเซ็นส่วนบุคคลออกตามข้อกำหนด พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล (PDPA) เพื่อป้องกันการคัดลอกหรือปลอมแปลงลายมือชื่อ</span>
+                </div>
+            </div>
+        </section>
+
+<!-- ======================================================== -->
         <!-- 7. ONLINE QUOTATION / SITE SURVEY REQUEST FORM           -->
         <!-- ======================================================== -->
         <section id="quote-request" class="py-16 sm:py-20 bg-slate-50 dark:bg-[#0b1329] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
@@ -946,6 +1082,7 @@
                     </div>
                 </div>
                 <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500 text-center sm:text-left">
+                    <div class="flex items-center gap-2 mb-1"><img src="img/dbd-registered.png" alt="DBD Registered" class="h-6 w-auto object-contain"><span class="text-[10px] text-purple-400 font-bold">จดทะเบียนพาณิชย์อิเล็กทรอนิกส์ DBD Registered</span></div>
                     <p>© 2026 ร้านเคอีควิป Kequiv. สงวนลิขสิทธิ์ทั้งหมด (Non-VAT Business)</p>
                     <p>พะเยา (สำนักงานใหญ่) & เชียงใหม่ (สาขา 2)</p>
                 </div>
@@ -1612,6 +1749,27 @@
                     <button type="submit" class="btn-ocean py-1.5 px-4">บันทึกผลงาน</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    
+    <!-- Modal: Certificate Full Viewer Lightbox -->
+    <div id="modal-cert-viewer" class="modal-container fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-xs hidden flex items-center justify-center p-2 sm:p-4 font-mono">
+        <div class="bg-white dark:bg-[#0d162d] rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col border border-slate-300 dark:border-slate-700 overflow-hidden text-slate-900 dark:text-white">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+                <div>
+                    <h3 id="cert-viewer-title" class="font-bold text-xs sm:text-sm font-heading">หนังสือรับรองฉบับเต็ม</h3>
+                    <p id="cert-viewer-desc" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-md"></p>
+                </div>
+                <button type="button" onclick="storefront.closeCertModal()" class="text-slate-400 hover:text-white p-1 text-lg">✕</button>
+            </div>
+            <div class="p-4 overflow-y-auto flex-1 flex justify-center bg-slate-100 dark:bg-slate-950/80">
+                <img id="cert-viewer-img" src="" alt="Certificate" class="max-w-full h-auto rounded-lg shadow-md border border-slate-200 dark:border-slate-800">
+            </div>
+            <div class="p-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
+                <span>🛡️ ลบลายเซ็นออกแล้วเพื่อความปลอดภัย (PDPA)</span>
+                <button type="button" onclick="storefront.closeCertModal()" class="btn-paper py-1 px-3 text-xs">ปิด</button>
+            </div>
         </div>
     </div>
 

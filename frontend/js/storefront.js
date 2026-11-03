@@ -179,6 +179,29 @@ const storefront = {
         if (modal) modal.classList.add('hidden');
     },
 
+    openCertModal(type) {
+        const modal = document.getElementById('modal-cert-viewer');
+        const img = document.getElementById('cert-viewer-img');
+        const title = document.getElementById('cert-viewer-title');
+        const desc = document.getElementById('cert-viewer-desc');
+        if (!modal || !img) return;
+
+        if (type === 'sme-gp') {
+            img.src = 'img/cert-sme-gp.png';
+            title.textContent = 'หนังสือรับรองขึ้นทะเบียนผู้ประกอบการ SME เพื่อการจัดซื้อจัดจ้างภาครัฐ (THAI SME-GP)';
+            desc.textContent = 'สำนักงานส่งเสริมวิสาหกิจขนาดกลางและขนาดย่อม (สสว.) • เลขที่ 30256/2569 • ผู้ประกอบการ: เค อีควิป';
+        } else {
+            img.src = 'img/cert-commercial.png';
+            title.textContent = 'ใบทะเบียนพาณิชย์ (กรมพัฒนาธุรกิจการค้า เทศบาลเมืองดอกคำใต้)';
+            desc.textContent = 'ทะเบียนเลขที่ 3560500055866 • ชื่อพาณิชยกิจ: เค อีควิป (K Equiv) • อุปกรณ์ไอที เน็ตเวิร์ก กล้องวงจรปิด';
+        }
+        modal.classList.remove('hidden');
+    },
+
+    closeCertModal() {
+        document.getElementById('modal-cert-viewer')?.classList.add('hidden');
+    },
+
     openLineChat(serviceName = '') {
         const lineUrl = 'https://line.me/R/ti/p/@vcv6921d';
         window.open(lineUrl, '_blank');

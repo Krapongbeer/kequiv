@@ -3,10 +3,23 @@
  */
 
 module.exports = {
-    version: '2.4.0',
+    version: '2.5.0',
     releaseDate: '2026-11-03',
-    codename: 'Dark Mode, Standalone Website CMS & Clean Typography Edition',
+    codename: 'Verified Accreditations, DBD Registered & THAI SME-GP Edition',
     changelog: [
+        {
+            version: '2.5.0',
+            date: '2026-11-03',
+            title: 'DBD Registered, THAI SME-GP & Official Accreditations Showcase',
+            features: [
+                'เพิ่มส่วนแสดงความน่าเชื่อถือทางธุรกิจ (Verified Business Credentials)',
+                'ติดตั้งเครื่องหมาย DBD Registered พาณิชย์อิเล็กทรอนิกส์ กรมพัฒนาธุรกิจการค้า',
+                'เพิ่มหนังสือรับรองผู้ประกอบการ SME เพื่อการจัดซื้อจัดจ้างภาครัฐ (THAI SME-GP สสว.) เลขที่ 30256/2569',
+                'เพิ่มใบทะเบียนพาณิชย์ (ท.พ.) เทศบาลเมืองดอกคำใต้ เลขทะเบียน 3560500055866',
+                'ลบลายเซ็นส่วนบุคคลออกจากเอกสารเผยแพร่ออนไลน์ 100% ตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล (PDPA)',
+                'ระบบ Lightbox Modal สำหรับขยายดูเอกสารรับรองฉบับเต็ม'
+            ]
+        },
         {
             version: '2.4.0',
             date: '2026-11-03',
