@@ -1,6 +1,6 @@
 /**
- * Main Application Controller & Utilities
- * Clean & Modern Professional Interface
+ * Main Application Controller & Utilities (v2.0.0 Ocean Typewriter Edition)
+ * Full Authentication, Session Guard, Zero-Collision Management & Versioning
  */
 
 const THAI_MONTHS_SHORT = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
@@ -14,23 +14,136 @@ const app = {
         activeTab: 'dashboard',
         company: null,
         presets: null,
+        currentUser: null,
         currentEditingCustomer: null,
         currentEditingDocument: null,
         pendingConvertDoc: null
     },
 
     async init() {
-        console.log('App initializing...');
+        console.log('Kequiv v2.0 Initializing...');
+
+        // Check authentication state
+        const token = localStorage.getItem('kequiv_token');
+        if (!token) {
+            this.showLoginScreen();
+            return;
+        }
+
         try {
+            // Verify session with backend
+            const userRes = await api.getCurrentUser();
+            this.state.currentUser = userRes.user;
+            this.updateUserUI(this.state.currentUser);
+            this.hideLoginScreen();
+
             await this.loadInitialData();
             this.setupEventListeners();
             this.switchTab('dashboard');
         } catch (err) {
-            console.error('Initialization error:', err);
-            this.toast('เกิดข้อผิดพลาดในการโหลดระบบ: ' + err.message, 'error');
+            console.warn('Session verification failed, requesting login:', err.message);
+            this.showLoginScreen();
         }
     },
 
+    // -----------------------------------------------------------------
+    // Authentication Handlers
+    // -----------------------------------------------------------------
+    showLoginScreen() {
+        const overlay = document.getElementById('login-overlay');
+        if (overlay) {
+            overlay.classList.remove('hidden');
+            overlay.style.opacity = '1';
+        }
+    },
+
+    hideLoginScreen() {
+        const overlay = document.getElementById('login-overlay');
+        if (overlay) {
+            overlay.classList.add('hidden');
+        }
+    },
+
+    quickFillLogin(username, password) {
+        const uEl = document.getElementById('login-username');
+        const pEl = document.getElementById('login-password');
+        if (uEl) uEl.value = username;
+        if (pEl) pEl.value = password;
+        const errEl = document.getElementById('login-error-alert');
+        if (errEl) errEl.classList.add('hidden');
+    },
+
+    async handleLogin() {
+        const username = document.getElementById('login-username')?.value?.trim();
+        const password = document.getElementById('login-password')?.value;
+        const errAlert = document.getElementById('login-error-alert');
+        const errMsg = document.getElementById('login-error-msg');
+        const btnSubmit = document.getElementById('btn-login-submit');
+
+        if (!username || !password) {
+            if (errAlert) {
+                errMsg.textContent = 'กรุณากรอกทั้งชื่อผู้ใช้และรหัสผ่าน';
+                errAlert.classList.remove('hidden');
+            }
+            return;
+        }
+
+        try {
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = `<span>⏳</span> <span>กำลังตรวจสอบ...</span>`;
+            }
+
+            const res = await api.login(username, password);
+
+            localStorage.setItem('kequiv_token', res.token);
+            localStorage.setItem('kequiv_user', JSON.stringify(res.user));
+            this.state.currentUser = res.user;
+
+            this.updateUserUI(res.user);
+            this.hideLoginScreen();
+            this.toast(`ยินดีต้อนรับคุณ ${res.user.name}`, 'success');
+
+            // Initialize app data
+            await this.loadInitialData();
+            this.setupEventListeners();
+            this.switchTab('dashboard');
+        } catch (err) {
+            console.error('Login error:', err);
+            if (errAlert) {
+                errMsg.textContent = err.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+                errAlert.classList.remove('hidden');
+            }
+        } finally {
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<span>🔐</span> <span>เข้าสู่ระบบ (LOGIN)</span>`;
+            }
+        }
+    },
+
+    handleLogout() {
+        localStorage.removeItem('kequiv_token');
+        localStorage.removeItem('kequiv_user');
+        this.state.currentUser = null;
+        this.toast('ออกจากระบบเรียบร้อยแล้ว', 'info');
+        this.showLoginScreen();
+    },
+
+    updateUserUI(user) {
+        const nameEl = document.getElementById('sidebar-username');
+        if (nameEl && user) {
+            nameEl.textContent = `${user.username} (${user.role})`;
+        }
+    },
+
+    openVersionModal() {
+        this.openModal('modal-version');
+    },
+
+    // -----------------------------------------------------------------
+    // Core Initializers
+    // -----------------------------------------------------------------
     async loadInitialData() {
         try {
             const [companyRes, presetsRes] = await Promise.all([
@@ -40,7 +153,6 @@ const app = {
             this.state.company = companyRes.data;
             this.state.presets = presetsRes;
 
-            // Update company name in header
             const brandEl = document.getElementById('header-company-name');
             if (brandEl && this.state.company) {
                 brandEl.textContent = this.state.company.name;
@@ -74,15 +186,15 @@ const app = {
     switchTab(tabName, payload = null) {
         this.state.activeTab = tabName;
 
-        // Update nav active states
+        // Update nav active states with modern Ocean styling
         document.querySelectorAll('.nav-link').forEach(link => {
             const isTarget = link.getAttribute('data-tab') === tabName;
             if (isTarget) {
-                link.classList.add('bg-blue-600', 'text-white', 'shadow-sm', 'font-semibold');
-                link.classList.remove('text-slate-600', 'hover:bg-slate-100');
+                link.classList.add('bg-sky-600', 'text-white', 'shadow-md', 'font-bold');
+                link.classList.remove('text-slate-300', 'hover:bg-slate-800');
             } else {
-                link.classList.remove('bg-blue-600', 'text-white', 'shadow-sm', 'font-semibold');
-                link.classList.add('text-slate-600', 'hover:bg-slate-100');
+                link.classList.remove('bg-sky-600', 'text-white', 'shadow-md', 'font-bold');
+                link.classList.add('text-slate-300', 'hover:bg-slate-800');
             }
         });
 
@@ -138,8 +250,8 @@ const app = {
         const bgColors = {
             success: 'bg-emerald-600 text-white',
             error: 'bg-rose-600 text-white',
-            warning: 'bg-amber-500 text-white',
-            info: 'bg-slate-800 text-white'
+            warning: 'bg-amber-600 text-white',
+            info: 'bg-sky-800 text-white'
         };
         const icons = {
             success: '✓',
@@ -148,9 +260,9 @@ const app = {
             info: 'ℹ'
         };
 
-        toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${bgColors[type] || bgColors.info} toast-enter mb-2 transition-all duration-300`;
+        toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl text-xs font-mono font-bold ${bgColors[type] || bgColors.info} mb-2 transition-all duration-300 border border-white/20`;
         toast.innerHTML = `
-            <span class="text-base font-bold">${icons[type] || '•'}</span>
+            <span class="text-sm">${icons[type] || '•'}</span>
             <span class="flex-1">${message}</span>
             <button class="opacity-70 hover:opacity-100 ml-2 text-xs">✕</button>
         `;
@@ -256,25 +368,25 @@ const app = {
 
     getDocTypeBadge(type) {
         const types = {
-            quotation: { label: '[QT] ใบเสนอราคา', class: 'badge-quotation' },
-            billing: { label: '[INV] ใบแจ้งหนี้/วางบิล', class: 'badge-billing' },
-            receipt: { label: '[RE] ใบเสร็จรับเงิน', class: 'badge-receipt' }
+            quotation: { label: '[QT] ใบเสนอราคา', class: 'bg-sky-100 text-sky-900 border border-sky-400' },
+            billing: { label: '[INV] ใบแจ้งหนี้/วางบิล', class: 'bg-amber-100 text-amber-950 border border-amber-400' },
+            receipt: { label: '[RE] ใบเสร็จรับเงิน', class: 'bg-emerald-100 text-emerald-950 border border-emerald-400' }
         };
-        const item = types[type] || { label: type, class: 'bg-stone-200 text-stone-800' };
-        return `<span class="px-2 py-0.5 rounded text-xs font-bold font-mono whitespace-nowrap inline-block ${item.class}">${item.label}</span>`;
+        const item = types[type] || { label: type, class: 'bg-slate-200 text-slate-800' };
+        return `<span class="px-2.5 py-0.5 rounded text-xs font-bold font-mono whitespace-nowrap inline-block ${item.class}">${item.label}</span>`;
     },
 
     getStatusBadge(status) {
         const map = {
-            draft: { label: 'ฉบับร่าง', class: 'stamp stamp-draft' },
-            issued: { label: 'ออกเอกสารแล้ว', class: 'stamp stamp-issued' },
-            paid: { label: 'ชำระเงินแล้ว', class: 'stamp stamp-paid' },
-            cancelled: { label: 'ยกเลิก', class: 'stamp stamp-cancelled' },
-            reserved: { label: 'กันเลขไว้', class: 'stamp stamp-reserved' },
-            used: { label: 'ใช้งานแล้ว', class: 'stamp border border-stone-400 text-stone-600' }
+            draft: { label: 'ฉบับร่าง', class: 'border border-slate-400 text-slate-600 bg-slate-50' },
+            issued: { label: 'ออกเอกสารแล้ว', class: 'border border-sky-500 text-sky-900 bg-sky-50 font-bold' },
+            paid: { label: 'ชำระเงินแล้ว', class: 'border border-emerald-500 text-emerald-900 bg-emerald-50 font-bold' },
+            cancelled: { label: 'ยกเลิก', class: 'border border-rose-500 text-rose-800 bg-rose-50' },
+            reserved: { label: 'กันเลขไว้', class: 'border border-purple-500 text-purple-900 bg-purple-50 font-bold' },
+            used: { label: 'ใช้งานแล้ว', class: 'border border-slate-400 text-slate-500 bg-slate-100' }
         };
-        const item = map[status] || { label: status, class: 'bg-stone-200 text-stone-800' };
-        return `<span class="${item.class} text-[11px] whitespace-nowrap inline-block">${item.label}</span>`;
+        const item = map[status] || { label: status, class: 'bg-slate-200 text-slate-800' };
+        return `<span class="px-2 py-0.5 rounded text-[11px] font-mono whitespace-nowrap inline-block ${item.class}">${item.label}</span>`;
     }
 };
 

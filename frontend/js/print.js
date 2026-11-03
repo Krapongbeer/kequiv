@@ -294,5 +294,43 @@ window.printModule = {
 
     triggerPrint() {
         window.print();
+    },
+
+    shareCurrentToLine() {
+        if (!this.currentDoc) {
+            app.toast('ไม่พบข้อมูลเอกสารสำหรับแชร์', 'warning');
+            return;
+        }
+        const doc = this.currentDoc;
+        const titles = { quotation: 'ใบเสนอราคา', billing: 'ใบแจ้งหนี้/วางบิล', receipt: 'ใบเสร็จรับเงิน' };
+        const title = titles[doc.type] || 'เอกสารธุรกิจ';
+
+        let msg = `📄 [${title}] ร้านเคอีควิป Kequiv\n`;
+        msg += `เลขที่: ${doc.code}\n`;
+        msg += `ลูกค้า: ${doc.customer_name || '-'}\n`;
+        if (doc.project_name_custom || doc.project_name) {
+            msg += `โครงการ: ${doc.project_name_custom || doc.project_name}\n`;
+        }
+        msg += `วันที่: ${app.formatDateThai(doc.issue_date, true)}\n`;
+        msg += `----------------------------\n`;
+        if (doc.items && doc.items.length > 0) {
+            doc.items.forEach((it, idx) => {
+                msg += `${idx + 1}. ${it.product_name} x ${it.quantity} ${it.unit} = ฿${app.formatCurrency(it.total_price)}\n`;
+            });
+            msg += `----------------------------\n`;
+        }
+        msg += `💰 ยอดรวมสุทธิ: ฿${app.formatCurrency(doc.grand_total)} บาท\n`;
+        msg += `(${doc.grand_total_thai || ''})\n\n`;
+
+        if (doc.company && doc.company.bank_accounts && doc.company.bank_accounts.length > 0) {
+            msg += `💳 ข้อมูลโอนเงิน:\n`;
+            doc.company.bank_accounts.forEach(b => {
+                msg += `${b.bank} เลขที่: ${b.account_no} (${b.account_name})\n`;
+            });
+        }
+        msg += `\nขอบพระคุณที่ไว้วางใจในบริการของเราครับ`;
+
+        const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(msg)}`;
+        window.open(lineUrl, '_blank');
     }
 };

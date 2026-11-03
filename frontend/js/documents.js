@@ -166,15 +166,18 @@ window.documentsModule = {
                                         ${app.getStatusBadge(d.status)}
                                     </td>
                                     <td class="px-3.5 py-3 text-right whitespace-nowrap space-x-1">
-                                        <button onclick="window.printModule.openPrint(${d.id})" class="btn-paper text-xs py-1 px-2.5" title="ดูเอกสารและสั่งพิมพ์ A4">
+                                        <button onclick="window.printModule.openPrint(${d.id})" class="btn-ocean text-xs py-1 px-2.5" title="ดูเอกสารและสั่งพิมพ์ A4">
                                             🖨️ พิมพ์
+                                        </button>
+                                        <button onclick="window.documentsModule.shareToLine(${d.id})" class="btn-line text-xs py-1 px-2" title="แชร์สรุปบิลเข้า LINE">
+                                            💬 LINE
                                         </button>
                                         ${d.status !== 'cancelled' ? `
                                             <button onclick="window.documentsModule.openConvertModal(${d.id}, '${d.type}', '${d.code}')" class="btn-paper text-xs py-1 px-2" title="แปลงเป็นเอกสารขั้นถัดไป">
                                                 🔄 แปลง
                                             </button>
                                             ${d.type === 'billing' && d.status !== 'paid' ? `
-                                                <button onclick="window.documentsModule.markPaid(${d.id})" class="btn-typewriter text-xs py-1 px-2 bg-emerald-900 border-emerald-950" title="ทำเครื่องหมายว่าชำระแล้ว">
+                                                <button onclick="window.documentsModule.markPaid(${d.id})" class="btn-paper text-xs py-1 px-2 text-emerald-800 border-emerald-800 bg-emerald-50" title="ทำเครื่องหมายว่าชำระแล้ว">
                                                     ✓ ชำระแล้ว
                                                 </button>
                                             ` : ''}
@@ -949,6 +952,17 @@ window.documentsModule = {
             this.loadList();
         } catch (err) {
             app.toast(err.message, 'error');
+        }
+    },
+
+    async shareToLine(docId) {
+        try {
+            app.toast('กำลังดึงข้อมูลเอกสารสำหรับส่ง LINE...', 'info');
+            const res = await api.getDocument(docId);
+            window.printModule.currentDoc = res.data;
+            window.printModule.shareCurrentToLine();
+        } catch (e) {
+            app.toast('เกิดข้อผิดพลาดในการโหลดข้อมูลสำหรับแชร์: ' + e.message, 'error');
         }
     }
 };

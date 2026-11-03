@@ -1,18 +1,32 @@
 /**
- * Kequiv API Client
+ * Kequiv API Client with Authentication & Extended Capabilities
  */
 
 const API_BASE = '/api';
 
 async function request(endpoint, options = {}) {
     const url = `${API_BASE}${endpoint}`;
+    const token = localStorage.getItem('kequiv_token');
+
     const headers = {
         'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         ...(options.headers || {})
     };
 
     try {
         const res = await fetch(url, { ...options, headers });
+
+        if (res.status === 401 && !endpoint.startsWith('/auth/login') && !endpoint.startsWith('/version')) {
+            // Token expired or invalid
+            localStorage.removeItem('kequiv_token');
+            localStorage.removeItem('kequiv_user');
+            if (window.app && typeof window.app.showLoginScreen === 'function') {
+                window.app.showLoginScreen();
+            }
+            throw new Error('จำเป็นต้องเข้าสู่ระบบก่อนใช้งาน');
+        }
+
         const json = await res.json();
         if (!res.ok || json.success === false) {
             throw new Error(json.error || `Request failed with status ${res.status}`);
@@ -25,6 +39,50 @@ async function request(endpoint, options = {}) {
 }
 
 const api = {
+    // Auth
+    login: (username, password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
+    getCurrentUser: () => request('/auth/me'),
+
+    // Version
+    getVersion: () => request('/version'),
+
+    // Backup & Reports
+    exportBackupUrl: () => {
+        const token = localStorage.getItem('kequiv_token');
+        return `/api/backup/export?auth=${encodeURIComponent(token || '')}`;
+    },
+    exportBackup: async () => {
+        const token = localStorage.getItem('kequiv_token');
+        const res = await fetch('/api/backup/export', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('เกิดข้อผิดพลาดในการสำรองข้อมูล');
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `kequiv-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    },
+    exportReportCsv: async (params = {}) => {
+        const token = localStorage.getItem('kequiv_token');
+        const qs = new URLSearchParams(params).toString();
+        const res = await fetch(`/api/reports/export-csv?${qs}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('เกิดข้อผิดพลาดในการส่งออกไฟล์รายงาน');
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `kequiv-report-${params.year || 'all'}-${params.month || 'all'}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    },
+
     // Dashboard
     getDashboard: () => request('/dashboard'),
 
@@ -66,7 +124,7 @@ const api = {
     convertDocument: (id, data) => request(`/documents/${id}/convert`, { method: 'POST', body: JSON.stringify(data) }),
     duplicateDocument: (id) => request(`/documents/${id}/duplicate`, { method: 'POST' }),
     cancelDocument: (id, reason) => request(`/documents/${id}/cancel`, { method: 'POST', body: JSON.stringify({ reason }) }),
-    markPaid: (id) => request(`/documents/${id}/mark-paid`, { method: 'POST' }),
+    markPaid: (id, paymentData = {}) => request(`/documents/${id}/mark-paid`, { method: 'POST', body: JSON.stringify(paymentData) }),
     deleteDocument: (id) => request(`/documents/${id}`, { method: 'DELETE' }),
 
     // Upload

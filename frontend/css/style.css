@@ -1,5 +1,6 @@
 /* =============================================================
-   VINTAGE TYPEWRITER & PAPER LEDGER UI THEME (สไตล์พิมพ์ดีดโบราณ)
+   KEQUIV - VINTAGE TYPEWRITER & OCEAN CYAN THEME (v2.0.0)
+   Authentic Typewriter Typography meets Modern Tech Ocean Aesthetics
    ============================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=Bai+Jamjuree:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Sarabun:ital,wght@0,300;0,400;0,600;0,700&display=swap');
@@ -8,15 +9,26 @@
     --font-typewriter: 'Special Elite', 'Courier Prime', 'Courier New', monospace;
     --font-thai-mono: 'Courier Prime', 'Bai Jamjuree', 'Sarabun', monospace;
     
-    /* Paper & Ink Palette */
+    /* Logo Colors: Ocean Cyan & Deep Navy */
+    --ocean-cyan: #06b6d4;
+    --ocean-light: #0ea5e9;
+    --ocean-primary: #0284c7;
+    --ocean-deep: #0369a1;
+    --ocean-navy: #0f172a;
+    --ocean-slate: #1e293b;
+    --ocean-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%);
+    --ocean-border: #0284c7;
+
+    /* Paper & Ledger Palette */
     --paper-bg: #f5eedc;
-    --paper-card: #fdfbf7;
+    --paper-card: #fffdfa;
+    --paper-cream: #faf5eb;
     --paper-darker: #eae0c8;
-    --ink-black: #1f1d1a;
-    --ink-ribbon-red: #a82020;
-    --ink-carbon-blue: #1e3a8a;
-    --ink-faded: #57534e;
-    --border-ink: #292524;
+    --ink-black: #1a1816;
+    --ink-ribbon-red: #b91c1c;
+    --ink-carbon-blue: #0369a1;
+    --ink-faded: #64748b;
+    --border-ink: #334155;
 }
 
 body {
@@ -24,10 +36,10 @@ body {
     background-color: var(--paper-bg);
     color: var(--ink-black);
     background-image: 
-        radial-gradient(#d6c7a7 0.75px, transparent 0.75px),
-        radial-gradient(#d6c7a7 0.75px, var(--paper-bg) 0.75px);
-    background-size: 30px 30px;
-    background-position: 0 0, 15px 15px;
+        radial-gradient(#d4c5a3 0.75px, transparent 0.75px),
+        radial-gradient(#d4c5a3 0.75px, var(--paper-bg) 0.75px);
+    background-size: 28px 28px;
+    background-position: 0 0, 14px 14px;
     line-height: 1.5;
 }
 
@@ -40,41 +52,70 @@ h1, h2, h3, h4, h5, h6, .font-heading, .typewriter-font, .font-typewriter {
     letter-spacing: 0.5px;
 }
 
-/* Custom Scrollbar */
+/* Custom Sleek Scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
 ::-webkit-scrollbar-track {
-    background: #eae0c8;
+    background: #e2e8f0;
 }
 ::-webkit-scrollbar-thumb {
-    background: #8c827a;
+    background: #0284c7;
     border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: #57534e;
+    background: #0369a1;
 }
 
-/* Vintage Paper Card */
+/* Vintage Paper Card with Ocean Edge */
 .typewriter-card {
     background-color: var(--paper-card);
     border: 2px solid var(--border-ink);
-    box-shadow: 4px 4px 0px rgba(41, 37, 36, 0.85);
+    box-shadow: 4px 4px 0px rgba(15, 23, 42, 0.9);
     position: relative;
 }
 
-/* Typewriter Keycap Button */
+/* Primary Button: Ocean Cyan Keycap */
+.btn-ocean {
+    font-family: var(--font-thai-mono);
+    background: var(--ocean-gradient);
+    color: #ffffff;
+    border: 2px solid #0369a1;
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 3px 0 #075985, 0 4px 6px rgba(2, 132, 199, 0.35);
+    transition: all 0.08s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.btn-ocean:hover {
+    filter: brightness(1.08);
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 #075985, 0 2px 4px rgba(2, 132, 199, 0.3);
+}
+.btn-ocean:active {
+    transform: translateY(3px);
+    box-shadow: 0 0 0 #075985;
+}
+
+/* Typewriter Dark Keycap Button */
 .btn-typewriter {
     font-family: var(--font-thai-mono);
-    background-color: #2b2725;
-    color: #fdfbf7;
-    border: 2px solid #1c1917;
+    background-color: #1e293b;
+    color: #f8fafc;
+    border: 2px solid #0f172a;
     border-radius: 6px;
     padding: 6px 14px;
     font-size: 0.85rem;
     font-weight: 600;
-    box-shadow: 0 3px 0 #0c0a09, 0 4px 6px rgba(0,0,0,0.25);
+    box-shadow: 0 3px 0 #020617, 0 4px 6px rgba(0, 0, 0, 0.3);
     transition: all 0.08s ease-in-out;
     display: inline-flex;
     align-items: center;
@@ -84,13 +125,13 @@ h1, h2, h3, h4, h5, h6, .font-heading, .typewriter-font, .font-typewriter {
     text-shadow: 0 1px 1px black;
 }
 .btn-typewriter:hover {
-    background-color: #383330;
+    background-color: #334155;
     transform: translateY(1px);
-    box-shadow: 0 2px 0 #0c0a09, 0 2px 4px rgba(0,0,0,0.25);
+    box-shadow: 0 2px 0 #020617, 0 2px 4px rgba(0, 0, 0, 0.25);
 }
 .btn-typewriter:active {
     transform: translateY(3px);
-    box-shadow: 0 0 0 #0c0a09;
+    box-shadow: 0 0 0 #020617;
 }
 
 /* Secondary Button (Paper Style) */
@@ -98,282 +139,182 @@ h1, h2, h3, h4, h5, h6, .font-heading, .typewriter-font, .font-typewriter {
     font-family: var(--font-thai-mono);
     background-color: #fffefb;
     color: var(--ink-black);
-    border: 2px solid var(--border-ink);
+    border: 2px solid #334155;
     border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 0.82rem;
+    padding: 6px 13px;
+    font-size: 0.85rem;
     font-weight: 600;
-    box-shadow: 2px 2px 0px var(--border-ink);
+    box-shadow: 0 2px 0 #334155;
     transition: all 0.08s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
     cursor: pointer;
 }
 .btn-paper:hover {
-    background-color: #f5eedc;
+    background-color: #f1f5f9;
+    border-color: #0284c7;
+    color: #0284c7;
     transform: translateY(1px);
-    box-shadow: 1px 1px 0px var(--border-ink);
+    box-shadow: 0 1px 0 #0284c7;
 }
 .btn-paper:active {
     transform: translateY(2px);
-    box-shadow: 0px 0px 0px var(--border-ink);
+    box-shadow: 0 0 0 #334155;
 }
 
-/* Red Ribbon Button */
-.btn-ribbon-red {
-    background-color: var(--ink-ribbon-red) !important;
-    border-color: #701010 !important;
-    color: #fff !important;
-    box-shadow: 0 3px 0 #4a0b0b, 0 4px 6px rgba(0,0,0,0.2) !important;
-}
-
-/* Navigation Tabs (Index / File Folder Tabs) */
-.nav-tab-retro {
+/* LINE Share Button */
+.btn-line {
     font-family: var(--font-thai-mono);
-    border: 2px solid var(--border-ink);
+    background-color: #06c755;
+    color: white;
+    border: 2px solid #049f43;
     border-radius: 6px;
-    background: #eadecc;
-    color: #44403c;
-    font-weight: 600;
-    transition: all 0.15s;
-    box-shadow: 2px 2px 0px rgba(41, 37, 36, 0.4);
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    box-shadow: 0 2px 0 #037833;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
 }
-.nav-tab-retro:hover {
-    background: #fdfbf7;
-    color: var(--ink-black);
-}
-.nav-tab-retro.active {
-    background: #2b2725 !important;
-    color: #fdfbf7 !important;
-    box-shadow: 3px 3px 0px var(--border-ink) !important;
+.btn-line:hover {
+    background-color: #05b34c;
+    transform: translateY(1px);
 }
 
-/* Typewriter Input Fields */
-input[type="text"], input[type="number"], input[type="date"], input[type="email"], select, textarea {
-    font-family: var(--font-thai-mono) !important;
-    background-color: #fffefc !important;
-    border: 2px solid var(--border-ink) !important;
-    color: var(--ink-black) !important;
-    border-radius: 4px !important;
-    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.08) !important;
-}
-input:focus, select:focus, textarea:focus {
-    outline: none !important;
-    border-color: #a82020 !important;
-    box-shadow: 0 0 0 2px rgba(168, 32, 32, 0.25) !important;
+/* Vintage Dual Ribbon Banner (Ocean Cyan & Dark Navy) */
+.ribbon-banner {
+    height: 7px;
+    background: repeating-linear-gradient(
+        45deg,
+        #0284c7,
+        #0284c7 12px,
+        #0f172a 12px,
+        #0f172a 24px
+    );
+    border-bottom: 2px solid #0f172a;
 }
 
-/* Vintage Rubber Stamp Effect */
-.stamp {
+/* Rubber Stamp Badges */
+.badge-stamp {
     display: inline-block;
     padding: 2px 8px;
     font-family: var(--font-typewriter);
+    font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
+    border: 2px solid;
     border-radius: 4px;
+    transform: rotate(-1deg);
     line-height: 1.2;
-    letter-spacing: 1px;
 }
-.stamp-paid {
-    color: #166534;
-    border: 2px solid #166534;
-    background: rgba(22, 101, 52, 0.08);
-    transform: rotate(-3deg);
+
+.badge-stamp-ocean {
+    color: #0284c7;
+    border-color: #0284c7;
+    background-color: rgba(14, 165, 233, 0.08);
 }
-.stamp-cancelled {
+.badge-stamp-red {
     color: var(--ink-ribbon-red);
-    border: 2px dashed var(--ink-ribbon-red);
-    background: rgba(168, 32, 32, 0.08);
-    transform: rotate(4deg);
+    border-color: var(--ink-ribbon-red);
+    background-color: rgba(185, 28, 28, 0.08);
 }
-.stamp-reserved {
-    color: #6b21a8;
-    border: 2px solid #6b21a8;
-    background: rgba(107, 33, 168, 0.08);
-    transform: rotate(-2deg);
+.badge-stamp-blue {
+    color: var(--ink-carbon-blue);
+    border-color: var(--ink-carbon-blue);
+    background-color: rgba(3, 105, 161, 0.08);
 }
-.stamp-issued {
-    color: #1e3a8a;
-    border: 2px solid #1e3a8a;
-    background: rgba(30, 58, 138, 0.08);
-}
-.stamp-draft {
-    color: #78716c;
-    border: 2px dotted #78716c;
+.badge-stamp-green {
+    color: #047857;
+    border-color: #047857;
+    background-color: rgba(4, 120, 87, 0.08);
 }
 
-/* Badges with Vintage Monospace */
-.badge-quotation {
-    background-color: #e0f2fe;
-    color: #0c4a6e;
-    border: 1.5px solid #0284c7;
-    font-family: var(--font-thai-mono);
+/* System Version Badge */
+.badge-version {
+    font-family: var(--font-typewriter);
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    color: #ffffff;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 1px 3px rgba(2, 132, 199, 0.4);
+    cursor: pointer;
+    transition: all 0.15s ease;
 }
-.badge-billing {
-    background-color: #fef3c7;
-    color: #78350f;
-    border: 1.5px solid #d97706;
-    font-family: var(--font-thai-mono);
-}
-.badge-receipt {
-    background-color: #dcfce7;
-    color: #14532d;
-    border: 1.5px solid #16a34a;
-    font-family: var(--font-thai-mono);
-}
-.badge-draft {
-    background-color: #f5f5f4;
-    color: #57534e;
-    border: 1px solid #d6d3d1;
-    font-family: var(--font-thai-mono);
-}
-.badge-issued {
-    background-color: #eff6ff;
-    color: #1e3a8a;
-    border: 1px solid #bfdbfe;
-    font-family: var(--font-thai-mono);
-}
-.badge-paid {
-    background-color: #f0fdf4;
-    color: #166534;
-    border: 1px solid #bbf7d0;
-    font-family: var(--font-thai-mono);
-}
-.badge-cancelled {
-    background-color: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
-    font-family: var(--font-thai-mono);
-}
-.badge-reserved {
-    background-color: #faf5ff;
-    color: #6b21a8;
-    border: 1px solid #e9d5ff;
-    font-family: var(--font-thai-mono);
+.badge-version:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
 }
 
-/* Perforated and decorative borders */
-.border-perforated {
-    border-bottom: 2px dashed #78716c;
-}
-.border-double-retro {
-    border: 4px double var(--border-ink);
+/* Fullscreen Login Overlay */
+#login-overlay {
+    background-color: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(6px);
 }
 
-/* Typewriter Ribbon Bar Header */
-.ribbon-banner {
-    background: linear-gradient(180deg, #1c1917 0%, #292524 50%, #7f1d1d 50%, #991b1b 100%);
-    height: 8px;
-    width: 100%;
+/* Modals */
+.modal-backdrop {
+    background-color: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(3px);
 }
 
-/* Toast animations */
-@keyframes slideIn {
-    from {
-        transform: translateY(-20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-.toast-enter {
-    animation: slideIn 0.25s ease-out forwards;
-}
-
-/* -------------------------------------------------------------
-   A4 PRINT SPECIFIC STYLES (AUTHENTIC TYPEWRITER DOCUMENT)
-   ------------------------------------------------------------- */
-#print-sheet {
-    background: #fffdfa;
+/* A4 Print Document Styles */
+.print-container {
     width: 210mm;
     min-height: 297mm;
-    padding: 10mm 12mm;
+    padding: 12mm 15mm 15mm 15mm;
     margin: 0 auto;
-    box-sizing: border-box;
+    background: #fffdf9;
+    color: #1a1816;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
     position: relative;
-    color: #171717;
-    font-family: 'Courier Prime', 'Bai Jamjuree', 'Sarabun', monospace;
-    border: 1px solid #d6d3d1;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    line-height: 1.42;
-    word-break: break-word;
-    overflow-wrap: break-word;
+    box-sizing: border-box;
 }
 
 .watermark-cancelled {
     position: absolute;
-    top: 45%;
+    top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-25deg);
-    font-family: 'Special Elite', 'Courier Prime', monospace;
-    font-size: 65pt;
+    font-family: var(--font-typewriter);
+    font-size: 7rem;
     font-weight: 900;
     color: rgba(185, 28, 28, 0.12);
-    border: 6px dashed rgba(185, 28, 28, 0.18);
-    padding: 8px 36px;
-    letter-spacing: 16px;
+    border: 8px solid rgba(185, 28, 28, 0.12);
+    border-radius: 12px;
+    padding: 10px 40px;
+    text-transform: uppercase;
+    letter-spacing: 12px;
     pointer-events: none;
     z-index: 50;
-    text-transform: uppercase;
-    border-radius: 8px;
+    user-select: none;
 }
 
 @media print {
-    @page {
-        size: A4 portrait;
-        margin: 8mm 10mm;
-    }
-
     body {
         background: white !important;
-        color: black !important;
+        background-image: none !important;
         margin: 0 !important;
         padding: 0 !important;
     }
-
-    #app-sidebar,
-    #app-header,
-    #app-content,
-    .no-print,
-    header,
-    nav,
-    aside,
-    button,
-    .modal-backdrop,
-    #toast-container {
+    .no-print, header, aside, .modal-backdrop, #login-overlay {
         display: none !important;
     }
-
-    #print-modal {
-        display: block !important;
-        position: static !important;
-        background: transparent !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    #print-modal-inner {
-        max-width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        box-shadow: none !important;
-        background: transparent !important;
-    }
-
-    #print-sheet {
+    .print-container {
         width: 100% !important;
         min-height: auto !important;
         margin: 0 !important;
-        padding: 0 !important;
+        padding: 8mm 10mm !important;
         box-shadow: none !important;
-        border: none !important;
         background: white !important;
-        page-break-after: avoid;
-    }
-
-    table, th, td {
-        border-color: #000 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
     }
 }
