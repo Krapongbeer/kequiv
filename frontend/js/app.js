@@ -186,9 +186,9 @@ const app = {
                     <span class="hidden sm:inline">แอด LINE</span>
                     <span class="sm:hidden">LINE</span>
                 </a>
-                <button type="button" onclick="app.showLoginScreen()" class="btn-ocean text-xs py-2 px-3 sm:px-4 shadow-sm flex items-center gap-1.5 whitespace-nowrap" title="เข้าสู่ระบบสำหรับทีมงาน">
+                <button type="button" onclick="app.showLoginScreen()" class="btn-ocean text-xs py-2 px-2.5 sm:px-3 shadow-sm flex items-center gap-1 whitespace-nowrap" title="เข้าสู่ระบบสำหรับทีมงาน">
                     <span>🔐</span>
-                    <span class="hidden md:inline">เข้าสู่ระบบทีมงาน</span>
+                    <span class="hidden 2xl:inline">ทีมงาน</span>
                 </button>
                 <button type="button" onclick="app.toggleTheme()" class="theme-toggle-btn p-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs hover:border-sky-500 transition flex-shrink-0" title="สลับโหมดมืด/สว่าง">
                     ${themeIcon}

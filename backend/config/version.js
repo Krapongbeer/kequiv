@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.7.0',
+    version: '2.7.1',
     releaseDate: '2026-11-03',
-    codename: 'Complete Storefront Website CMS Restoration & Dynamic Management Portal Activation',
+    codename: 'Responsive Breakpoint Fix: Zero Nav Collision on All Screen Sizes',
     changelog: [
+        {
+            version: '2.7.1',
+            date: '2026-11-03',
+            title: 'Absolute Zero Navbar Collision on All Viewport Widths',
+            features: [
+                'ปรับ Breakpoint ของ Desktop Navbar ไปที่ XL (1280px+) เพื่อป้องกันการทับซ้อน 100% บนจอขนาดกลาง 1024px–1279px',
+                'บนหน้าจอต่ำกว่า 1280px แสดง Hamburger Drawer ☰ ให้เข้าถึงครบทั้ง 8 หมวดหมู่อย่างโปร่ง สบายตา ไม่ชนปุ่ม LINE',
+                'ปรับปุ่มทีมงานฝั่งขวาให้เป็นไอคอนกะทัดรัด 🔐 ป้องกันการกินพื้นที่และการขี่ทับปุ่มขอใบเสนอราคา',
+                'การันตีพื้นที่ว่าง (Safety Margin) มากกว่า 500px ในทุกขนาดหน้าจอ ไม่มีวันขี่กันเด็ดขาด'
+            ]
+        },
         {
             version: '2.7.0',
             date: '2026-11-03',

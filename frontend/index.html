@@ -125,8 +125,8 @@
                     </div>
                 </a>
 
-                <!-- Desktop Navigation Menu (Streamlined 5 Anchors, Perfectly Responsive) -->
-                <nav class="hidden lg:flex items-center gap-1 xl:gap-2 font-mono text-xs font-bold text-slate-700 dark:text-slate-200 flex-shrink min-w-0">
+                <!-- Desktop Navigation Menu (Crisp & Spacious on XL+ screens, Never Collides) -->
+                <nav class="hidden xl:flex items-center gap-1.5 2xl:gap-2 font-mono text-xs font-bold text-slate-700 dark:text-slate-200 flex-shrink-0">
                     <a href="#cctv" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">📹 กล้องวงจรปิด</a>
                     <a href="#network" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">💻 ไอที-เน็ตเวิร์ก</a>
                     <a href="#systems" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">⚡ ระบบไฟฟ้า</a>
@@ -135,31 +135,31 @@
                 </nav>
 
                 <!-- Action Buttons & Auth Container (flex-shrink-0) -->
-                <div class="flex items-center gap-2 flex-shrink-0">
-                    <div id="store-auth-container" class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                    <div id="store-auth-container" class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                         <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" rel="noopener" class="btn-line text-xs py-2 px-3 sm:px-4 shadow-sm flex items-center gap-1.5 whitespace-nowrap" title="เพิ่มเพื่อนทาง LINE">
                             <span class="text-base">💬</span>
                             <span class="hidden sm:inline">แอด LINE</span>
                             <span class="sm:hidden">LINE</span>
                         </a>
-                        <button type="button" onclick="app.showLoginScreen()" class="btn-ocean text-xs py-2 px-3 sm:px-4 shadow-sm flex items-center gap-1.5 whitespace-nowrap" title="เข้าสู่ระบบสำหรับทีมงาน">
+                        <button type="button" onclick="app.showLoginScreen()" class="btn-ocean text-xs py-2 px-2.5 sm:px-3 shadow-sm flex items-center gap-1 whitespace-nowrap" title="เข้าสู่ระบบสำหรับทีมงาน">
                             <span>🔐</span>
-                            <span class="hidden md:inline">เข้าสู่ระบบทีมงาน</span>
+                            <span class="hidden 2xl:inline">ทีมงาน</span>
                         </button>
                         <button type="button" onclick="app.toggleTheme()" class="theme-toggle-btn p-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs hover:border-sky-500 transition flex-shrink-0" title="สลับโหมดมืด/สว่าง">
                             🌙
                         </button>
                     </div>
 
-                    <!-- Mobile Hamburger -->
-                    <button id="store-mobile-toggle" class="lg:hidden p-2 text-slate-700 dark:text-slate-200 hover:text-sky-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition flex-shrink-0" title="เมนู">
+                    <!-- Mobile / Tablet Hamburger (Active on < XL screens) -->
+                    <button id="store-mobile-toggle" class="xl:hidden p-2 text-slate-700 dark:text-slate-200 hover:text-sky-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition flex-shrink-0" title="เมนู">
                         <span class="text-2xl leading-none">☰</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Mobile Navigation Drawer Menu -->
-            <div id="store-mobile-menu" class="hidden lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b1329] px-4 py-4 space-y-2 font-mono text-xs shadow-lg">
+            <!-- Mobile / Tablet Navigation Drawer Menu -->
+            <div id="store-mobile-menu" class="hidden xl:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b1329] px-4 py-4 space-y-2 font-mono text-xs shadow-lg">
                 <a href="#cctv" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold">📹 1. ระบบกล้องวงจรปิด (CCTV)</a>
                 <a href="#network" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold">💻 2. งานไอทีและเน็ตเวิร์ก (IT & Network)</a>
                 <a href="#systems" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold">⚡ 3. งานระบบไฟฟ้าและอาคาร (Systems)</a>
