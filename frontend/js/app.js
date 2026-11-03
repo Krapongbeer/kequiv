@@ -181,16 +181,16 @@ const app = {
             }
         } else {
             const html = `
-                <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" rel="noopener" class="btn-line text-xs py-2 px-3 sm:px-4 shadow-sm" title="เพิ่มเพื่อนทาง LINE">
+                <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" rel="noopener" class="btn-line text-xs py-2 px-3 sm:px-4 shadow-sm flex items-center gap-1.5 whitespace-nowrap" title="เพิ่มเพื่อนทาง LINE">
                     <span class="text-base">💬</span>
-                    <span class="hidden sm:inline">แอด LINE @vcv6921d</span>
+                    <span class="hidden sm:inline">แอด LINE</span>
                     <span class="sm:hidden">LINE</span>
                 </a>
-                <button type="button" onclick="app.showLoginScreen()" class="btn-ocean text-xs py-2 px-3 sm:px-4 shadow-sm" title="เข้าสู่ระบบสำหรับทีมงาน">
+                <button type="button" onclick="app.showLoginScreen()" class="btn-ocean text-xs py-2 px-3 sm:px-4 shadow-sm flex items-center gap-1.5 whitespace-nowrap" title="เข้าสู่ระบบสำหรับทีมงาน">
                     <span>🔐</span>
                     <span class="hidden md:inline">เข้าสู่ระบบทีมงาน</span>
                 </button>
-                <button type="button" onclick="app.toggleTheme()" class="theme-toggle-btn p-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs hover:border-sky-500 transition" title="สลับโหมดมืด/สว่าง">
+                <button type="button" onclick="app.toggleTheme()" class="theme-toggle-btn p-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs hover:border-sky-500 transition flex-shrink-0" title="สลับโหมดมืด/สว่าง">
                     ${themeIcon}
                 </button>
             `;

@@ -3,10 +3,22 @@
  */
 
 module.exports = {
-    version: '2.6.0',
+    version: '2.6.1',
     releaseDate: '2026-11-03',
-    codename: 'Cybersecurity Hardening, Zero-Credential Exposure, Supabase Keep-Alive Heartbeat & Non-VAT Cleansing',
+    codename: 'Responsive Navigation Overhaul, Zero Text Collision & Smooth Section Scroll Padding',
     changelog: [
+        {
+            version: '2.6.1',
+            date: '2026-11-03',
+            title: 'Responsive Navbar, Zero Collision & Scroll Margins',
+            features: [
+                'ปรับปรุงโครงสร้างแถบนำทาง (Navbar) ให้รองรับการตอบสนองทุกขนาดหน้าจอ (100% Fully Responsive)',
+                'แก้ปัญหาตัวอักษรขี่กัน (Zero Collision) โดยล็อก flex-shrink-0 บนโลโก้และปุ่ม Action',
+                'จัดระเบียบเมนู Desktop เป็น 5 หมวดหลักที่กระชับ ไม่เบียดบังโลโก้และปุ่มบนจอขนาดกลาง-แล็ปท็อป',
+                'ตั้งค่า scroll-padding-top และ scroll-mt-24 ในทุก Section ป้องกันหัวข้อเลื่อนไปซ่อนใต้ Sticky Header',
+                'ปรับความทึบของแถบเมนูด้านบน (Solid 98% Backdrop) ป้องกันตัวอักษรของหน้าเว็บทะลุขึ้นมาซ้อนทับขณะเลื่อนจอ'
+            ]
+        },
         {
             version: '2.6.0',
             date: '2026-11-03',

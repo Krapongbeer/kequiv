@@ -110,65 +110,64 @@
     <div id="storefront-view" class="w-full min-h-screen flex flex-col bg-slate-100 dark:bg-[#070d1e] text-slate-900 dark:text-slate-100 selection:bg-cyan-500 selection:text-white transition-colors duration-200">
         
         <!-- Storefront Navbar -->
-        <header class="sticky top-0 z-40 bg-white/95 dark:bg-[#0b1329]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-xs transition-colors duration-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-                <!-- Brand Logo & Title (Clear, Prominent, No heavy white container) -->
-                <a href="#hero" class="flex items-center gap-3 group py-1">
+        <header class="sticky top-0 z-40 bg-white/98 dark:bg-[#0b1329]/98 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm transition-colors duration-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3 sm:gap-4">
+                
+                <!-- Brand Logo & Title (Prominent, Zero Collision, flex-shrink-0) -->
+                <a href="#hero" class="flex items-center gap-2.5 sm:gap-3 group py-1 flex-shrink-0">
                     <img src="img/logo.png" alt="Kequiv Logo" class="h-10 sm:h-12 w-auto object-contain filter drop-shadow hover:scale-105 transition">
                     <div class="flex flex-col">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xl sm:text-2xl font-black tracking-wider text-slate-900 dark:text-white font-sans">KEQUIV</span>
-                            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 font-bold border border-sky-500/30">IT & SYSTEMS</span>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <span class="text-lg sm:text-2xl font-black tracking-wider text-slate-900 dark:text-white font-sans">KEQUIV</span>
+                            <span class="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 font-bold border border-sky-500/30 whitespace-nowrap">IT & SYSTEMS</span>
                         </div>
-                        <p class="text-[11px] font-mono text-slate-500 dark:text-slate-400 hidden sm:block whitespace-nowrap">เคอีควิป • กล้องวงจรปิด • ไอทีเน็ตเวิร์ก • งานระบบ</p>
+                        <p class="text-[11px] font-mono text-slate-500 dark:text-slate-400 hidden 2xl:block whitespace-nowrap">เคอีควิป • กล้องวงจรปิด • ไอทีเน็ตเวิร์ก • งานระบบ</p>
                     </div>
                 </a>
 
-                <!-- Desktop Navigation Menu (Single line, No text falling) -->
-                <nav class="hidden xl:flex items-center gap-1 xl:gap-2 font-mono text-xs font-bold text-slate-700 dark:text-slate-200">
-                    <a href="#cctv" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">กล้องวงจรปิด</a>
-                    <a href="#network" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">ไอที-เน็ตเวิร์ก</a>
-                    <a href="#systems" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">ระบบไฟฟ้า & อาคาร</a>
-                    <a href="#services" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">บริการอื่นๆ</a>
-                    <a href="#portfolio" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">ผลงานจริง</a>
-                    <a href="#credentials" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap text-emerald-600 dark:text-emerald-400 font-bold">ใบรับรอง & DBD</a>
-                    <a href="#quote-request" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">ขอใบเสนอราคา</a>
-                    <a href="#contact" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">ติดต่อร้าน</a>
+                <!-- Desktop Navigation Menu (Streamlined 5 Anchors, Perfectly Responsive) -->
+                <nav class="hidden lg:flex items-center gap-1 xl:gap-2 font-mono text-xs font-bold text-slate-700 dark:text-slate-200 flex-shrink min-w-0">
+                    <a href="#cctv" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">📹 กล้องวงจรปิด</a>
+                    <a href="#network" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">💻 ไอที-เน็ตเวิร์ก</a>
+                    <a href="#systems" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">⚡ ระบบไฟฟ้า</a>
+                    <a href="#portfolio" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">🏆 ผลงาน & DBD</a>
+                    <a href="#quote-request" class="px-2.5 py-1.5 rounded-lg hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap text-sky-600 dark:text-sky-400 font-bold">📋 ขอใบเสนอราคา</a>
                 </nav>
 
-                <!-- Action Buttons & Auth Container -->
-                <div class="flex items-center gap-2">
+                <!-- Action Buttons & Auth Container (flex-shrink-0) -->
+                <div class="flex items-center gap-2 flex-shrink-0">
                     <div id="store-auth-container" class="flex items-center gap-2">
-                        <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" rel="noopener" class="btn-line text-xs py-2 px-3 sm:px-4 shadow-sm" title="เพิ่มเพื่อนทาง LINE">
+                        <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" rel="noopener" class="btn-line text-xs py-2 px-3 sm:px-4 shadow-sm flex items-center gap-1.5 whitespace-nowrap" title="เพิ่มเพื่อนทาง LINE">
                             <span class="text-base">💬</span>
-                            <span class="hidden sm:inline">แอด LINE @vcv6921d</span>
+                            <span class="hidden sm:inline">แอด LINE</span>
                             <span class="sm:hidden">LINE</span>
                         </a>
-                        <button type="button" onclick="app.showLoginScreen()" class="btn-ocean text-xs py-2 px-3 sm:px-4 shadow-sm" title="เข้าสู่ระบบสำหรับทีมงาน">
+                        <button type="button" onclick="app.showLoginScreen()" class="btn-ocean text-xs py-2 px-3 sm:px-4 shadow-sm flex items-center gap-1.5 whitespace-nowrap" title="เข้าสู่ระบบสำหรับทีมงาน">
                             <span>🔐</span>
                             <span class="hidden md:inline">เข้าสู่ระบบทีมงาน</span>
                         </button>
-                        <button type="button" onclick="app.toggleTheme()" class="theme-toggle-btn p-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs hover:border-sky-500 transition" title="สลับโหมดมืด/สว่าง">
+                        <button type="button" onclick="app.toggleTheme()" class="theme-toggle-btn p-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs hover:border-sky-500 transition flex-shrink-0" title="สลับโหมดมืด/สว่าง">
                             🌙
                         </button>
                     </div>
 
                     <!-- Mobile Hamburger -->
-                    <button id="store-mobile-toggle" class="xl:hidden p-2 text-slate-700 dark:text-slate-200 hover:text-sky-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition" title="เมนู">
+                    <button id="store-mobile-toggle" class="lg:hidden p-2 text-slate-700 dark:text-slate-200 hover:text-sky-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition flex-shrink-0" title="เมนู">
                         <span class="text-2xl leading-none">☰</span>
                     </button>
                 </div>
             </div>
 
             <!-- Mobile Navigation Drawer Menu -->
-            <div id="store-mobile-menu" class="hidden xl:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b1329] px-4 py-4 space-y-2 font-mono text-xs shadow-lg">
+            <div id="store-mobile-menu" class="hidden lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b1329] px-4 py-4 space-y-2 font-mono text-xs shadow-lg">
                 <a href="#cctv" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold">📹 1. ระบบกล้องวงจรปิด (CCTV)</a>
                 <a href="#network" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold">💻 2. งานไอทีและเน็ตเวิร์ก (IT & Network)</a>
                 <a href="#systems" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold">⚡ 3. งานระบบไฟฟ้าและอาคาร (Systems)</a>
                 <a href="#services" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold">🛠️ 4. บริการเสริมและงานอื่นๆ (Other Services)</a>
                 <a href="#portfolio" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold">🏆 5. ผลงานการติดตั้งจริง (Portfolio)</a>
-                <a href="#quote-request" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold">📋 6. ขอใบเสนอราคาออนไลน์ (Get Quote)</a>
-                <a href="#contact" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold">📍 7. ข้อมูลร้านและ LINE OA (@vcv6921d)</a>
+                <a href="#credentials" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold text-emerald-600 dark:text-emerald-400">🛡️ 6. หนังสือรับรอง SME-GP & DBD Registered</a>
+                <a href="#quote-request" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold text-sky-600 dark:text-sky-400">📋 7. ขอใบเสนอราคาออนไลน์ (Get Quote)</a>
+                <a href="#contact" class="block py-2 px-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold">📍 8. ข้อมูลติดต่อร้าน & LINE OA (@vcv6921d)</a>
                 <div id="store-mobile-auth-container" class="pt-2 border-t border-slate-100 dark:border-slate-800"></div>
             </div>
         </header>
@@ -176,7 +175,7 @@
         <!-- ======================================================== -->
         <!-- 1. HERO SECTION -->
         <!-- ======================================================== -->
-        <section id="hero" class="relative overflow-hidden bg-gradient-to-b from-sky-50/80 via-slate-100 to-slate-50 dark:from-[#0b1329] dark:via-[#070d1e] dark:to-[#070d1e] pt-12 pb-16 sm:pt-20 sm:pb-24 border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+        <section id="hero" class="relative overflow-hidden bg-gradient-to-b from-sky-50/80 via-slate-100 to-slate-50 dark:from-[#0b1329] dark:via-[#070d1e] dark:to-[#070d1e] pt-12 pb-16 sm:pt-20 sm:pb-24 border-b border-slate-200 dark:border-slate-800 transition-colors duration-200 scroll-mt-24">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div class="text-center max-w-3xl mx-auto">
                     <!-- Badges -->
@@ -247,7 +246,7 @@
         <!-- ======================================================== -->
         <!-- 2. CORE PILLAR 1: CCTV & SECURITY SOLUTIONS -->
         <!-- ======================================================== -->
-        <section id="cctv" class="py-16 sm:py-20 bg-white dark:bg-[#070d1e] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+        <section id="cctv" class="py-16 sm:py-20 bg-white dark:bg-[#070d1e] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200 scroll-mt-24">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-3xl mx-auto mb-12">
                     <span class="inline-block text-[11px] font-mono font-bold px-3 py-1 bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-full border border-sky-500/30 mb-3">
@@ -357,7 +356,7 @@
         <!-- ======================================================== -->
         <!-- 3. CORE PILLAR 2: IT INFRASTRUCTURE & NETWORK SOLUTIONS  -->
         <!-- ======================================================== -->
-        <section id="network" class="py-16 sm:py-20 bg-slate-50 dark:bg-[#0b1329] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+        <section id="network" class="py-16 sm:py-20 bg-slate-50 dark:bg-[#0b1329] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200 scroll-mt-24">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-3xl mx-auto mb-12">
                     <span class="inline-block text-[11px] font-mono font-bold px-3 py-1 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-full border border-cyan-500/30 mb-3">
@@ -456,7 +455,7 @@
         <!-- ======================================================== -->
         <!-- 4. CORE PILLAR 3: ELECTRICAL & BUILDING SYSTEMS          -->
         <!-- ======================================================== -->
-        <section id="systems" class="py-16 sm:py-20 bg-white dark:bg-[#070d1e] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+        <section id="systems" class="py-16 sm:py-20 bg-white dark:bg-[#070d1e] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200 scroll-mt-24">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-3xl mx-auto mb-12">
                     <span class="inline-block text-[11px] font-mono font-bold px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-full border border-amber-500/30 mb-3">
@@ -509,7 +508,7 @@
         <!-- ======================================================== -->
         <!-- 5. OTHER SERVICES: COMPREHENSIVE CONTRACTING             -->
         <!-- ======================================================== -->
-        <section id="services" class="py-16 sm:py-20 bg-slate-100/80 dark:bg-[#0b1329] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+        <section id="services" class="py-16 sm:py-20 bg-slate-100/80 dark:bg-[#0b1329] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200 scroll-mt-24">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-3xl mx-auto mb-12">
                     <span class="inline-block text-[11px] font-mono font-bold px-3 py-1 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-full border border-slate-300 dark:border-slate-700 mb-3">
@@ -562,7 +561,7 @@
         <!-- ======================================================== -->
         <!-- 6. PORTFOLIO & RECENT PROJECTS                           -->
         <!-- ======================================================== -->
-        <section id="portfolio" class="py-16 sm:py-20 bg-white dark:bg-[#070d1e] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+        <section id="portfolio" class="py-16 sm:py-20 bg-white dark:bg-[#070d1e] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200 scroll-mt-24">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-3xl mx-auto mb-10">
                     <span class="inline-block text-[11px] font-mono font-bold px-3 py-1 bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-full border border-sky-500/30 mb-3">
@@ -721,7 +720,7 @@
         <!-- 6.5 ACCREDITATIONS & VERIFIED BUSINESS CREDENTIALS      -->
         <!-- DBD Registered & THAI SME-GP (สสว.)                      -->
         <!-- ======================================================== -->
-        <section id="credentials" class="py-16 sm:py-20 bg-slate-100/90 dark:bg-[#070d1e] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+        <section id="credentials" class="py-16 sm:py-20 bg-slate-100/90 dark:bg-[#070d1e] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200 scroll-mt-24">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-3xl mx-auto mb-12">
                     <span class="inline-block text-[11px] font-mono font-bold px-3.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-500/30 mb-3">
@@ -855,7 +854,7 @@
 <!-- ======================================================== -->
         <!-- 7. ONLINE QUOTATION / SITE SURVEY REQUEST FORM           -->
         <!-- ======================================================== -->
-        <section id="quote-request" class="py-16 sm:py-20 bg-slate-50 dark:bg-[#0b1329] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+        <section id="quote-request" class="py-16 sm:py-20 bg-slate-50 dark:bg-[#0b1329] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200 scroll-mt-24">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="bg-white dark:bg-[#0d162d] p-6 sm:p-10 rounded-3xl shadow-xl border-2 border-slate-300 dark:border-slate-700 relative">
                     <div class="ribbon-banner absolute -top-0.5 left-0 right-0 rounded-t-2xl"></div>
@@ -959,7 +958,7 @@
         <!-- ======================================================== -->
         <!-- 8. CONTACT & LINE OFFICIAL ACCOUNT HUB                   -->
         <!-- ======================================================== -->
-        <section id="contact" class="py-16 sm:py-20 bg-white dark:bg-[#070d1e] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+        <section id="contact" class="py-16 sm:py-20 bg-white dark:bg-[#070d1e] border-b border-slate-200 dark:border-slate-800 transition-colors duration-200 scroll-mt-24">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                     

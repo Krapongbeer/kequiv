@@ -32,7 +32,10 @@ const storefront = {
         if (bEl && c.hero_badge) bEl.textContent = c.hero_badge;
 
         const tEl = document.getElementById('store-hero-title');
-        if (tEl && c.hero_title) tEl.innerHTML = this.escapeHtml(c.hero_title);
+        if (tEl && c.hero_title) {
+            const escaped = this.escapeHtml(c.hero_title);
+            tEl.innerHTML = escaped.replace(/(KEQUIV)/gi, '<span class="text-sky-500 font-black">$1</span>');
+        }
 
         const subEl = document.getElementById('store-hero-subtitle');
         if (subEl && c.hero_subtitle) subEl.textContent = c.hero_subtitle;
