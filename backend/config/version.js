@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.7.1',
+    version: '2.7.2',
     releaseDate: '2026-11-03',
-    codename: 'Responsive Breakpoint Fix: Zero Nav Collision on All Screen Sizes',
+    codename: 'Bill Header Layout Alignment & 2x2 Balanced Metadata Grid',
     changelog: [
+        {
+            version: '2.7.2',
+            date: '2026-11-03',
+            title: 'Bill Header Logo Alignment & Balanced Contact Layout',
+            features: [
+                'ครอบตัดขอบโปร่งใสซ้ายของไฟล์โลโก้ (247px Left Margin Trim) ทำให้ขอบซ้ายของโลโก้เสมอแนวเดียวกับข้อความ (สำนักงานใหญ่) พอดี 100%',
+                'จัดระเบียบข้อมูลหัวบิลเป็นตาราง 2x2 สมดุลสวยงาม (คอลัมน์ 1: เลขผู้เสียภาษี & อีเมล | คอลัมน์ 2: เบอร์โทร & LINE)',
+                'ปรับระยะห่างและสีตัวอักษรให้อ่านง่าย สบายตา สไตล์พิมพ์ดีดคลาสสิกร่วมสมัย'
+            ]
+        },
         {
             version: '2.7.1',
             date: '2026-11-03',

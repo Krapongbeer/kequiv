@@ -56,25 +56,25 @@ window.printModule = {
 
             <!-- 1. Header Section: Company Profile & Document Title (Vintage Typewriter Style) -->
             <div class="flex items-start justify-between gap-4 pb-2.5 border-b-2 border-[#1f1d1a] relative">
-                <!-- Left: Company Info -->
+                <!-- Left: Company Info (Aligned flush with Branch Address) -->
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-3.5">
                         ${company.logo_url ? `
-                            <img src="${company.logo_url}" alt="Logo" class="w-auto object-contain shrink-0" style="height: 68px; max-width: 220px;">
+                            <img src="${company.logo_url}" alt="Logo" class="w-auto object-contain shrink-0" style="height: 64px; max-width: 200px;">
                         ` : ''}
-                        <div class="min-w-0">
+                        <div class="min-w-0 flex-1">
                             <h1 class="text-lg font-bold font-typewriter text-[#1f1d1a] leading-tight">
                                 ${company.name || 'ชื่อกิจการ / ร้านค้า'}
                             </h1>
-                            <div class="text-[11px] text-stone-600 flex flex-wrap gap-x-2.5 leading-tight mt-1 font-mono">
-                                ${company.tax_id ? `<span>เลขผู้เสียภาษี: <b>${company.tax_id}</b></span>` : ''}
-                                ${company.phone ? `<span>โทร: <b>${company.phone}</b></span>` : ''}
-                                ${company.email ? `<span>อีเมล: <b>${company.email}</b></span>` : ''}
-                                ${company.line_id ? `<span>LINE: <b>${company.line_id}</b></span>` : ''}
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-stone-700 leading-tight mt-1.5 font-mono">
+                                ${company.tax_id ? `<div><span class="text-stone-500">เลขผู้เสียภาษี:</span> <b class="font-bold text-stone-900">${company.tax_id}</b></div>` : ''}
+                                ${company.phone ? `<div><span class="text-stone-500">โทร:</span> <b class="font-bold text-stone-900">${company.phone}</b></div>` : ''}
+                                ${company.email ? `<div><span class="text-stone-500">อีเมล:</span> <b class="font-bold text-stone-900">${company.email}</b></div>` : ''}
+                                ${company.line_id ? `<div><span class="text-stone-500">LINE:</span> <b class="font-bold text-stone-900">${company.line_id}</b></div>` : ''}
                             </div>
                         </div>
                     </div>
-                    <div class="text-[11px] text-stone-600 mt-1.5 leading-snug font-mono whitespace-pre-line">
+                    <div class="text-[11px] text-stone-600 mt-2 leading-snug font-mono whitespace-pre-line">
                         ${(company.address || '-').split('\n').map(l => l.trim()).filter(Boolean).join('\n')}
                     </div>
                 </div>
