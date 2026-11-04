@@ -55,18 +55,18 @@ window.printModule = {
             ` : ''}
 
             <!-- 1. Header Section: Company Profile & Document Title (Vintage Typewriter Style) -->
-            <div class="flex items-start justify-between gap-4 pb-2.5 border-b-2 border-[#1f1d1a] relative avoid-page-break">
+            <div class="flex items-start justify-between gap-4 pt-2.5 pb-2 border-b-2 border-[#1f1d1a] relative avoid-page-break overflow-visible">
                 <!-- Left: Company Info (Aligned flush with Branch Address) -->
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-3.5">
+                <div class="flex-1 min-w-0 pt-0.5 overflow-visible">
+                    <div class="flex items-center gap-3.5 overflow-visible">
                         ${company.logo_url ? `
                             <img src="${company.logo_url}" alt="Logo" class="w-auto object-contain shrink-0" style="height: 64px; max-width: 200px;">
                         ` : ''}
-                        <div class="min-w-0 flex-1">
-                            <h1 class="text-lg font-bold font-typewriter text-[#1f1d1a] leading-tight">
+                        <div class="min-w-0 flex-1 overflow-visible">
+                            <h1 class="text-lg font-bold text-[#1f1d1a] pt-1 pb-0.5 leading-normal overflow-visible" style="font-family: 'Bai Jamjuree', 'Special Elite', var(--font-typewriter);">
                                 ${company.name || 'ชื่อกิจการ / ร้านค้า'}
                             </h1>
-                            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-stone-700 leading-tight mt-1.5 font-mono">
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-stone-700 leading-normal mt-1 font-mono">
                                 ${company.tax_id ? `<div><span class="text-stone-500">เลขผู้เสียภาษี:</span> <b class="font-bold text-stone-900">${company.tax_id}</b></div>` : ''}
                                 ${company.phone ? `<div><span class="text-stone-500">โทร:</span> <b class="font-bold text-stone-900">${company.phone}</b></div>` : ''}
                                 ${company.email ? `<div><span class="text-stone-500">อีเมล:</span> <b class="font-bold text-stone-900">${company.email}</b></div>` : ''}
@@ -80,9 +80,9 @@ window.printModule = {
                 </div>
 
                 <!-- Right: Document Title & Compact Meta Box -->
-                <div class="w-64 text-right shrink-0">
-                    <div class="flex items-baseline justify-end gap-2 mb-1.5">
-                        <h2 class="text-xl font-bold font-typewriter text-[#1f1d1a] tracking-wide">${titleInfo.th}</h2>
+                <div class="w-64 text-right shrink-0 pt-0.5 overflow-visible">
+                    <div class="flex items-baseline justify-end gap-2 mb-1.5 overflow-visible">
+                        <h2 class="text-xl font-bold text-[#1f1d1a] tracking-wide pt-1 pb-0.5 leading-normal overflow-visible" style="font-family: 'Bai Jamjuree', 'Special Elite', var(--font-typewriter);">${titleInfo.th}</h2>
                         <span class="text-[11px] font-bold text-stone-600 uppercase font-typewriter">${titleInfo.en}</span>
                     </div>
 
@@ -328,13 +328,13 @@ window.printModule = {
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>${docTitle}</title>
+    <title></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css?v=2.7.4">
+    <link rel="stylesheet" href="css/style.css?v=2.7.5">
     <style>
         @page {
             size: A4 portrait;
-            margin: 10mm 12mm 12mm 12mm;
+            margin: 0 !important; /* Disables browser-generated header (doc title/date) & footer (URL/pages) */
         }
         *, *::before, *::after {
             -webkit-print-color-adjust: exact !important;
@@ -351,18 +351,21 @@ window.printModule = {
             width: 100% !important;
             height: auto !important;
             overflow: visible !important;
-            font-family: 'Courier Prime', 'Bai Jamjuree', 'Sarabun', monospace;
+            font-family: 'Bai Jamjuree', 'Courier Prime', 'Sarabun', monospace;
+            -webkit-font-smoothing: antialiased;
         }
         .print-container {
-            width: 100% !important;
-            max-width: 100% !important;
-            min-height: 0 !important;
-            height: auto !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            box-shadow: none !important;
-            border: none !important;
+            width: 210mm !important;
+            max-width: 210mm !important;
+            min-height: 297mm !important;
+            padding: 12mm 15mm 15mm 15mm !important;
+            margin: 0 auto !important;
+            box-sizing: border-box !important;
             background: #ffffff !important;
+            overflow: visible !important;
+        }
+        h1, h2, h3, p, div, span, th, td {
+            overflow: visible !important;
         }
         table {
             border-collapse: collapse !important;

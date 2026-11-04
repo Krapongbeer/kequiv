@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.7.4',
+    version: '2.7.5',
     releaseDate: '2026-11-04',
-    codename: 'Isolated Pure A4 Print Frame & CSS Header Fix',
+    codename: 'Header/Footer Suppression & Full Thai Glyph Headroom',
     changelog: [
+        {
+            version: '2.7.5',
+            date: '2026-11-04',
+            title: 'Header/Footer Suppression & Full Thai Glyph Headroom',
+            features: [
+                'ยกเลิกส่วนหัวกระดาษและท้ายกระดาษของเบราว์เซอร์อัตโนมัติ (ลบชื่อโครงการ วันที่ และเลขหน้าทิ้ง 100%) ด้วย @page margin: 0',
+                'แก้ปัญหาสระและวรรณยุกต์หัวแหว่ง (ไม้โท ้ ใน ร้านเคอีควิป และ สระใอ ใ ใน ใบเสร็จรับเงิน/ใบเสนอราคา)',
+                'เพิ่ม Headroom ด้านบน (pt-2.5) และปรับฟอนต์หัวเรื่องเป็น Bai Jamjuree & Sarabun ที่รองรับความสูงของสระและวรรณยุกต์ไทยครบถ้วน',
+                'กำหนดขนาดพิมพ์ A4 แน่นอน (210mm x 297mm) พร้อมระยะขอบมาตรฐาน 12mm 15mm 15mm 15mm คมชัดสะอาดตา'
+            ]
+        },
         {
             version: '2.7.4',
             date: '2026-11-04',

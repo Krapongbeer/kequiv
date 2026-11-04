@@ -415,7 +415,7 @@ table, th, td {
 
 @page {
     size: A4 portrait;
-    margin: 12mm 15mm 15mm 15mm;
+    margin: 0 !important; /* Disables browser-generated header (doc title/date) & footer (URL/pages) */
 }
 
 @media print {
@@ -533,12 +533,13 @@ table, th, td {
         display: block !important;
         visibility: visible !important;
         position: relative !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        min-height: 0 !important;
+        width: 210mm !important;
+        max-width: 210mm !important;
+        min-height: 297mm !important;
         height: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
+        margin: 0 auto !important;
+        padding: 12mm 15mm 15mm 15mm !important;
+        box-sizing: border-box !important;
         box-shadow: none !important;
         border: none !important;
         border-radius: 0 !important;
