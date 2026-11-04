@@ -384,7 +384,7 @@ const app = {
         } else if (tabName === 'documents' && window.documentsModule) {
             window.documentsModule.loadList(payload);
         } else if (tabName === 'create-doc' && window.documentsModule) {
-            window.documentsModule.loadCreateForm(payload);
+            window.documentsModule.loadCreateForm(payload || {});
         } else if (tabName === 'customers' && window.customersModule) {
             window.customersModule.loadList();
         } else if (tabName === 'reservations' && window.reservationsModule) {

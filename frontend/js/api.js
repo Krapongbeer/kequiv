@@ -5,6 +5,7 @@
 const API_BASE = '/api';
 
 async function request(endpoint, options = {}) {
+    options = options || {};
     const url = `${API_BASE}${endpoint}`;
     const token = localStorage.getItem('kequiv_token');
 

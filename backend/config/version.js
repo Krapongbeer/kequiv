@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.8.4',
+    version: '2.8.5',
     releaseDate: '2026-11-04',
-    codename: 'Customer Project Identity Sequence Collision Fix & Zero-Fail Insert Engine',
+    codename: 'Create Document View Safe Options & Form Initialization Guard Fix',
     changelog: [
+        {
+            version: '2.8.5',
+            date: '2026-11-04',
+            title: 'Create Document View Safe Options & Form Initialization Guard Fix',
+            features: [
+                'แก้ไขข้อผิดพลาดหน้าออกเอกสารใหม่ว่างเปล่า (Safe Options Guard ใน loadCreateForm และ switchTab)',
+                'ป้องกัน Null Pointer Exception เมื่อกดเข้าเมนูออกเอกสารใหม่จากแถบเมนูด้านข้างหรือปุ่มต่าง ๆ',
+                'เพิ่ม Fallback สำหรับการดึงข้อมูลลูกค้า เลขถัดไป และคลังเลขสำรอง ให้โหลดฟอร์มได้อย่างราบรื่น 100%'
+            ]
+        },
         {
             version: '2.8.4',
             date: '2026-11-04',

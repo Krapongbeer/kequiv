@@ -324,6 +324,7 @@ window.documentsModule = {
     // 2. DOCUMENT CREATOR / FORM
     // ==========================================
     async loadCreateForm(options = {}) {
+        options = options || {};
         const container = document.getElementById('create-doc-content');
         if (!container) return;
 
@@ -344,8 +345,8 @@ window.documentsModule = {
                     api.getDocument(options.edit_id),
                     api.getCustomers()
                 ]);
-                const doc = docRes.data;
-                const customers = customersRes.data;
+                const doc = (docRes && docRes.data) || {};
+                const customers = (customersRes && customersRes.data) || [];
 
                 this.formData.items = (doc.items || []).map(it => {
                     const parts = (it.product_name || '').split('\n');
@@ -399,9 +400,9 @@ window.documentsModule = {
                 api.getReservations(defaultType, 'reserved')
             ]);
 
-            const customers = customersRes.data;
-            const nextCodePreview = nextCodeRes.data.code;
-            const availableReservations = reservationsRes.data;
+            const customers = (customersRes && customersRes.data) || [];
+            const nextCodePreview = (nextCodeRes && nextCodeRes.data && nextCodeRes.data.code) || '';
+            const availableReservations = (reservationsRes && reservationsRes.data) || [];
 
             // Initialize default items (3 empty item rows ready for quick entry)
             this.formData.items = [
