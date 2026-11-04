@@ -181,13 +181,103 @@ window.printModule = {
                         </tr>
                     </thead>
                     <tbody>
-                        ${doc.items && doc.items.length > 0 ? doc.items.map((item, idx) => {
-                            const isNoteRow = item.product_name && (
-                                item.product_name.trim().startsWith('*') || 
-                                (Number(item.unit_price) === 0 && Number(item.total_price) === 0 && (!item.unit || item.unit === 'รายการ' || item.unit === '-' || item.unit === ''))
-                            );
+                        ${(() => {
+                            const allItems = doc.items || [];
+                            const regularItems = [];
+                            const noteItems = [];
 
-                            if (isNoteRow) {
+                            allItems.forEach(item => {
+                                const isNoteRow = item.product_name && (
+                                    item.product_name.trim().startsWith('*') || 
+                                    (Number(item.unit_price) === 0 && Number(item.total_price) === 0 && (!item.unit || item.unit === 'รายการ' || item.unit === '-' || item.unit === ''))
+                                );
+                                if (isNoteRow) {
+                                    noteItems.push(item);
+                                } else {
+                                    regularItems.push(item);
+                                }
+                            });
+
+                            const totalItemsCount = regularItems.length + noteItems.length;
+                            if (totalItemsCount === 0) {
+                                return `
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4 text-stone-500 font-mono">ไม่มีรายการสินค้า</td>
+                                    </tr>
+                                    ${Array.from({ length: 11 }).map(() => `
+                                        <tr class="border-b border-stone-200 select-none h-6">
+                                            <td class="border-x border-stone-800 px-1 py-0.5 text-center text-transparent">&nbsp;</td>
+                                            <td class="border-x border-stone-800 px-2 py-0.5 text-transparent">&nbsp;</td>
+                                            <td class="border-x border-stone-800 px-1 py-0.5 text-transparent">&nbsp;</td>
+                                            <td class="border-x border-stone-800 px-1 py-0.5 text-transparent">&nbsp;</td>
+                                            <td class="border-x border-stone-800 px-2 py-0.5 text-transparent">&nbsp;</td>
+                                            <td class="border-x border-stone-800 px-1 py-0.5 text-transparent">&nbsp;</td>
+                                            <td class="border-x border-stone-800 px-2.5 py-0.5 text-transparent">&nbsp;</td>
+                                        </tr>
+                                    `).join('')}
+                                `;
+                            }
+
+                            const emptyRowsCount = Math.max(0, 12 - totalItemsCount);
+
+                            // 1. Regular items
+                            const renderedRegular = regularItems.map((item, idx) => {
+                                const hasValidImage = item.image_url && 
+                                    typeof item.image_url === 'string' && 
+                                    item.image_url.trim().length > 0 && 
+                                    !item.image_url.includes('placeholder') && 
+                                    !item.image_url.includes('undefined') && 
+                                    !item.image_url.includes('null');
+
+                                const parts = (item.product_name || '').split('\n');
+                                const title = parts[0] || '';
+                                const desc = parts.slice(1).join('\n');
+                                const intQty = Math.round(Number(item.quantity) || 0);
+
+                                return `
+                                    <tr class="border-b border-stone-300 hover:bg-stone-50/50 min-h-6">
+                                        <td class="border-x border-stone-800 px-1 py-1 text-center text-stone-600 align-middle font-mono">${idx + 1}</td>
+                                        <td class="border-x border-stone-800 px-2 py-1 align-middle">
+                                            <div class="flex items-start gap-1.5">
+                                                ${hasValidImage ? `
+                                                    <img src="${item.image_url}" alt="รูปสินค้า" class="w-6 h-6 object-cover rounded border border-stone-300 shrink-0 bg-white mt-0.5" onerror="this.remove()">
+                                                ` : ''}
+                                                <div class="min-w-0 flex-1">
+                                                    <div class="font-medium text-stone-900 leading-snug break-words">${title}</div>
+                                                    ${desc ? `<div class="text-[9.5px] text-stone-600 mt-0.5 leading-tight whitespace-pre-line font-sans">${desc}</div>` : ''}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="border-x border-stone-800 px-2 py-1 text-right font-mono align-middle">${intQty}</td>
+                                        <td class="border-x border-stone-800 px-2 py-1 text-center text-stone-700 align-middle">${item.unit || 'ชิ้น'}</td>
+                                        <td class="border-x border-stone-800 px-2 py-1 text-right font-mono align-middle">
+                                            ${Number(item.unit_price) > 0 ? app.formatCurrency(item.unit_price) : (Number(item.total_price) === 0 ? '<span class="text-emerald-700 font-bold">ฟรี</span>' : '0.00')}
+                                        </td>
+                                        <td class="border-x border-stone-800 px-2 py-1 text-right text-stone-600 font-mono align-middle">
+                                            ${item.discount > 0 ? app.formatCurrency(item.discount) : '-'}
+                                        </td>
+                                        <td class="border-x border-stone-800 px-2.5 py-1 text-right font-bold text-stone-900 font-mono align-middle">
+                                            ${Number(item.total_price) > 0 ? app.formatCurrency(item.total_price) : (Number(item.unit_price) === 0 ? '<span class="text-emerald-700 font-bold">0.00</span>' : app.formatCurrency(item.total_price))}
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('');
+
+                            // 2. Middle empty rows (fills space between regular items and bottom note rows)
+                            const renderedEmpty = Array.from({ length: emptyRowsCount }).map(() => `
+                                <tr class="border-b border-stone-200 select-none h-6">
+                                    <td class="border-x border-stone-800 px-1 py-0.5 text-center text-transparent">&nbsp;</td>
+                                    <td class="border-x border-stone-800 px-2 py-0.5 text-transparent">&nbsp;</td>
+                                    <td class="border-x border-stone-800 px-1 py-0.5 text-transparent">&nbsp;</td>
+                                    <td class="border-x border-stone-800 px-1 py-0.5 text-transparent">&nbsp;</td>
+                                    <td class="border-x border-stone-800 px-2 py-0.5 text-transparent">&nbsp;</td>
+                                    <td class="border-x border-stone-800 px-1 py-0.5 text-transparent">&nbsp;</td>
+                                    <td class="border-x border-stone-800 px-2.5 py-0.5 text-transparent">&nbsp;</td>
+                                </tr>
+                            `).join('');
+
+                            // 3. Note / Gift / Warranty rows (ALWAYS ANCHORED AT THE VERY BOTTOM OF THE 12-ROW TABLE)
+                            const renderedNotes = noteItems.map(item => {
                                 const cleanNote = item.product_name.startsWith('*') 
                                     ? item.product_name.substring(1).trim() 
                                     : item.product_name.trim();
@@ -200,58 +290,10 @@ window.printModule = {
                                         </td>
                                     </tr>
                                 `;
-                            }
+                            }).join('');
 
-                            const hasValidImage = item.image_url && 
-                                typeof item.image_url === 'string' && 
-                                item.image_url.trim().length > 0 && 
-                                !item.image_url.includes('placeholder') && 
-                                !item.image_url.includes('undefined') && 
-                                !item.image_url.includes('null');
-
-                            return `
-                                <tr class="border-b border-stone-300 hover:bg-stone-50/50 h-6">
-                                    <td class="border-x border-stone-800 px-1 py-1 text-center text-stone-600 align-middle font-mono">${idx + 1}</td>
-                                    <td class="border-x border-stone-800 px-2 py-1 align-middle">
-                                        <div class="flex items-center gap-1.5">
-                                            ${hasValidImage ? `
-                                                <img src="${item.image_url}" alt="รูปสินค้า" class="w-6 h-6 object-cover rounded border border-stone-300 shrink-0 bg-white" onerror="this.remove()">
-                                            ` : ''}
-                                            <div class="min-w-0">
-                                                <div class="font-medium text-stone-900 leading-snug break-words">${item.product_name}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="border-x border-stone-800 px-2 py-1 text-right font-mono align-middle">${item.quantity}</td>
-                                    <td class="border-x border-stone-800 px-2 py-1 text-center text-stone-700 align-middle">${item.unit || 'ชิ้น'}</td>
-                                    <td class="border-x border-stone-800 px-2 py-1 text-right font-mono align-middle">
-                                        ${Number(item.unit_price) > 0 ? app.formatCurrency(item.unit_price) : (Number(item.total_price) === 0 ? '<span class="text-emerald-700 font-bold">ฟรี</span>' : '0.00')}
-                                    </td>
-                                    <td class="border-x border-stone-800 px-2 py-1 text-right text-stone-600 font-mono align-middle">
-                                        ${item.discount > 0 ? app.formatCurrency(item.discount) : '-'}
-                                    </td>
-                                    <td class="border-x border-stone-800 px-2.5 py-1 text-right font-bold text-stone-900 font-mono align-middle">
-                                        ${Number(item.total_price) > 0 ? app.formatCurrency(item.total_price) : (Number(item.unit_price) === 0 ? '<span class="text-emerald-700 font-bold">0.00</span>' : app.formatCurrency(item.total_price))}
-                                    </td>
-                                </tr>
-                            `;
-                        }).join('') : `
-                            <tr>
-                                <td colspan="7" class="text-center py-4 text-stone-500 font-mono">ไม่มีรายการสินค้า</td>
-                            </tr>
-                        `}
-                        <!-- Pad empty rows up to 12 rows so the table fills the A4 page gracefully (12 บรรทัดมาตรฐาน พอดี 1 หน้า) -->
-                        ${Array.from({ length: Math.max(0, 12 - (doc.items ? doc.items.length : 0)) }).map(() => `
-                            <tr class="border-b border-stone-200 select-none h-6">
-                                <td class="border-x border-stone-800 px-1 py-0.5 text-center text-transparent">&nbsp;</td>
-                                <td class="border-x border-stone-800 px-2 py-0.5 text-transparent">&nbsp;</td>
-                                <td class="border-x border-stone-800 px-1 py-0.5 text-transparent">&nbsp;</td>
-                                <td class="border-x border-stone-800 px-1 py-0.5 text-transparent">&nbsp;</td>
-                                <td class="border-x border-stone-800 px-2 py-0.5 text-transparent">&nbsp;</td>
-                                <td class="border-x border-stone-800 px-1 py-0.5 text-transparent">&nbsp;</td>
-                                <td class="border-x border-stone-800 px-2.5 py-0.5 text-transparent">&nbsp;</td>
-                            </tr>
-                        `).join('')}
+                            return renderedRegular + renderedEmpty + renderedNotes;
+                        })()}
                     </tbody>
                 </table>
             </div>
@@ -379,7 +421,7 @@ window.printModule = {
     <meta charset="UTF-8">
     <title></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css?v=2.7.9">
+    <link rel="stylesheet" href="css/style.css?v=2.8.0">
     <style>
         @page {
             size: A4 portrait;

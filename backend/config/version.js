@@ -3,10 +3,22 @@
  */
 
 module.exports = {
-    version: '2.7.9',
+    version: '2.8.0',
     releaseDate: '2026-11-04',
-    codename: 'Perfect Header Contact Symmetry & Zero-Wrap Layout',
+    codename: 'Integer Quantity, Custom Item Specs, Row Reordering & Bottom Anchored Notes',
     changelog: [
+        {
+            version: '2.8.0',
+            date: '2026-11-04',
+            title: 'Integer Quantity, Custom Item Specs, Row Reordering & Bottom Anchored Notes',
+            features: [
+                'บังคับจำนวนสินค้าเป็นจำนวนเต็ม (Integer Quantity) ป้องกันทศนิยม step=1 ทั้งตอนกรอกและพิมพ์',
+                'เพิ่มช่องพิมพ์รายละเอียด / สเปกสินค้า (+ เพิ่มรายละเอียด / สเปกสินค้า) พิมพ์กำกับใต้ชื่อสินค้าอย่างสวยงาม',
+                'เพิ่มปุ่มสลับลำดับแถว (▲ สลับขึ้น / ▼ สลับลง) สามารถคลิกเปลี่ยนตำแหน่งแถวรายการสินค้าได้ตามใจชอบ',
+                'จัดแถวของแถม/ประกัน (*) ให้ลงไปอยู่บรรทัดสุดท้ายของตารางเสมอ (Bottom-Anchored Ledger Notes) คั่นด้วยบรรทัดเปล่าอย่างสมบูรณ์แบบ',
+                'แก้ไขข้อผิดพลาดตอนบันทึกแก้ไขเอกสาร (PUT /api/documents) ขจัดปัญหา Primary Key Collision ใน Supabase'
+            ]
+        },
         {
             version: '2.7.9',
             date: '2026-11-04',

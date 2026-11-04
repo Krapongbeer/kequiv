@@ -10,7 +10,7 @@ const { supabase, isSupabaseConfigured } = require('../supabase');
 function calculateItemsTotal(items, docDiscountTotal = 0) {
     let subtotal = 0;
     const processedItems = items.map((item, index) => {
-        const qty = parseFloat(item.quantity) || 0;
+        const qty = Math.max(1, Math.round(parseFloat(item.quantity) || 1));
         const price = parseFloat(item.unit_price) || 0;
         const disc = parseFloat(item.discount) || 0;
         const discType = item.discount_type || 'amount';
@@ -503,45 +503,36 @@ router.put('/:id', async (req, res) => {
             }
 
             // Update document header
+            const docIdNum = parseInt(id, 10);
             const { error: uErr } = await supabase
                 .from('documents')
                 .update({
-                    customer_id,
-                    project_id: project_id || null,
-                    project_name_custom,
+                    customer_id: parseInt(customer_id, 10),
+                    project_id: project_id ? parseInt(project_id, 10) : null,
+                    project_name_custom: project_name_custom || '',
                     issue_date,
                     due_date: due_date || null,
                     subtotal: totals.subtotal,
                     discount_total: totals.discount_total,
                     grand_total: totals.grand_total,
                     status: status || existingDoc.status,
-                    remark,
-                    payment_terms,
+                    remark: remark || '',
+                    payment_terms: payment_terms || '',
                     updated_at: new Date().toISOString()
                 })
-                .eq('id', id);
+                .eq('id', docIdNum);
 
             if (uErr) throw new Error(uErr.message);
 
-            // Replace items
-            await supabase.from('document_items').delete().eq('document_id', id);
+            // Replace items safely without manual primary key collision
+            await supabase.from('document_items').delete().eq('document_id', docIdNum);
 
-            // Fetch max id for sequence safety
-            const { data: maxItemRow } = await supabase
-                .from('document_items')
-                .select('id')
-                .order('id', { ascending: false })
-                .limit(1);
-
-            let nextItemId = (maxItemRow && maxItemRow.length > 0) ? (Number(maxItemRow[0].id) + 1) : 1;
-
-            const rowsToInsert = items.map((it, idx) => ({
-                id: nextItemId++,
-                document_id: id,
-                sort_order: idx + 1,
+            const rowsToInsert = totals.processedItems.map(it => ({
+                document_id: docIdNum,
+                sort_order: it.sort_order,
                 product_name: it.product_name,
                 image_url: it.image_url || '',
-                quantity: it.quantity || 1,
+                quantity: it.quantity,
                 unit: it.unit || 'ชิ้น',
                 unit_price: it.unit_price || 0,
                 discount: it.discount || 0,
@@ -593,10 +584,10 @@ router.put('/:id', async (req, res) => {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
 
-            items.forEach((it, idx) => {
+            totals.processedItems.forEach((it) => {
                 insertItem.run(
-                    id, idx + 1, it.product_name, it.image_url || '',
-                    it.quantity || 1, it.unit || 'ชิ้น', it.unit_price || 0,
+                    id, it.sort_order, it.product_name, it.image_url || '',
+                    it.quantity, it.unit || 'ชิ้น', it.unit_price || 0,
                     it.discount || 0, it.discount_type || 'amount', it.total_price || 0
                 );
             });

@@ -347,16 +347,23 @@ window.documentsModule = {
                 const doc = docRes.data;
                 const customers = customersRes.data;
 
-                this.formData.items = (doc.items || []).map(it => ({
-                    product_name: it.product_name,
-                    image_url: it.image_url || '',
-                    quantity: it.quantity,
-                    unit: it.unit,
-                    unit_price: it.unit_price,
-                    discount: it.discount,
-                    discount_type: it.discount_type || 'amount',
-                    total_price: it.total_price
-                }));
+                this.formData.items = (doc.items || []).map(it => {
+                    const parts = (it.product_name || '').split('\n');
+                    const pName = parts[0] || '';
+                    const desc = parts.slice(1).join('\n');
+                    return {
+                        product_name: pName,
+                        description: desc,
+                        show_description: Boolean(desc),
+                        image_url: it.image_url || '',
+                        quantity: Math.max(1, Math.round(Number(it.quantity) || 1)),
+                        unit: it.unit || 'ชิ้น',
+                        unit_price: it.unit_price || 0,
+                        discount: it.discount || 0,
+                        discount_type: it.discount_type || 'amount',
+                        total_price: it.total_price || 0
+                    };
+                });
 
                 this.renderCreateForm({
                     isEdit: true,
@@ -704,9 +711,9 @@ window.documentsModule = {
             <tr class="hover:bg-slate-50/60 transition ${isNoteRow ? 'bg-amber-50/30' : ''}">
                 <td class="px-3 py-2 text-center text-slate-400 font-mono font-medium">${isNoteRow ? '★' : idx + 1}</td>
                 <td class="px-3 py-2">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-start gap-2">
                         <!-- Thumbnail upload/preview -->
-                        <div class="relative shrink-0">
+                        <div class="relative shrink-0 mt-0.5">
                             ${item.image_url ? `
                                 <div class="relative group">
                                     <img src="${item.image_url}" alt="Item" class="w-9 h-9 object-cover rounded-lg border border-slate-200 bg-white" onerror="this.remove()">
@@ -719,13 +726,34 @@ window.documentsModule = {
                                 </label>
                             `}
                         </div>
-                        <input type="text" value="${item.product_name || ''}" placeholder="ชื่อสินค้า หรือ *ข้อความของแถม/ประกันท้ายตาราง (เช่น *แถมฟรีเมาส์ Bluetooth, Warranty 3 years)" 
-                            class="w-full px-2.5 py-1.5 text-xs border ${isNoteRow ? 'border-amber-400 bg-amber-50/60 font-bold text-amber-950' : 'border-slate-200'} rounded-lg focus:outline-none focus:border-blue-500"
-                            oninput="window.documentsModule.updateItemField(${idx}, 'product_name', this.value)">
+                        <div class="flex-1 min-w-0">
+                            <input type="text" value="${item.product_name || ''}" placeholder="ชื่อสินค้า หรือ *ข้อความของแถม/ประกันท้ายตาราง (เช่น *แถมฟรีเมาส์ Bluetooth, Warranty 3 years)" 
+                                class="w-full px-2.5 py-1.5 text-xs border ${isNoteRow ? 'border-amber-400 bg-amber-50/60 font-bold text-amber-950' : 'border-slate-200'} rounded-lg focus:outline-none focus:border-blue-500"
+                                oninput="window.documentsModule.updateItemField(${idx}, 'product_name', this.value)">
+                            ${!isNoteRow ? `
+                                <div class="mt-1">
+                                    ${item.show_description || item.description ? `
+                                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-1.5 mt-0.5">
+                                            <div class="flex items-center justify-between text-[10px] text-slate-500 mb-0.5">
+                                                <span class="font-medium text-slate-600">📝 รายละเอียด / สเปกสินค้า:</span>
+                                                <button type="button" onclick="window.documentsModule.toggleItemDescription(${idx}, false)" class="text-slate-400 hover:text-rose-500 font-bold text-[10px]" title="ซ่อน">✕ ปิด</button>
+                                            </div>
+                                            <textarea rows="2" placeholder="ระบุรายละเอียดเพิ่มเติม สเปกสินค้า ประกัน หรือซีเรียลนัมเบอร์..." 
+                                                class="w-full px-2 py-1 text-xs border border-slate-200 rounded bg-white text-slate-700 focus:outline-none focus:border-blue-500 leading-snug font-sans"
+                                                oninput="window.documentsModule.updateItemField(${idx}, 'description', this.value)">${item.description || ''}</textarea>
+                                        </div>
+                                    ` : `
+                                        <button type="button" onclick="window.documentsModule.toggleItemDescription(${idx}, true)" class="text-[11px] text-sky-600 hover:text-sky-800 font-medium inline-flex items-center gap-1 hover:underline">
+                                            <span>+ เพิ่มรายละเอียด / สเปกสินค้า</span>
+                                        </button>
+                                    `}
+                                </div>
+                            ` : ''}
+                        </div>
                     </div>
                 </td>
                 <td class="px-3 py-2">
-                    <input type="number" step="0.01" min="0" value="${item.quantity}" 
+                    <input type="number" step="1" min="1" value="${Math.max(1, Math.round(Number(item.quantity) || 1))}" 
                         class="w-full px-2 py-1.5 text-right text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 font-mono"
                         oninput="window.documentsModule.updateItemField(${idx}, 'quantity', this.value)">
                 </td>
@@ -750,14 +778,41 @@ window.documentsModule = {
                 <td class="px-3 py-2 text-right font-bold text-slate-800 font-mono" id="row-total-${idx}">
                     ฿${app.formatCurrency(item.total_price || 0)}
                 </td>
-                <td class="px-3 py-2 text-center">
-                    <button type="button" onclick="window.documentsModule.removeItemRow(${idx})" class="text-slate-300 hover:text-rose-500 font-bold text-sm transition" title="ลบแถว">
-                        ✕
-                    </button>
+                <td class="px-2 py-2 text-center whitespace-nowrap">
+                    <div class="inline-flex items-center gap-0.5">
+                        <button type="button" onclick="window.documentsModule.moveItemRow(${idx}, -1)" ${idx === 0 ? 'disabled class="text-slate-200 cursor-not-allowed text-xs p-1"' : 'class="text-slate-400 hover:text-sky-600 font-bold text-xs p-1 rounded hover:bg-slate-100 transition"'} title="สลับขึ้น">
+                            ▲
+                        </button>
+                        <button type="button" onclick="window.documentsModule.moveItemRow(${idx}, 1)" ${idx === this.formData.items.length - 1 ? 'disabled class="text-slate-200 cursor-not-allowed text-xs p-1"' : 'class="text-slate-400 hover:text-sky-600 font-bold text-xs p-1 rounded hover:bg-slate-100 transition"'} title="สลับลง">
+                            ▼
+                        </button>
+                        <button type="button" onclick="window.documentsModule.removeItemRow(${idx})" class="text-slate-300 hover:text-rose-500 font-bold text-sm p-1 rounded hover:bg-rose-50 transition ml-0.5" title="ลบแถว">
+                            ✕
+                        </button>
+                    </div>
                 </td>
             </tr>
             `;
         }).join('');
+    },
+
+    toggleItemDescription(index, show) {
+        if (!this.formData.items[index]) return;
+        this.formData.items[index].show_description = show;
+        if (!show) {
+            this.formData.items[index].description = '';
+        }
+        this.renderItemRows();
+    },
+
+    moveItemRow(index, direction) {
+        const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= this.formData.items.length) return;
+        const temp = this.formData.items[index];
+        this.formData.items[index] = this.formData.items[targetIndex];
+        this.formData.items[targetIndex] = temp;
+        this.renderItemRows();
+        this.recalculate();
     },
 
     async handleImageUpload(idx, event) {
@@ -831,10 +886,14 @@ window.documentsModule = {
 
     updateItemField(index, field, value) {
         if (!this.formData.items[index]) return;
-        this.formData.items[index][field] = value;
+        if (field === 'quantity') {
+            this.formData.items[index].quantity = Math.max(0, parseInt(value, 10) || 0);
+        } else {
+            this.formData.items[index][field] = value;
+        }
 
         // Recalculate row total
-        const qty = parseFloat(this.formData.items[index].quantity) || 0;
+        const qty = Math.max(0, parseInt(this.formData.items[index].quantity, 10) || 0);
         const price = parseFloat(this.formData.items[index].unit_price) || 0;
         const disc = parseFloat(this.formData.items[index].discount) || 0;
         const total = Math.max(0, (qty * price) - disc);
@@ -851,7 +910,7 @@ window.documentsModule = {
     recalculate() {
         let subtotal = 0;
         this.formData.items.forEach(it => {
-            const qty = parseFloat(it.quantity) || 0;
+            const qty = Math.max(0, parseInt(it.quantity, 10) || 0);
             const price = parseFloat(it.unit_price) || 0;
             const disc = parseFloat(it.discount) || 0;
             const total = Math.max(0, (qty * price) - disc);
@@ -1015,8 +1074,19 @@ window.documentsModule = {
             return;
         }
 
-        // Validate items
-        const validItems = this.formData.items.filter(it => it.product_name && it.product_name.trim());
+        // Validate items & combine description if provided
+        const validItems = this.formData.items
+            .filter(it => it.product_name && it.product_name.trim())
+            .map(it => {
+                const pName = it.product_name.trim();
+                const desc = (it.description || '').trim();
+                const finalName = desc ? `${pName}\n${desc}` : pName;
+                return {
+                    ...it,
+                    product_name: finalName,
+                    quantity: Math.max(1, Math.round(Number(it.quantity) || 1))
+                };
+            });
         if (validItems.length === 0) {
             app.toast('กรุณาระบุรายการสินค้าอย่างน้อย 1 รายการ', 'warning');
             return;
