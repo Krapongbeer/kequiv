@@ -672,6 +672,11 @@ router.post('/:id/convert', async (req, res) => {
                 await supabase.from('document_items').insert(itemsToInsert);
             }
 
+            // If billing note was converted to a receipt, mark source billing note as paid
+            if (target_type === 'receipt' && sourceDoc.type === 'billing') {
+                await supabase.from('documents').update({ status: 'paid', updated_at: new Date().toISOString() }).eq('id', sourceDoc.id);
+            }
+
             return res.json({
                 success: true,
                 message: `แปลงเป็น ${target_type} สำเร็จ (เลขที่ ${newCode})`,
@@ -719,6 +724,11 @@ router.post('/:id/convert', async (req, res) => {
                     newDocId, it.sort_order, it.product_name, it.image_url || '', it.quantity, it.unit,
                     it.unit_price, it.discount, it.discount_type, it.total_price
                 );
+            }
+
+            // If billing note was converted to a receipt, mark source billing note as paid
+            if (target_type === 'receipt' && sourceDoc.type === 'billing') {
+                db.prepare("UPDATE documents SET status = 'paid', updated_at = datetime('now', 'localtime') WHERE id = ?").run(sourceDoc.id);
             }
 
             db.exec('COMMIT');

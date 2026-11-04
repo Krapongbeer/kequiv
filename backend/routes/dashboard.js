@@ -12,27 +12,45 @@ router.get('/', async (req, res) => {
             // 1. Fetch active docs
             const { data: allDocs, error: docsErr } = await supabase
                 .from('documents')
-                .select('id, code, type, status, issue_date, due_date, grand_total, customer_id, project_name_custom, customer:customers(name)')
+                .select('id, code, type, status, issue_date, due_date, grand_total, customer_id, reference_document_id, project_name_custom, customer:customers(name)')
                 .is('deleted_at', null)
                 .order('id', { ascending: false });
 
             if (docsErr) throw new Error(docsErr.message);
             const docs = allDocs || [];
 
-            // Month revenue
-            const monthRevenue = docs
-                .filter(d => ['issued', 'paid'].includes(d.status) && ['billing', 'receipt'].includes(d.type) && d.issue_date >= thisMonthStart)
+            // Find all doc IDs that are referenced by a non-cancelled receipt (to prevent double counting when converted)
+            const docsReferencedByReceipt = new Set(
+                docs.filter(d => d.type === 'receipt' && d.status !== 'cancelled' && d.reference_document_id)
+                    .map(d => Number(d.reference_document_id))
+            );
+
+            // True Sales: Receipts + unconverted Billing notes (NOT cancelled, NEVER quotations)
+            const salesDocs = docs.filter(d => {
+                if (d.status === 'cancelled') return false;
+                if (d.type === 'receipt') return true;
+                if (d.type === 'billing' && !docsReferencedByReceipt.has(Number(d.id))) return true;
+                return false;
+            });
+
+            // Month revenue (only true sales from this month)
+            const monthRevenue = salesDocs
+                .filter(d => d.issue_date && d.issue_date >= thisMonthStart)
                 .reduce((sum, d) => sum + Number(d.grand_total || 0), 0);
 
-            // Unpaid billing
-            const unpaidBillingDocs = docs.filter(d => d.type === 'billing' && d.status === 'issued');
+            // Unpaid billing (only open billing notes that have NOT been paid or converted to a receipt)
+            const unpaidBillingDocs = docs.filter(d => 
+                d.type === 'billing' && 
+                d.status === 'issued' && 
+                !docsReferencedByReceipt.has(Number(d.id))
+            );
             const unpaidBilling = {
                 count: unpaidBillingDocs.length,
                 total: unpaidBillingDocs.reduce((sum, d) => sum + Number(d.grand_total || 0), 0)
             };
 
             // Overdue billing
-            const overdueBillingDocs = docs.filter(d => d.type === 'billing' && d.status === 'issued' && d.due_date && d.due_date < today);
+            const overdueBillingDocs = unpaidBillingDocs.filter(d => d.due_date && d.due_date < today);
             const overdueBilling = {
                 count: overdueBillingDocs.length,
                 total: overdueBillingDocs.reduce((sum, d) => sum + Number(d.grand_total || 0), 0)
@@ -73,9 +91,9 @@ router.get('/', async (req, res) => {
                 project_name_custom: d.project_name_custom
             }));
 
-            // Top 5 customers
+            // Top 5 customers based on actual sales (Receipts + unconverted Billing, EXCLUDING quotations & cancelled)
             const customerSpendMap = {};
-            docs.filter(d => d.status !== 'cancelled').forEach(d => {
+            salesDocs.forEach(d => {
                 const cid = d.customer_id;
                 const cname = d.customer ? d.customer.name : 'ลูกค้า #' + cid;
                 if (!customerSpendMap[cid]) {
@@ -121,9 +139,15 @@ router.get('/', async (req, res) => {
             SELECT COALESCE(SUM(grand_total), 0) as total
             FROM documents
             WHERE deleted_at IS NULL
-              AND status IN ('issued', 'paid')
-              AND type IN ('billing', 'receipt')
+              AND status != 'cancelled'
               AND issue_date >= ?
+              AND (
+                  type = 'receipt'
+                  OR (type = 'billing' AND id NOT IN (
+                      SELECT reference_document_id FROM documents 
+                      WHERE type = 'receipt' AND status != 'cancelled' AND reference_document_id IS NOT NULL
+                  ))
+              )
         `).get(thisMonthStart).total;
 
         const unpaidBilling = db.prepare(`
@@ -132,6 +156,10 @@ router.get('/', async (req, res) => {
             WHERE deleted_at IS NULL
               AND type = 'billing'
               AND status = 'issued'
+              AND id NOT IN (
+                  SELECT reference_document_id FROM documents 
+                  WHERE type = 'receipt' AND status != 'cancelled' AND reference_document_id IS NOT NULL
+              )
         `).get();
 
         const overdueBilling = db.prepare(`
@@ -142,6 +170,10 @@ router.get('/', async (req, res) => {
               AND status = 'issued'
               AND due_date IS NOT NULL
               AND due_date < ?
+              AND id NOT IN (
+                  SELECT reference_document_id FROM documents 
+                  WHERE type = 'receipt' AND status != 'cancelled' AND reference_document_id IS NOT NULL
+              )
         `).get(today);
 
         const typeCounts = db.prepare(`
@@ -172,7 +204,16 @@ router.get('/', async (req, res) => {
             SELECT c.id, c.name, COUNT(d.id) as doc_count, COALESCE(SUM(d.grand_total), 0) as total_spent
             FROM customers c
             JOIN documents d ON d.customer_id = c.id
-            WHERE c.deleted_at IS NULL AND d.deleted_at IS NULL AND d.status != 'cancelled'
+            WHERE c.deleted_at IS NULL 
+              AND d.deleted_at IS NULL 
+              AND d.status != 'cancelled'
+              AND (
+                  d.type = 'receipt'
+                  OR (d.type = 'billing' AND d.id NOT IN (
+                      SELECT reference_document_id FROM documents 
+                      WHERE type = 'receipt' AND status != 'cancelled' AND reference_document_id IS NOT NULL
+                  ))
+              )
             GROUP BY c.id
             ORDER BY total_spent DESC
             LIMIT 5

@@ -56,7 +56,7 @@ window.dashboardModule = {
                     <div class="text-2xl font-bold font-typewriter text-slate-900">
                         ฿${app.formatCurrency(monthRevenue)}
                     </div>
-                    <p class="text-[11px] text-slate-500 mt-1">บิลแจ้งหนี้และใบเสร็จ (ไม่รวม VAT)</p>
+                    <p class="text-[11px] text-slate-500 mt-1">คำนวณจากใบเสร็จและบิลขายจริง (ไม่นับซ้ำ)</p>
                 </div>
 
                 <!-- Unpaid Invoices -->
@@ -232,7 +232,7 @@ window.dashboardModule = {
                                     <div class="flex items-center justify-between bg-slate-50 px-2.5 py-2 rounded-lg border border-slate-200 text-xs">
                                         <div class="min-w-0 pr-2">
                                             <div class="font-bold text-slate-900 truncate">${idx + 1}. ${c.name}</div>
-                                            <div class="text-[10px] text-slate-500">${c.doc_count} เอกสาร</div>
+                                            <div class="text-[10px] text-slate-500">${c.doc_count} บิลขายจริง</div>
                                         </div>
                                         <div class="font-bold text-sky-800 font-mono shrink-0">
                                             ฿${app.formatCurrency(c.total_spent)}

@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.8.0',
+    version: '2.8.1',
     releaseDate: '2026-11-04',
-    codename: 'Integer Quantity, Custom Item Specs, Row Reordering & Bottom Anchored Notes',
+    codename: 'Undated Documents, Smart PDF File Naming & Revenue Double-Count Fix',
     changelog: [
+        {
+            version: '2.8.1',
+            date: '2026-11-04',
+            title: 'Undated Documents, Smart PDF File Naming & Revenue Double-Count Fix',
+            features: [
+                'เพิ่มตัวเลือกออกบิลไม่ลงวันที่ (เว้นว่างเป็น ..... / ..... / .......... บนบิลจริง เหมาะสำหรับประทับตรายางหรือลงวันที่ภายหลัง)',
+                'ตั้งชื่อไฟล์อัตโนมัติเวลาสั่งพิมพ์/เซฟ PDF ตามประเภทเอกสาร (KequivQT@เลขใบ, KequivINV@เลขใบ, KequivRE@เลขใบ)',
+                'แก้ไขการคำนวณยอดขายเดือนนี้และยอดรอเก็บเงิน ไม่นับบิลที่แปลงแล้วซ้ำ (ตัดการนับเบิ้ลระหว่าง INV กับ RE)',
+                'แก้ไขการคำนวณลูกค้ายอดซื้อสูงสุด ไม่นำใบเสนอราคา (QT) และเอกสารที่ยกเลิกแล้วมารวม นับเฉพาะบิลขายจริงเท่านั้น'
+            ]
+        },
         {
             version: '2.8.0',
             date: '2026-11-04',

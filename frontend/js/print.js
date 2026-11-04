@@ -40,6 +40,9 @@ window.printModule = {
         const company = doc.company || {};
         const bankAccounts = company.bank_accounts || [];
 
+        const isUndated = doc.is_undated || (doc.remark && doc.remark.includes('[ไม่ลงวันที่]')) || !doc.issue_date;
+        const cleanRemark = (doc.remark || '').replace(/\[ไม่ลงวันที่\]/g, '').trim();
+
         // Titles map (strictly NO "ใบกำกับภาษี")
         const titles = {
             quotation: { th: 'ใบเสนอราคา', en: 'QUOTATION', code: 'QT' },
@@ -111,7 +114,7 @@ window.printModule = {
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-stone-500 text-[11px]">วันที่ออก:</span>
-                            <span class="font-bold text-stone-800 text-xs">${app.formatDateThai(doc.issue_date, true)}</span>
+                            <span class="font-bold text-stone-800 text-xs">${isUndated ? '<span class="font-mono">..... / ..... / ..........</span>' : app.formatDateThai(doc.issue_date, true)}</span>
                         </div>
                         ${doc.due_date ? `
                             <div class="flex justify-between items-center">
@@ -331,8 +334,8 @@ window.printModule = {
                         ${doc.payment_terms ? `
                             <div><span class="font-bold text-stone-700">เงื่อนไขชำระเงิน:</span> ${doc.payment_terms}</div>
                         ` : ''}
-                        ${doc.remark ? `
-                            <div><span class="font-bold text-stone-700">หมายเหตุ:</span> ${doc.remark}</div>
+                        ${cleanRemark ? `
+                            <div><span class="font-bold text-stone-700">หมายเหตุ:</span> ${cleanRemark}</div>
                         ` : ''}
                     </div>
                 </div>
@@ -410,18 +413,31 @@ window.printModule = {
             document.body.appendChild(iframe);
 
             const iframeDoc = iframe.contentWindow.document;
-            const docTitle = this.currentDoc 
-                ? `${this.currentDoc.code} - ${this.currentDoc.customer_name || 'เคอีควิป'}`
-                : 'เอกสารบิล - ร้านเคอีควิป Kequiv';
+            let pdfFileName = 'KequivDoc';
+            if (this.currentDoc) {
+                const code = this.currentDoc.code || '';
+                if (this.currentDoc.type === 'quotation') {
+                    pdfFileName = `KequivQT@${code}`;
+                } else if (this.currentDoc.type === 'billing') {
+                    pdfFileName = `KequivINV@${code}`;
+                } else if (this.currentDoc.type === 'receipt') {
+                    pdfFileName = `KequivRE@${code}`;
+                } else {
+                    pdfFileName = `Kequiv@${code}`;
+                }
+            }
+
+            const originalTitle = document.title;
+            document.title = pdfFileName;
 
             iframeDoc.open();
             iframeDoc.write(`<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>${pdfFileName}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css?v=2.8.0">
+    <link rel="stylesheet" href="css/style.css?v=2.8.1">
     <style>
         @page {
             size: A4 portrait;
@@ -500,6 +516,10 @@ window.printModule = {
                 } catch (e) {
                     document.body.classList.add('is-printing-doc');
                     window.print();
+                } finally {
+                    setTimeout(() => {
+                        document.title = originalTitle;
+                    }, 1000);
                 }
             }, 250);
         } catch (err) {

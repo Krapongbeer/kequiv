@@ -365,6 +365,10 @@ window.documentsModule = {
                     };
                 });
 
+                const rawRemark = doc.remark || '';
+                const isUndated = rawRemark.includes('[ไม่ลงวันที่]');
+                const cleanRemark = rawRemark.replace(/\[ไม่ลงวันที่\]/g, '').trim();
+
                 this.renderCreateForm({
                     isEdit: true,
                     docId: doc.id,
@@ -381,7 +385,8 @@ window.documentsModule = {
                     projectNameCustom: doc.project_name_custom,
                     discountTotal: doc.discount_total,
                     paymentTerms: doc.payment_terms,
-                    remark: doc.remark,
+                    remark: cleanRemark,
+                    isUndated,
                     useReservedCode: null
                 });
                 return;
@@ -434,7 +439,7 @@ window.documentsModule = {
             isEdit, docId, docCode, docStatus,
             type, issue_date, due_date, customers, nextCodePreview,
             availableReservations, selectedCustomerId, selectedProjectId, projectNameCustom,
-            discountTotal, paymentTerms, remark, useReservedCode
+            discountTotal, paymentTerms, remark, isUndated, useReservedCode
         } = ctx;
 
         container.innerHTML = `
@@ -565,12 +570,21 @@ window.documentsModule = {
                             </div>
                         </div>
 
-                        <!-- Issue Date (รองรับลงย้อนหลัง) -->
+                        <!-- Issue Date (รองรับลงย้อนหลัง & ออกบิลไม่ลงวันที่) -->
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                                วันที่ออกเอกสาร (ลงวันที่ย้อนหลังได้) <span class="text-rose-500">*</span>
-                            </label>
-                            <input type="date" id="doc-issue-date" name="issue_date" value="${issue_date}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none" onchange="window.documentsModule.onDateChanged(this.value)">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-bold text-slate-700">
+                                    วันที่ออกเอกสาร <span class="text-rose-500">*</span>
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 cursor-pointer text-[11px] text-sky-700 font-medium select-none hover:text-sky-900" title="พิมพ์วันที่บนบิลเป็น ..... / ..... / ..........">
+                                    <input type="checkbox" id="doc-is-undated" ${isUndated ? 'checked' : ''} onchange="window.documentsModule.toggleUndated(this.checked)" class="rounded border-slate-300 text-sky-600 focus:ring-sky-500">
+                                    <span>ออกบิลไม่ลงวันที่ (เว้นว่าง)</span>
+                                </label>
+                            </div>
+                            <input type="date" id="doc-issue-date" name="issue_date" value="${issue_date}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none ${isUndated ? 'opacity-50' : ''}" onchange="window.documentsModule.onDateChanged(this.value)">
+                            <div id="undated-helper" class="text-[11px] text-amber-700 mt-1 font-mono ${isUndated ? '' : 'hidden'}">
+                                ℹ️ บนบิลจริงจะแสดงเป็น: <span class="font-bold">..... / ..... / ..........</span> (สามารถประทับตรายางหรือลงวันที่ภายหลังได้)
+                            </div>
                         </div>
 
                         <!-- Due Date -->
@@ -932,6 +946,19 @@ window.documentsModule = {
         if (thaiBahtEl) thaiBahtEl.textContent = app.thaiBahtText(grandTotal);
     },
 
+    toggleUndated(checked) {
+        const dateInput = document.getElementById('doc-issue-date');
+        const helper = document.getElementById('undated-helper');
+        if (dateInput) {
+            if (checked) dateInput.classList.add('opacity-50');
+            else dateInput.classList.remove('opacity-50');
+        }
+        if (helper) {
+            if (checked) helper.classList.remove('hidden');
+            else helper.classList.add('hidden');
+        }
+    },
+
     toggleCodeMode(mode) {
         const autoBox = document.getElementById('code-auto-container');
         const reservedBox = document.getElementById('code-reserved-container');
@@ -1052,7 +1079,11 @@ window.documentsModule = {
         const due_date = form.due_date.value || null;
         const discount_total = parseFloat(document.getElementById('doc-discount-total').value) || 0;
         const payment_terms = document.getElementById('doc-payment-terms').value.trim();
-        const remark = document.getElementById('doc-remark').value.trim();
+        let remark = document.getElementById('doc-remark').value.trim();
+        const isUndated = document.getElementById('doc-is-undated')?.checked || false;
+        if (isUndated) {
+            remark = remark ? `${remark}\n[ไม่ลงวันที่]` : '[ไม่ลงวันที่]';
+        }
 
         const code_mode = form.code_mode.value;
         let specified_code = null;
