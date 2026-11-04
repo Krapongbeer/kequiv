@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.7.8',
+    version: '2.7.9',
     releaseDate: '2026-11-04',
-    codename: 'Compact Customer Block & 12-Row Single-Page A4 Layout',
+    codename: 'Perfect Header Contact Symmetry & Zero-Wrap Layout',
     changelog: [
+        {
+            version: '2.7.9',
+            date: '2026-11-04',
+            title: 'Perfect Header Contact Symmetry & Zero-Wrap Layout',
+            features: [
+                'จัดเลย์เอาต์ข้อมูลติดต่อหัวบิลใหม่แบบ 2x2 ตารางสมดุลสมบูรณ์แบบ (เลขผู้เสียภาษี, โทร, อีเมล, LINE)',
+                'ป้องกันการตัดบรรทัดเลขผู้เสียภาษีและอีเมลตกขอบ (Zero-Wrap) จัดวางคู่อยู่ในบรรทัดเดียวกันอย่างลงตัว',
+                'แนวคอลัมน์ซ้าย-ขวาตรงกันทุกระดับสายตา พร้อมระยะห่างระหว่างคอลัมน์ที่สบายตาและเป็นระเบียบ',
+                'ปรับความกว้างกล่องเลขที่เอกสารด้านขวาให้ได้สัดส่วนลงตัวพอดีกับฝั่งข้อมูลร้านค้า'
+            ]
+        },
         {
             version: '2.7.8',
             date: '2026-11-04',

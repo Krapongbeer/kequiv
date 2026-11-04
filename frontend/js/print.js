@@ -66,21 +66,39 @@ window.printModule = {
                             <h1 class="text-lg font-bold text-[#1f1d1a] pt-1 pb-0.5 leading-normal overflow-visible" style="font-family: 'Bai Jamjuree', 'Special Elite', var(--font-typewriter);">
                                 ${company.name || 'ชื่อกิจการ / ร้านค้า'}
                             </h1>
-                            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-stone-700 leading-normal mt-1 font-mono">
-                                ${company.tax_id ? `<div><span class="text-stone-500">เลขผู้เสียภาษี:</span> <b class="font-bold text-stone-900">${company.tax_id}</b></div>` : ''}
-                                ${company.phone ? `<div><span class="text-stone-500">โทร:</span> <b class="font-bold text-stone-900">${company.phone}</b></div>` : ''}
-                                ${company.email ? `<div><span class="text-stone-500">อีเมล:</span> <b class="font-bold text-stone-900">${company.email}</b></div>` : ''}
-                                ${company.line_id ? `<div><span class="text-stone-500">LINE:</span> <b class="font-bold text-stone-900">${company.line_id}</b></div>` : ''}
-                            </div>
+                            <table class="text-[10.5px] text-stone-700 leading-tight mt-1 font-mono border-collapse">
+                                <tbody>
+                                    ${(company.tax_id || company.phone) ? `
+                                        <tr>
+                                            <td class="pr-5 py-0.5 whitespace-nowrap">
+                                                ${company.tax_id ? `<span class="text-stone-500">เลขผู้เสียภาษี:</span> <b class="font-bold text-stone-900">${company.tax_id}</b>` : ''}
+                                            </td>
+                                            <td class="py-0.5 whitespace-nowrap">
+                                                ${company.phone ? `<span class="text-stone-500">โทร:</span> <b class="font-bold text-stone-900">${company.phone}</b>` : ''}
+                                            </td>
+                                        </tr>
+                                    ` : ''}
+                                    ${(company.email || company.line_id) ? `
+                                        <tr>
+                                            <td class="pr-5 py-0.5 whitespace-nowrap">
+                                                ${company.email ? `<span class="text-stone-500">อีเมล:</span> <b class="font-bold text-stone-900">${company.email}</b>` : ''}
+                                            </td>
+                                            <td class="py-0.5 whitespace-nowrap">
+                                                ${company.line_id ? `<span class="text-stone-500">LINE:</span> <b class="font-bold text-stone-900">${company.line_id}</b>` : ''}
+                                            </td>
+                                        </tr>
+                                    ` : ''}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    <div class="text-[11px] text-stone-600 mt-2 leading-snug font-mono whitespace-pre-line">
+                    <div class="text-[10.5px] text-stone-600 mt-1.5 leading-snug font-mono whitespace-pre-line">
                         ${(company.address || '-').split('\n').map(l => l.trim()).filter(Boolean).join('\n')}
                     </div>
                 </div>
 
                 <!-- Right: Document Title & Compact Meta Box -->
-                <div class="w-64 text-right shrink-0 pt-0.5 overflow-visible">
+                <div class="w-56 text-right shrink-0 pt-0.5 overflow-visible">
                     <div class="flex items-baseline justify-end gap-2 mb-1.5 overflow-visible">
                         <h2 class="text-xl font-bold text-[#1f1d1a] tracking-wide pt-1 pb-0.5 leading-normal overflow-visible" style="font-family: 'Bai Jamjuree', 'Special Elite', var(--font-typewriter);">${titleInfo.th}</h2>
                         <span class="text-[11px] font-bold text-stone-600 uppercase font-typewriter">${titleInfo.en}</span>
@@ -361,7 +379,7 @@ window.printModule = {
     <meta charset="UTF-8">
     <title></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css?v=2.7.8">
+    <link rel="stylesheet" href="css/style.css?v=2.7.9">
     <style>
         @page {
             size: A4 portrait;
