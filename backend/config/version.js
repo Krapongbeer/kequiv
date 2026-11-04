@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.8.2',
+    version: '2.8.3',
     releaseDate: '2026-11-04',
-    codename: 'Proportional Logout Button, Compact LINE Floating Widget & Buffer Refinement',
+    codename: 'Blank Undated Field, Clean Ledger Notes & Complete Daily Buffer Pool',
     changelog: [
+        {
+            version: '2.8.3',
+            date: '2026-11-04',
+            title: 'Blank Undated Field, Clean Ledger Notes & Complete Daily Buffer Pool',
+            features: [
+                'ปรับช่องวันที่ออกบิลแบบไม่ลงวันที่ให้เป็นช่องว่างอย่างแท้จริง (เว้นว่าง 100% ไม่มีจุดไข่ปลาหรือ ../...)',
+                'จัดระเบียบเงื่อนไขชำระเงินและหมายเหตุท้ายบิล (Clean Ledger Notes) ขึ้นบรรทัดใหม่ตามข้ออย่างถูกต้อง ป้องกันคำตกหล่น และป้องกันเลขที่เอกสาร (เช่น QT202611-008) ตัดขาดครึ่งบรรทัด',
+                'เปิดใช้งานระบบกันเลขสำรองประจำวัน (Daily Auto-Buffer Pool) ครบทั้ง 3 ประเภท: QT, INV, และ RE ตามความต้องการใช้งาน'
+            ]
+        },
         {
             version: '2.8.2',
             date: '2026-11-04',

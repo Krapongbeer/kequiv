@@ -631,6 +631,13 @@ router.post('/:id/convert', async (req, res) => {
 
             const newCode = await commitDocumentCodeSupabase(supabase, target_type, issue_date);
 
+            // Build clean reference remark without redundant duplication
+            const existingRemark = (sourceDoc.remark || '').trim();
+            const refLine = `อ้างอิงจากเอกสาร ${sourceDoc.code}`;
+            const combinedRemark = existingRemark
+                ? (existingRemark.includes(sourceDoc.code) ? existingRemark : `${refLine}\n${existingRemark}`)
+                : refLine;
+
             const { data: newDoc, error: nErr } = await supabase
                 .from('documents')
                 .insert({
@@ -647,7 +654,7 @@ router.post('/:id/convert', async (req, res) => {
                     vat_amount: 0,
                     grand_total: sourceDoc.grand_total,
                     status: 'issued',
-                    remark: `อ้างอิงจากเอกสาร ${sourceDoc.code}\n${sourceDoc.remark || ''}`.trim(),
+                    remark: combinedRemark,
                     payment_terms: sourceDoc.payment_terms || ''
                 })
                 .select()
@@ -704,11 +711,18 @@ router.post('/:id/convert', async (req, res) => {
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 'issued', ?, ?)
             `);
 
+            // Build clean reference remark without redundant duplication
+            const existingRemarkSqlite = (sourceDoc.remark || '').trim();
+            const refLineSqlite = `อ้างอิงจากเอกสาร ${sourceDoc.code}`;
+            const combinedRemarkSqlite = existingRemarkSqlite
+                ? (existingRemarkSqlite.includes(sourceDoc.code) ? existingRemarkSqlite : `${refLineSqlite}\n${existingRemarkSqlite}`)
+                : refLineSqlite;
+
             const result = insertDoc.run(
                 newCode, target_type, sourceDoc.customer_id, sourceDoc.project_id, sourceDoc.project_name_custom,
                 sourceDoc.id, issue_date, due_date || null,
                 sourceDoc.subtotal, sourceDoc.discount_total, sourceDoc.grand_total,
-                `อ้างอิงจากเอกสาร ${sourceDoc.code}\n${sourceDoc.remark || ''}`.trim(),
+                combinedRemarkSqlite,
                 sourceDoc.payment_terms || ''
             );
             const newDocId = result.lastInsertRowid;

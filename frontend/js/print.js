@@ -51,6 +51,31 @@ window.printModule = {
         };
         const titleInfo = titles[doc.type] || { th: 'เอกสารธุรกิจ', en: 'DOCUMENT', code: 'DOC' };
 
+        // Helper: Format payment terms cleanly preserving numbered points and preventing word drops
+        const formatPaymentTerms = (terms) => {
+            if (!terms) return '';
+            // If string contains 1. 2. 3. without proper line breaks, split them neatly
+            let text = terms.replace(/(\d+\.\s*)/g, '\n$1').trim();
+            const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+            return lines.map(line => {
+                const safeLine = line.replace(/\b(QT|INV|RE)(\d{6})-(\d{3})\b/g, '<span class="whitespace-nowrap inline-block font-mono font-medium text-stone-900">$1$2-$3</span>');
+                return `<div class="leading-relaxed">${safeLine}</div>`;
+            }).join('');
+        };
+
+        // Helper: Format remarks preserving lines, separating stacked references, and preventing code hyphens from breaking
+        const formatRemarks = (remark) => {
+            if (!remark) return '';
+            // If multiple "อ้างอิงจากเอกสาร" or thank-you messages are merged into one line, separate them
+            let text = remark.replace(/(?<!^)(อ้างอิงจากเอกสาร\s+)/g, '\n$1');
+            text = text.replace(/(?<!^)(ขอบพระคุณ)/g, '\n$1').trim();
+            const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+            return lines.map(line => {
+                const safeLine = line.replace(/\b(QT|INV|RE)(\d{6})-(\d{3})\b/g, '<span class="whitespace-nowrap inline-block font-mono font-medium text-stone-900">$1$2-$3</span>');
+                return `<div class="leading-relaxed">${safeLine}</div>`;
+            }).join('');
+        };
+
         sheet.innerHTML = `
             <!-- Watermark if cancelled -->
             ${doc.status === 'cancelled' ? `
@@ -113,8 +138,8 @@ window.printModule = {
                             <span class="font-bold text-[#1f1d1a] font-typewriter text-xs">${doc.code}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-stone-500 text-[11px]">วันที่ออก:</span>
-                            <span class="font-bold text-stone-800 text-xs">${isUndated ? '<span class="font-mono">..... / ..... / ..........</span>' : app.formatDateThai(doc.issue_date, true)}</span>
+                            <span class="text-stone-500 text-[11px] whitespace-nowrap">วันที่ออก:</span>
+                            <span class="font-bold text-stone-800 text-xs">${isUndated ? '' : app.formatDateThai(doc.issue_date, true)}</span>
                         </div>
                         ${doc.due_date ? `
                             <div class="flex justify-between items-center">
@@ -329,13 +354,23 @@ window.printModule = {
                         </div>
                     ` : ''}
 
-                    <!-- Payment Terms & Remarks -->
-                    <div class="text-[11px] text-stone-600 space-y-0.5 leading-snug">
+                    <!-- Payment Terms & Remarks (Beautiful Ledger Typography with Non-Breaking Document Codes) -->
+                    <div class="text-[10px] text-stone-700 space-y-1.5 mt-1 font-mono">
                         ${doc.payment_terms ? `
-                            <div><span class="font-bold text-stone-700">เงื่อนไขชำระเงิน:</span> ${doc.payment_terms}</div>
+                            <div>
+                                <span class="font-bold text-stone-900 block mb-0.5">เงื่อนไขชำระเงิน:</span>
+                                <div class="pl-2 border-l-2 border-stone-300 text-stone-600 space-y-0.5">
+                                    ${formatPaymentTerms(doc.payment_terms)}
+                                </div>
+                            </div>
                         ` : ''}
                         ${cleanRemark ? `
-                            <div><span class="font-bold text-stone-700">หมายเหตุ:</span> ${cleanRemark}</div>
+                            <div>
+                                <span class="font-bold text-stone-900 block mb-0.5">หมายเหตุ:</span>
+                                <div class="pl-2 border-l-2 border-stone-300 text-stone-600 space-y-0.5">
+                                    ${formatRemarks(cleanRemark)}
+                                </div>
+                            </div>
                         ` : ''}
                     </div>
                 </div>
@@ -437,7 +472,7 @@ window.printModule = {
     <meta charset="UTF-8">
     <title>${pdfFileName}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css?v=2.8.2">
+    <link rel="stylesheet" href="css/style.css?v=2.8.3">
     <style>
         @page {
             size: A4 portrait;
