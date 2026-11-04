@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.7.7',
+    version: '2.7.8',
     releaseDate: '2026-11-04',
-    codename: 'Full-Page 8-Row Balanced Ledger Print Layout',
+    codename: 'Compact Customer Block & 12-Row Single-Page A4 Layout',
     changelog: [
+        {
+            version: '2.7.8',
+            date: '2026-11-04',
+            title: 'Compact Customer Block & 12-Row Single-Page A4 Layout',
+            features: [
+                'ปรับสัดส่วนกล่องชื่อลูกค้าและโครงการให้กะทัดรัด สวยงาม สมดุล ไม่เทอะทะ (Compact & Balanced Customer Block)',
+                'ขยายตารางรายการสินค้าเป็น 12 บรรทัดมาตรฐาน (12-Row Standard Ledger) เติมเต็มกระดาษพิมพ์ดีด A4 พอดี 1 หน้ากระดาษ',
+                'รองรับบรรทัดพิเศษสำหรับของแถม บริการ หรือการรับประกัน (*) แบบขยายเต็มบรรทัด (Colspan 6) ไฮไลท์โทนกระดาษคลาสสิก',
+                'การันตีเนื้อหาเอกสารทั้งหมด 12 บรรทัด + ยอดสรุปการเงิน + ลายเซ็น อยู่พอดีในแผ่น A4 หน้าเดียว 100% ไม่หลุดข้ามหน้า 2'
+            ]
+        },
         {
             version: '2.7.7',
             date: '2026-11-04',

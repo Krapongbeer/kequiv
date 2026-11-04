@@ -111,55 +111,55 @@ window.printModule = {
                 </div>
             </div>
 
-            <!-- 2. Compact Customer & Project Block -->
-            <div class="grid grid-cols-2 gap-3 py-2 border-b-2 border-[#1f1d1a] text-xs font-mono avoid-page-break">
+            <!-- 2. Balanced & Compact Customer & Project Block -->
+            <div class="grid grid-cols-2 gap-2.5 py-1.5 border-b-2 border-[#1f1d1a] font-mono avoid-page-break">
                 <!-- Customer Box -->
-                <div class="bg-[#faf6ee] p-2.5 rounded border-2 border-[#292524]">
+                <div class="bg-[#faf6ee] px-2.5 py-1.5 rounded border border-stone-800 text-[10.5px]">
                     <div class="flex items-center justify-between mb-1 pb-0.5 border-b border-stone-300">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-stone-600 font-typewriter">ลูกค้า / CUSTOMER</span>
-                        ${doc.customer_tax_id ? `<span class="text-[10px] text-stone-700 font-mono font-bold">Tax: ${doc.customer_tax_id}</span>` : ''}
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-stone-600 font-typewriter">ลูกค้า / CUSTOMER</span>
+                        ${doc.customer_tax_id ? `<span class="text-[9.5px] text-stone-700 font-mono font-bold">Tax: ${doc.customer_tax_id}</span>` : ''}
                     </div>
-                    <div class="font-bold text-stone-900 text-xs">${doc.customer_name || '-'}</div>
-                    <div class="text-[11px] text-stone-600 mt-1 leading-snug whitespace-pre-line">${doc.customer_address || '-'}</div>
-                    <div class="text-[11px] text-stone-600 mt-1.5 space-y-0.5 font-mono">
+                    <div class="font-bold text-stone-900 text-[11px] leading-snug">${doc.customer_name || '-'}</div>
+                    <div class="text-[10px] text-stone-600 mt-0.5 leading-tight whitespace-pre-line">${doc.customer_address || '-'}</div>
+                    <div class="text-[10px] text-stone-600 mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono">
                         ${doc.customer_phone ? `<div>โทร: <b>${doc.customer_phone}</b></div>` : ''}
                         ${doc.customer_email ? `<div class="break-all">อีเมล: <b>${doc.customer_email}</b></div>` : ''}
                     </div>
                 </div>
 
                 <!-- Project / Site Box -->
-                <div class="bg-[#faf6ee] p-2.5 rounded border-2 border-[#292524]">
+                <div class="bg-[#faf6ee] px-2.5 py-1.5 rounded border border-stone-800 text-[10.5px]">
                     <div class="flex items-center justify-between mb-1 pb-0.5 border-b border-stone-300">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-stone-600 font-typewriter">
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-stone-600 font-typewriter">
                             โครงการ / หัวบิล (PROJECT & SITE)
                         </span>
                     </div>
-                    <div class="font-bold text-indigo-950 text-xs">
+                    <div class="font-bold text-indigo-950 text-[11px] leading-snug">
                         ${doc.project_name_custom || doc.project_name || 'หัวบิลมาตรฐาน (ไม่มีโครงการย่อย)'}
                     </div>
-                    <div class="text-[11px] text-stone-600 mt-1 leading-snug whitespace-pre-line">
+                    <div class="text-[10px] text-stone-600 mt-0.5 leading-tight whitespace-pre-line">
                         ${doc.project_site_address ? `หน้างาน: ${doc.project_site_address}` : 'ที่อยู่ตามข้อมูลลูกค้า'}
                     </div>
                     ${doc.project_contact_person ? `
-                        <div class="text-[11px] text-stone-600 mt-1.5 font-mono">
+                        <div class="text-[10px] text-stone-600 mt-1 font-mono">
                             ผู้ประสานงาน: <b>${doc.project_contact_person}</b>
                         </div>
                     ` : ''}
                 </div>
             </div>
 
-            <!-- 3. Space-Efficient Typewriter Items Table with Product Thumbnail -->
-            <div class="mt-2.5">
-                <table class="w-full text-xs text-left border-collapse border-2 border-[#1f1d1a]">
+            <!-- 3. Space-Efficient Typewriter Items Table (12 Rows Standard - ให้อยู่ในหน้าเดียว) -->
+            <div class="mt-2">
+                <table class="w-full text-[11px] text-left border-collapse border-2 border-[#1f1d1a]">
                     <thead>
                         <tr class="bg-[#ede4d3] text-stone-900 font-bold border-b-2 border-[#1f1d1a] font-typewriter">
-                            <th class="border border-stone-800 px-2 py-1.5 text-center whitespace-nowrap w-12">ลำดับ</th>
-                            <th class="border border-stone-800 px-2.5 py-1.5">รายการสินค้า / รายละเอียดงาน</th>
-                            <th class="border border-stone-800 px-2 py-1.5 text-right whitespace-nowrap w-16">จำนวน</th>
-                            <th class="border border-stone-800 px-2 py-1.5 text-center whitespace-nowrap w-16">หน่วย</th>
-                            <th class="border border-stone-800 px-2.5 py-1.5 text-right whitespace-nowrap w-24">ราคา/หน่วย</th>
-                            <th class="border border-stone-800 px-2 py-1.5 text-right whitespace-nowrap w-20">ส่วนลด</th>
-                            <th class="border border-stone-800 px-2.5 py-1.5 text-right whitespace-nowrap w-28">จำนวนเงิน</th>
+                            <th class="border border-stone-800 px-1.5 py-1 text-center whitespace-nowrap w-10">ลำดับ</th>
+                            <th class="border border-stone-800 px-2 py-1">รายการสินค้า / รายละเอียดงาน</th>
+                            <th class="border border-stone-800 px-2 py-1 text-right whitespace-nowrap w-14">จำนวน</th>
+                            <th class="border border-stone-800 px-2 py-1 text-center whitespace-nowrap w-14">หน่วย</th>
+                            <th class="border border-stone-800 px-2 py-1 text-right whitespace-nowrap w-24">ราคา/หน่วย</th>
+                            <th class="border border-stone-800 px-2 py-1 text-right whitespace-nowrap w-16">ส่วนลด</th>
+                            <th class="border border-stone-800 px-2.5 py-1 text-right whitespace-nowrap w-24">จำนวนเงิน</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -175,9 +175,9 @@ window.printModule = {
                                     : item.product_name.trim();
 
                                 return `
-                                    <tr class="border-b border-stone-300 bg-[#faf6ee]/80 text-stone-900 font-mono">
-                                        <td class="border-x border-stone-800 px-1.5 py-1 text-center font-bold text-amber-900">★</td>
-                                        <td colspan="6" class="border-x border-stone-800 px-2.5 py-1 text-xs leading-normal">
+                                    <tr class="border-b border-stone-300 bg-[#faf6ee]/80 text-stone-900 font-mono h-6">
+                                        <td class="border-x border-stone-800 px-1 py-0.5 text-center font-bold text-amber-900">★</td>
+                                        <td colspan="6" class="border-x border-stone-800 px-2.5 py-0.5 text-[10.5px] leading-tight">
                                             <span class="font-bold text-stone-950">* ${cleanNote}</span>
                                         </td>
                                     </tr>
@@ -192,46 +192,46 @@ window.printModule = {
                                 !item.image_url.includes('null');
 
                             return `
-                                <tr class="border-b border-stone-300 hover:bg-stone-50/50">
-                                    <td class="border-x border-stone-800 px-1.5 py-1.5 text-center text-stone-600 align-middle font-mono">${idx + 1}</td>
-                                    <td class="border-x border-stone-800 px-2.5 py-1.5 align-middle">
-                                        <div class="flex items-center gap-2">
+                                <tr class="border-b border-stone-300 hover:bg-stone-50/50 h-6">
+                                    <td class="border-x border-stone-800 px-1 py-1 text-center text-stone-600 align-middle font-mono">${idx + 1}</td>
+                                    <td class="border-x border-stone-800 px-2 py-1 align-middle">
+                                        <div class="flex items-center gap-1.5">
                                             ${hasValidImage ? `
-                                                <img src="${item.image_url}" alt="รูปสินค้า" class="w-8 h-8 object-cover rounded border border-stone-300 shrink-0 bg-white shadow-xs" onerror="this.remove()">
+                                                <img src="${item.image_url}" alt="รูปสินค้า" class="w-6 h-6 object-cover rounded border border-stone-300 shrink-0 bg-white" onerror="this.remove()">
                                             ` : ''}
                                             <div class="min-w-0">
                                                 <div class="font-medium text-stone-900 leading-snug break-words">${item.product_name}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="border-x border-stone-800 px-2 py-1.5 text-right font-mono align-middle">${item.quantity}</td>
-                                    <td class="border-x border-stone-800 px-2 py-1.5 text-center text-stone-700 align-middle">${item.unit || 'ชิ้น'}</td>
-                                    <td class="border-x border-stone-800 px-2.5 py-1.5 text-right font-mono align-middle">
+                                    <td class="border-x border-stone-800 px-2 py-1 text-right font-mono align-middle">${item.quantity}</td>
+                                    <td class="border-x border-stone-800 px-2 py-1 text-center text-stone-700 align-middle">${item.unit || 'ชิ้น'}</td>
+                                    <td class="border-x border-stone-800 px-2 py-1 text-right font-mono align-middle">
                                         ${Number(item.unit_price) > 0 ? app.formatCurrency(item.unit_price) : (Number(item.total_price) === 0 ? '<span class="text-emerald-700 font-bold">ฟรี</span>' : '0.00')}
                                     </td>
-                                    <td class="border-x border-stone-800 px-2 py-1.5 text-right text-stone-600 font-mono align-middle">
+                                    <td class="border-x border-stone-800 px-2 py-1 text-right text-stone-600 font-mono align-middle">
                                         ${item.discount > 0 ? app.formatCurrency(item.discount) : '-'}
                                     </td>
-                                    <td class="border-x border-stone-800 px-2.5 py-1.5 text-right font-bold text-stone-900 font-mono align-middle">
+                                    <td class="border-x border-stone-800 px-2.5 py-1 text-right font-bold text-stone-900 font-mono align-middle">
                                         ${Number(item.total_price) > 0 ? app.formatCurrency(item.total_price) : (Number(item.unit_price) === 0 ? '<span class="text-emerald-700 font-bold">0.00</span>' : app.formatCurrency(item.total_price))}
                                     </td>
                                 </tr>
                             `;
                         }).join('') : `
                             <tr>
-                                <td colspan="7" class="text-center py-6 text-stone-500 font-mono">ไม่มีรายการสินค้า</td>
+                                <td colspan="7" class="text-center py-4 text-stone-500 font-mono">ไม่มีรายการสินค้า</td>
                             </tr>
                         `}
-                        <!-- Pad empty rows up to 8 rows so the table fills the A4 page gracefully (เวลาพิมพ์จะได้ไม่สั้น) -->
-                        ${Array.from({ length: Math.max(0, 8 - (doc.items ? doc.items.length : 0)) }).map(() => `
-                            <tr class="border-b border-stone-200 select-none h-7">
-                                <td class="border-x border-stone-800 px-1.5 py-1 text-center text-transparent">&nbsp;</td>
-                                <td class="border-x border-stone-800 px-2.5 py-1 text-transparent">&nbsp;</td>
-                                <td class="border-x border-stone-800 px-2 py-1 text-transparent">&nbsp;</td>
-                                <td class="border-x border-stone-800 px-2 py-1 text-transparent">&nbsp;</td>
-                                <td class="border-x border-stone-800 px-2.5 py-1 text-transparent">&nbsp;</td>
-                                <td class="border-x border-stone-800 px-2 py-1 text-transparent">&nbsp;</td>
-                                <td class="border-x border-stone-800 px-2.5 py-1 text-transparent">&nbsp;</td>
+                        <!-- Pad empty rows up to 12 rows so the table fills the A4 page gracefully (12 บรรทัดมาตรฐาน พอดี 1 หน้า) -->
+                        ${Array.from({ length: Math.max(0, 12 - (doc.items ? doc.items.length : 0)) }).map(() => `
+                            <tr class="border-b border-stone-200 select-none h-6">
+                                <td class="border-x border-stone-800 px-1 py-0.5 text-center text-transparent">&nbsp;</td>
+                                <td class="border-x border-stone-800 px-2 py-0.5 text-transparent">&nbsp;</td>
+                                <td class="border-x border-stone-800 px-1 py-0.5 text-transparent">&nbsp;</td>
+                                <td class="border-x border-stone-800 px-1 py-0.5 text-transparent">&nbsp;</td>
+                                <td class="border-x border-stone-800 px-2 py-0.5 text-transparent">&nbsp;</td>
+                                <td class="border-x border-stone-800 px-1 py-0.5 text-transparent">&nbsp;</td>
+                                <td class="border-x border-stone-800 px-2.5 py-0.5 text-transparent">&nbsp;</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -361,7 +361,7 @@ window.printModule = {
     <meta charset="UTF-8">
     <title></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css?v=2.7.7">
+    <link rel="stylesheet" href="css/style.css?v=2.7.8">
     <style>
         @page {
             size: A4 portrait;
