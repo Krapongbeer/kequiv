@@ -45,7 +45,9 @@ async function ensureDailyBuffer(count = 5) {
 
             console.log(`📦 Running Daily Auto-Buffer: Reserving ${count} numbers for ${today}...`);
 
-            const types = ['quotation', 'billing', 'receipt'];
+            // Best practice: Auto-reserve only Quotation (QT) daily as it's the primary doc needing backdates.
+            // Billing (INV) and Receipt (RE) should not be bloated daily; users can reserve them on-demand if needed.
+            const types = ['quotation'];
             for (const type of types) {
                 try {
                     await reserveBatchNumbersSupabase(supabase, type, count, {
@@ -67,7 +69,7 @@ async function ensureDailyBuffer(count = 5) {
             }
 
             console.log(`📦 Running SQLite Daily Auto-Buffer: Reserving ${count} numbers for ${today}...`);
-            const types = ['quotation', 'billing', 'receipt'];
+            const types = ['quotation'];
             for (const type of types) {
                 try {
                     reserveBatchNumbers(db, type, count, {

@@ -6,7 +6,7 @@
     <title>เคอีควิป KEQUIV - ระบบไอที กล้องวงจรปิด และงานระบบครบวงจร</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css?v=2.8.1">
+    <link rel="stylesheet" href="css/style.css?v=2.8.2">
     <style>
         @media print {
             #storefront-view,
@@ -1247,8 +1247,9 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
                     <span id="sidebar-username" class="font-bold text-white truncate">phongphana</span>
                 </div>
-                <button onclick="app.handleLogout()" class="px-2 py-0.5 bg-rose-950/70 text-rose-300 border border-rose-800/80 rounded hover:bg-rose-900 transition" title="ออกจากระบบ">
-                    🚪 ออกจากระบบ
+                <button onclick="app.handleLogout()" class="shrink-0 px-2 py-0.5 bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800/80 rounded text-[10px] whitespace-nowrap inline-flex items-center gap-1 transition shadow-xs cursor-pointer" title="ออกจากระบบ">
+                    <span>🚪</span>
+                    <span>ออก</span>
                 </button>
             </div>
             <div class="text-[10px] text-slate-400 flex items-center justify-between">
@@ -1657,11 +1658,10 @@
         </div>
     </div>
 
-    <!-- Floating LINE OA Quick Contact Widget -->
+    <!-- Floating LINE OA Quick Contact Widget (Compact & Minimal) -->
     <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" rel="noopener" class="line-floating-btn" title="ติดต่อร้านทาง LINE @vcv6921d">
-        <span class="pulse-ring"></span>
-        <span class="text-xl">💬</span>
-        <span class="hidden sm:inline">ปรึกษาช่าง LINE @vcv6921d</span>
+        <span class="text-xs">💬</span>
+        <span class="font-mono text-[11px] font-bold">LINE @vcv6921d</span>
     </a>
 
 

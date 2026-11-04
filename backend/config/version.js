@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.8.1',
+    version: '2.8.2',
     releaseDate: '2026-11-04',
-    codename: 'Undated Documents, Smart PDF File Naming & Revenue Double-Count Fix',
+    codename: 'Proportional Logout Button, Compact LINE Floating Widget & Buffer Refinement',
     changelog: [
+        {
+            version: '2.8.2',
+            date: '2026-11-04',
+            title: 'Proportional Logout Button, Compact LINE Floating Widget & Buffer Refinement',
+            features: [
+                'ปรับปุ่มออกจากระบบที่แถบเมนูด้านข้างให้สมส่วน สวยงาม ไม่ตัดข้อความเป็น 2 บรรทัด',
+                'ย่อขนาดปุ่ม LINE ติดต่อร้านให้กะทัดรัด ไม่บดบังการแสดงผลการ์ดสรุปข้อมูลบนแดชบอร์ด',
+                'ปรับปรุงระบบคลังเลขสำรองอัตโนมัติประจำวัน (Daily Auto-Buffer) ให้เน้นเฉพาะใบเสนอราคา (QT) ป้องกันการเกิดเลขสำรองค้างของ INV และ RE'
+            ]
+        },
         {
             version: '2.8.1',
             date: '2026-11-04',

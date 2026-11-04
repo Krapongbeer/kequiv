@@ -365,38 +365,32 @@ table, th, td {
 
 .line-floating-btn {
     position: fixed;
-    bottom: 24px;
-    right: 24px;
+    bottom: 14px;
+    right: 16px;
     z-index: 999;
     background: #06C755;
     color: white;
     border-radius: 9999px;
-    box-shadow: 0 10px 25px -5px rgba(6, 199, 85, 0.5), 0 8px 10px -6px rgba(6, 199, 85, 0.5);
-    padding: 12px 20px;
+    box-shadow: 0 4px 12px rgba(6, 199, 85, 0.35);
+    padding: 5px 12px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-weight: bold;
+    gap: 6px;
+    font-weight: 600;
     font-family: var(--font-thai-mono);
-    font-size: 0.9rem;
+    font-size: 11px;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
-    border: 2px solid #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.9);
     text-decoration: none;
+    opacity: 0.92;
 }
 .line-floating-btn:hover {
-    transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 15px 30px -5px rgba(6, 199, 85, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(6, 199, 85, 0.5);
     background: #05b34c;
     color: white;
-}
-.line-floating-btn .pulse-ring {
-    position: absolute;
-    inset: -4px;
-    border-radius: 9999px;
-    border: 2px solid #06C755;
-    animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-    pointer-events: none;
+    opacity: 1;
 }
 
 .store-service-card {
