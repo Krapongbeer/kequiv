@@ -222,16 +222,16 @@ window.printModule = {
                                 <td colspan="7" class="text-center py-6 text-stone-500 font-mono">ไม่มีรายการสินค้า</td>
                             </tr>
                         `}
-                        <!-- Pad empty rows only if fewer than 3 items to preserve A4 balance without overflowing -->
-                        ${Array.from({ length: Math.max(0, 3 - (doc.items ? doc.items.length : 0)) }).map(() => `
-                            <tr class="border-b border-stone-200 text-transparent select-none">
-                                <td class="border-x border-stone-800 px-1.5 py-1 text-center">-</td>
-                                <td class="border-x border-stone-800 px-2.5 py-1">-</td>
-                                <td class="border-x border-stone-800 px-2 py-1">-</td>
-                                <td class="border-x border-stone-800 px-2 py-1">-</td>
-                                <td class="border-x border-stone-800 px-2.5 py-1">-</td>
-                                <td class="border-x border-stone-800 px-2 py-1">-</td>
-                                <td class="border-x border-stone-800 px-2.5 py-1">-</td>
+                        <!-- Pad empty rows up to 8 rows so the table fills the A4 page gracefully (เวลาพิมพ์จะได้ไม่สั้น) -->
+                        ${Array.from({ length: Math.max(0, 8 - (doc.items ? doc.items.length : 0)) }).map(() => `
+                            <tr class="border-b border-stone-200 select-none h-7">
+                                <td class="border-x border-stone-800 px-1.5 py-1 text-center text-transparent">&nbsp;</td>
+                                <td class="border-x border-stone-800 px-2.5 py-1 text-transparent">&nbsp;</td>
+                                <td class="border-x border-stone-800 px-2 py-1 text-transparent">&nbsp;</td>
+                                <td class="border-x border-stone-800 px-2 py-1 text-transparent">&nbsp;</td>
+                                <td class="border-x border-stone-800 px-2.5 py-1 text-transparent">&nbsp;</td>
+                                <td class="border-x border-stone-800 px-2 py-1 text-transparent">&nbsp;</td>
+                                <td class="border-x border-stone-800 px-2.5 py-1 text-transparent">&nbsp;</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -361,7 +361,7 @@ window.printModule = {
     <meta charset="UTF-8">
     <title></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css?v=2.7.6">
+    <link rel="stylesheet" href="css/style.css?v=2.7.7">
     <style>
         @page {
             size: A4 portrait;

@@ -391,8 +391,10 @@ window.documentsModule = {
             const nextCodePreview = nextCodeRes.data.code;
             const availableReservations = reservationsRes.data;
 
-            // Initialize default items (1 empty item)
+            // Initialize default items (3 empty item rows ready for quick entry)
             this.formData.items = [
+                { product_name: '', image_url: '', quantity: 1, unit: 'ชิ้น', unit_price: 0, discount: 0, discount_type: 'amount', total_price: 0 },
+                { product_name: '', image_url: '', quantity: 1, unit: 'ชิ้น', unit_price: 0, discount: 0, discount_type: 'amount', total_price: 0 },
                 { product_name: '', image_url: '', quantity: 1, unit: 'ชิ้น', unit_price: 0, discount: 0, discount_type: 'amount', total_price: 0 }
             ];
 

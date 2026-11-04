@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.7.6',
+    version: '2.7.7',
     releaseDate: '2026-11-04',
-    codename: 'Clean Image Suppression & Table Note Row Support',
+    codename: 'Full-Page 8-Row Balanced Ledger Print Layout',
     changelog: [
+        {
+            version: '2.7.7',
+            date: '2026-11-04',
+            title: 'Full-Page 8-Row Balanced Ledger Print Layout',
+            features: [
+                'ปรับตารางรายการสินค้าตอนพิมพ์ให้มีบรรทัดเต็มกระดาษ 8 บรรทัดมาตรฐาน (Full A4 Ledger Table) เวลาพิมพ์เอกสารจะไม่สั้นหรือโล่ง',
+                'เส้นตารางต่อเนื่องสวยงามเต็มหน้ากระดาษ A4 สไตล์สมุดบัญชีการค้าอย่างเป็นทางการ',
+                'เปิดฟอร์มสร้างเอกสารใหม่พร้อมแถวรายการ 3 แถวเริ่มต้นให้กรอกขายสินค้าได้รวดเร็วทันใจ',
+                'รักษายอดรวมและกล่องลายเซ็นให้อยู่พอดีกับระยะขอบล่างของกระดาษ 1 แผ่น ไม่ล้นหน้า 2'
+            ]
+        },
         {
             version: '2.7.6',
             date: '2026-11-04',
