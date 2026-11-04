@@ -29,57 +29,47 @@ async function ensureDailyBuffer(count = 5) {
     isRunning = true;
     try {
         const noteTag = `โควตากันเลขสำรองประจำวัน [${today}]`;
+        const types = ['quotation', 'billing', 'receipt'];
 
         if (isSupabaseConfigured && supabase) {
-            // Check if already created for today
-            const { data: existing, error } = await supabase
-                .from('document_reservations')
-                .select('id')
-                .eq('note', noteTag)
-                .limit(1);
-
-            if (!error && existing && existing.length > 0) {
-                lastCheckedDate = today;
-                return;
-            }
-
-            console.log(`📦 Running Daily Auto-Buffer: Reserving ${count} numbers for ${today}...`);
-
-            // Daily buffer for all 3 document types: Quotation (QT), Billing (INV), and Receipt (RE)
-            const types = ['quotation', 'billing', 'receipt'];
             for (const type of types) {
-                try {
-                    await reserveBatchNumbersSupabase(supabase, type, count, {
-                        note: noteTag
-                    });
-                } catch (e) {
-                    console.error(`Auto-buffer error for ${type}:`, e.message);
+                // Check if already created for today for this specific document type
+                const { data: existing, error } = await supabase
+                    .from('document_reservations')
+                    .select('id')
+                    .eq('note', noteTag)
+                    .eq('doc_type', type)
+                    .limit(1);
+
+                if (!error && (!existing || existing.length === 0)) {
+                    console.log(`📦 Running Daily Auto-Buffer: Reserving ${count} ${type} numbers for ${today}...`);
+                    try {
+                        await reserveBatchNumbersSupabase(supabase, type, count, {
+                            note: noteTag
+                        });
+                        console.log(`✓ Daily Auto-Buffer completed for ${type} (${count} numbers)`);
+                    } catch (e) {
+                        console.error(`Auto-buffer error for ${type}:`, e.message);
+                    }
                 }
             }
-
-            console.log(`✓ Daily Auto-Buffer completed for ${today} (${count} per type)`);
             lastCheckedDate = today;
         } else {
             // SQLite Fallback
-            const existing = db.prepare('SELECT id FROM document_reservations WHERE note = ? LIMIT 1').get(noteTag);
-            if (existing) {
-                lastCheckedDate = today;
-                return;
-            }
-
-            console.log(`📦 Running SQLite Daily Auto-Buffer: Reserving ${count} numbers for ${today}...`);
-            const types = ['quotation', 'billing', 'receipt'];
             for (const type of types) {
-                try {
-                    reserveBatchNumbers(db, type, count, {
-                        note: noteTag
-                    });
-                } catch (e) {
-                    console.error(`SQLite Auto-buffer error for ${type}:`, e.message);
+                const existing = db.prepare('SELECT id FROM document_reservations WHERE note = ? AND doc_type = ? LIMIT 1').get(noteTag, type);
+                if (!existing) {
+                    console.log(`📦 Running SQLite Daily Auto-Buffer: Reserving ${count} ${type} numbers for ${today}...`);
+                    try {
+                        reserveBatchNumbers(db, type, count, {
+                            note: noteTag
+                        });
+                        console.log(`✓ SQLite Daily Auto-Buffer completed for ${type} (${count} numbers)`);
+                    } catch (e) {
+                        console.error(`SQLite Auto-buffer error for ${type}:`, e.message);
+                    }
                 }
             }
-
-            console.log(`✓ SQLite Daily Auto-Buffer completed for ${today}`);
             lastCheckedDate = today;
         }
     } catch (err) {
