@@ -472,7 +472,7 @@ window.printModule = {
     <meta charset="UTF-8">
     <title>${pdfFileName}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css?v=2.8.3">
+    <link rel="stylesheet" href="css/style.css?v=2.8.4">
     <style>
         @page {
             size: A4 portrait;

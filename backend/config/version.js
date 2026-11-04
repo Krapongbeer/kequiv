@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.8.3',
+    version: '2.8.4',
     releaseDate: '2026-11-04',
-    codename: 'Blank Undated Field, Clean Ledger Notes & Complete Daily Buffer Pool',
+    codename: 'Customer Project Identity Sequence Collision Fix & Zero-Fail Insert Engine',
     changelog: [
+        {
+            version: '2.8.4',
+            date: '2026-11-04',
+            title: 'Customer Project Identity Sequence Collision Fix & Zero-Fail Insert Engine',
+            features: [
+                'แก้ไขข้อผิดพลาด duplicate key value violates unique constraint customer_projects_pkey เมื่อกดเพิ่มโครงการหรือหัวบิลใหม่',
+                'เพิ่มระบบกลไก Sequence Auto-Advancement & Fallback (Zero-Fail Insert) กู้คืนและเลื่อนลำดับอัตโนมัติหากลำดับเลข ID ของ PostgreSQL ใน Supabase ไม่ตรงกับข้อมูลเดิม',
+                'รองรับการเพิ่มโครงการได้ราบรื่น 100% ทั้งตอนสร้างลูกค้าใหม่และตอนเพิ่มแฟ้มโครงการภายหลัง'
+            ]
+        },
         {
             version: '2.8.3',
             date: '2026-11-04',

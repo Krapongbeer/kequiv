@@ -3,6 +3,41 @@ const router = express.Router();
 const db = require('../db');
 const { supabase, isSupabaseConfigured } = require('../supabase');
 
+// Helper to safely insert into Supabase with automatic sequence recovery on duplicate key (23505)
+async function insertWithSequenceRetry(client, table, payload, maxRetries = 5) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        const { data, error } = await client.from(table).insert(payload).select().single();
+        if (!error) return { data, error: null };
+        if (error.code === '23505' && (error.message.includes('_pkey') || (error.details && error.details.includes('(id)=')))) {
+            console.warn(`[Supabase ${table}] Auto-advancing sequence on collision (attempt ${attempt}/${maxRetries})...`);
+            continue;
+        }
+        return { data: null, error };
+    }
+    // If sequence is significantly behind, calculate max(id) + 1 and supply explicitly
+    const { data: maxRows } = await client.from(table).select('id').order('id', { ascending: false }).limit(1);
+    const nextId = (maxRows && maxRows[0] ? Number(maxRows[0].id) : 0) + 1;
+    console.log(`[Supabase ${table}] Manually assigning next id = ${nextId}`);
+    return await client.from(table).insert({ ...payload, id: nextId }).select().single();
+}
+
+async function insertBatchWithSequenceRetry(client, table, rows, maxRetries = 5) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        const { data, error } = await client.from(table).insert(rows).select();
+        if (!error) return { data, error: null };
+        if (error.code === '23505' && (error.message.includes('_pkey') || (error.details && error.details.includes('(id)=')))) {
+            console.warn(`[Supabase ${table}] Auto-advancing sequence on batch collision (attempt ${attempt}/${maxRetries})...`);
+            continue;
+        }
+        return { data: null, error };
+    }
+    // Assign manual IDs sequentially
+    const { data: maxRows } = await client.from(table).select('id').order('id', { ascending: false }).limit(1);
+    let nextId = (maxRows && maxRows[0] ? Number(maxRows[0].id) : 0) + 1;
+    const rowsWithId = rows.map(r => ({ ...r, id: nextId++ }));
+    return await client.from(table).insert(rowsWithId).select();
+}
+
 // GET all active customers
 router.get('/', async (req, res) => {
     try {
@@ -148,18 +183,14 @@ router.post('/', async (req, res) => {
         }
 
         if (isSupabaseConfigured && supabase) {
-            const { data: newCustomer, error } = await supabase
-                .from('customers')
-                .insert({
-                    name: name.trim(),
-                    tax_id: tax_id || '',
-                    address: address || '',
-                    phone: phone || '',
-                    email: email || '',
-                    note: note || ''
-                })
-                .select()
-                .single();
+            const { data: newCustomer, error } = await insertWithSequenceRetry(supabase, 'customers', {
+                name: name.trim(),
+                tax_id: tax_id || '',
+                address: address || '',
+                phone: phone || '',
+                email: email || '',
+                note: note || ''
+            });
 
             if (error) throw new Error(error.message);
 
@@ -176,10 +207,7 @@ router.post('/', async (req, res) => {
                     }));
 
                 if (projectRows.length > 0) {
-                    const { data: projs, error: pErr } = await supabase
-                        .from('customer_projects')
-                        .insert(projectRows)
-                        .select();
+                    const { data: projs, error: pErr } = await insertBatchWithSequenceRetry(supabase, 'customer_projects', projectRows);
                     if (!pErr && projs) createdProjects = projs;
                 }
             }
@@ -383,17 +411,13 @@ router.post('/:id/projects', async (req, res) => {
         }
 
         if (isSupabaseConfigured && supabase) {
-            const { data, error } = await supabase
-                .from('customer_projects')
-                .insert({
-                    customer_id: customerId,
-                    project_name: project_name.trim(),
-                    site_address: site_address || '',
-                    contact_person: contact_person || '',
-                    note: note || ''
-                })
-                .select()
-                .single();
+            const { data, error } = await insertWithSequenceRetry(supabase, 'customer_projects', {
+                customer_id: customerId,
+                project_name: project_name.trim(),
+                site_address: site_address || '',
+                contact_person: contact_person || '',
+                note: note || ''
+            });
 
             if (error) throw new Error(error.message);
             return res.json({ success: true, data });
