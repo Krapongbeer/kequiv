@@ -580,9 +580,14 @@ window.documentsModule = {
                                 <h3 class="text-sm font-bold text-slate-800 font-heading">รายการสินค้า / บริการ</h3>
                                 <p class="text-xs text-slate-400">ระบุจำนวน หน่วย และราคาต่อหน่วย (ระบบคำนวณอัตโนมัติ)</p>
                             </div>
-                            <button type="button" onclick="window.documentsModule.addItemRow()" class="px-3.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300 text-xs font-semibold rounded-lg transition">
-                                + เพิ่มแถวรายการ
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="window.documentsModule.addNoteRow()" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-semibold rounded-lg transition" title="เพิ่มบรรทัดข้อความ เช่น *แถมฟรีเมาส์ Bluetooth, Warranty 3 years">
+                                    ★ + ของแถม / บริการ / ประกัน (*)
+                                </button>
+                                <button type="button" onclick="window.documentsModule.addItemRow()" class="px-3.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300 text-xs font-semibold rounded-lg transition">
+                                    + เพิ่มแถวรายการ
+                                </button>
+                            </div>
                         </div>
 
                         <div class="overflow-x-auto border border-slate-200 rounded-xl">
@@ -690,16 +695,19 @@ window.documentsModule = {
 
         const unitsPreset = (app.state.presets && app.state.presets.units) || ['ชิ้น', 'งาน', 'เมตร', 'ตร.ม.', 'ชุด', 'ม้วน', 'กล่อง'];
 
-        tbody.innerHTML = this.formData.items.map((item, idx) => `
-            <tr class="hover:bg-slate-50/60 transition">
-                <td class="px-3 py-2 text-center text-slate-400 font-mono font-medium">${idx + 1}</td>
+        tbody.innerHTML = this.formData.items.map((item, idx) => {
+            const isNoteRow = (item.product_name || '').trim().startsWith('*');
+
+            return `
+            <tr class="hover:bg-slate-50/60 transition ${isNoteRow ? 'bg-amber-50/30' : ''}">
+                <td class="px-3 py-2 text-center text-slate-400 font-mono font-medium">${isNoteRow ? '★' : idx + 1}</td>
                 <td class="px-3 py-2">
                     <div class="flex items-center gap-2">
                         <!-- Thumbnail upload/preview -->
                         <div class="relative shrink-0">
                             ${item.image_url ? `
                                 <div class="relative group">
-                                    <img src="${item.image_url}" alt="Item" class="w-9 h-9 object-cover rounded-lg border border-slate-200 bg-white">
+                                    <img src="${item.image_url}" alt="Item" class="w-9 h-9 object-cover rounded-lg border border-slate-200 bg-white" onerror="this.remove()">
                                     <button type="button" onclick="window.documentsModule.removeItemImage(${idx})" title="ลบรูปภาพ" class="absolute -top-1.5 -right-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px] shadow transition">✕</button>
                                 </div>
                             ` : `
@@ -709,8 +717,8 @@ window.documentsModule = {
                                 </label>
                             `}
                         </div>
-                        <input type="text" value="${item.product_name || ''}" placeholder="ชื่อสินค้า, บริการ หรือรายละเอียดงาน" 
-                            class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500"
+                        <input type="text" value="${item.product_name || ''}" placeholder="ชื่อสินค้า หรือ *ข้อความของแถม/ประกันท้ายตาราง (เช่น *แถมฟรีเมาส์ Bluetooth, Warranty 3 years)" 
+                            class="w-full px-2.5 py-1.5 text-xs border ${isNoteRow ? 'border-amber-400 bg-amber-50/60 font-bold text-amber-950' : 'border-slate-200'} rounded-lg focus:outline-none focus:border-blue-500"
                             oninput="window.documentsModule.updateItemField(${idx}, 'product_name', this.value)">
                     </div>
                 </td>
@@ -746,7 +754,8 @@ window.documentsModule = {
                     </button>
                 </td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
     },
 
     async handleImageUpload(idx, event) {
@@ -784,6 +793,21 @@ window.documentsModule = {
             image_url: '',
             quantity: 1,
             unit: 'ชิ้น',
+            unit_price: 0,
+            discount: 0,
+            discount_type: 'amount',
+            total_price: 0
+        });
+        this.renderItemRows();
+        this.recalculate();
+    },
+
+    addNoteRow(defaultText = '*แถมฟรีเมาส์ Bluetooth, Service, Warranty 3 years') {
+        this.formData.items.push({
+            product_name: defaultText,
+            image_url: '',
+            quantity: 1,
+            unit: 'รายการ',
             unit_price: 0,
             discount: 0,
             discount_type: 'amount',

@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.7.5',
+    version: '2.7.6',
     releaseDate: '2026-11-04',
-    codename: 'Header/Footer Suppression & Full Thai Glyph Headroom',
+    codename: 'Clean Image Suppression & Table Note Row Support',
     changelog: [
+        {
+            version: '2.7.6',
+            date: '2026-11-04',
+            title: 'Clean Image Suppression & Table Note Row Support',
+            features: [
+                'ตัดการแสดงรูปภาพที่ไม่ได้ใส่หรือโหลดไม่ติดทิ้ง 100% ไม่หลงเหลือกรอบรูปแหว่งหรือช่องว่าง',
+                'รองรับการใส่ข้อความบรรทัดสุดท้ายในตาราง เช่น *แถมฟรีเมาส์ Bluetooth, Service, Warranty 3 years',
+                'เพิ่มปุ่มลัด ★ + ของแถม / บริการ / ประกัน (*) ในหน้าสร้างและแก้ไขเอกสาร ให้เพิ่มแถวข้อความได้ทันทีในคลิกเดียว',
+                'แถวข้อความของแถมจะขยายเต็มความกว้างตาราง (colspan) สไตล์กระดาษพิมพ์ดีดอย่างลงตัวโดยไม่กระทบยอดเงิน'
+            ]
+        },
         {
             version: '2.7.5',
             date: '2026-11-04',

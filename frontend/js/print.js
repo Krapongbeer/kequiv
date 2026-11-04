@@ -163,30 +163,61 @@ window.printModule = {
                         </tr>
                     </thead>
                     <tbody>
-                        ${doc.items && doc.items.length > 0 ? doc.items.map((item, idx) => `
-                            <tr class="border-b border-stone-300 hover:bg-stone-50/50">
-                                <td class="border-x border-stone-800 px-1.5 py-1.5 text-center text-stone-600 align-middle font-mono">${idx + 1}</td>
-                                <td class="border-x border-stone-800 px-2.5 py-1.5 align-middle">
-                                    <div class="flex items-center gap-2">
-                                        ${item.image_url ? `
-                                            <img src="${item.image_url}" alt="รูปสินค้า" class="w-8 h-8 object-cover rounded border border-stone-300 shrink-0 bg-white shadow-xs" onerror="this.style.display='none'">
-                                        ` : ''}
-                                        <div class="min-w-0">
-                                            <div class="font-medium text-stone-900 leading-snug break-words">${item.product_name}</div>
+                        ${doc.items && doc.items.length > 0 ? doc.items.map((item, idx) => {
+                            const isNoteRow = item.product_name && (
+                                item.product_name.trim().startsWith('*') || 
+                                (Number(item.unit_price) === 0 && Number(item.total_price) === 0 && (!item.unit || item.unit === 'รายการ' || item.unit === '-' || item.unit === ''))
+                            );
+
+                            if (isNoteRow) {
+                                const cleanNote = item.product_name.startsWith('*') 
+                                    ? item.product_name.substring(1).trim() 
+                                    : item.product_name.trim();
+
+                                return `
+                                    <tr class="border-b border-stone-300 bg-[#faf6ee]/80 text-stone-900 font-mono">
+                                        <td class="border-x border-stone-800 px-1.5 py-1 text-center font-bold text-amber-900">★</td>
+                                        <td colspan="6" class="border-x border-stone-800 px-2.5 py-1 text-xs leading-normal">
+                                            <span class="font-bold text-stone-950">* ${cleanNote}</span>
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+
+                            const hasValidImage = item.image_url && 
+                                typeof item.image_url === 'string' && 
+                                item.image_url.trim().length > 0 && 
+                                !item.image_url.includes('placeholder') && 
+                                !item.image_url.includes('undefined') && 
+                                !item.image_url.includes('null');
+
+                            return `
+                                <tr class="border-b border-stone-300 hover:bg-stone-50/50">
+                                    <td class="border-x border-stone-800 px-1.5 py-1.5 text-center text-stone-600 align-middle font-mono">${idx + 1}</td>
+                                    <td class="border-x border-stone-800 px-2.5 py-1.5 align-middle">
+                                        <div class="flex items-center gap-2">
+                                            ${hasValidImage ? `
+                                                <img src="${item.image_url}" alt="รูปสินค้า" class="w-8 h-8 object-cover rounded border border-stone-300 shrink-0 bg-white shadow-xs" onerror="this.remove()">
+                                            ` : ''}
+                                            <div class="min-w-0">
+                                                <div class="font-medium text-stone-900 leading-snug break-words">${item.product_name}</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="border-x border-stone-800 px-2 py-1.5 text-right font-mono align-middle">${item.quantity}</td>
-                                <td class="border-x border-stone-800 px-2 py-1.5 text-center text-stone-700 align-middle">${item.unit || 'ชิ้น'}</td>
-                                <td class="border-x border-stone-800 px-2.5 py-1.5 text-right font-mono align-middle">${app.formatCurrency(item.unit_price)}</td>
-                                <td class="border-x border-stone-800 px-2 py-1.5 text-right text-stone-600 font-mono align-middle">
-                                    ${item.discount > 0 ? app.formatCurrency(item.discount) : '-'}
-                                </td>
-                                <td class="border-x border-stone-800 px-2.5 py-1.5 text-right font-bold text-stone-900 font-mono align-middle">
-                                    ${app.formatCurrency(item.total_price)}
-                                </td>
-                            </tr>
-                        `).join('') : `
+                                    </td>
+                                    <td class="border-x border-stone-800 px-2 py-1.5 text-right font-mono align-middle">${item.quantity}</td>
+                                    <td class="border-x border-stone-800 px-2 py-1.5 text-center text-stone-700 align-middle">${item.unit || 'ชิ้น'}</td>
+                                    <td class="border-x border-stone-800 px-2.5 py-1.5 text-right font-mono align-middle">
+                                        ${Number(item.unit_price) > 0 ? app.formatCurrency(item.unit_price) : (Number(item.total_price) === 0 ? '<span class="text-emerald-700 font-bold">ฟรี</span>' : '0.00')}
+                                    </td>
+                                    <td class="border-x border-stone-800 px-2 py-1.5 text-right text-stone-600 font-mono align-middle">
+                                        ${item.discount > 0 ? app.formatCurrency(item.discount) : '-'}
+                                    </td>
+                                    <td class="border-x border-stone-800 px-2.5 py-1.5 text-right font-bold text-stone-900 font-mono align-middle">
+                                        ${Number(item.total_price) > 0 ? app.formatCurrency(item.total_price) : (Number(item.unit_price) === 0 ? '<span class="text-emerald-700 font-bold">0.00</span>' : app.formatCurrency(item.total_price))}
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('') : `
                             <tr>
                                 <td colspan="7" class="text-center py-6 text-stone-500 font-mono">ไม่มีรายการสินค้า</td>
                             </tr>
@@ -330,7 +361,7 @@ window.printModule = {
     <meta charset="UTF-8">
     <title></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css?v=2.7.5">
+    <link rel="stylesheet" href="css/style.css?v=2.7.6">
     <style>
         @page {
             size: A4 portrait;
