@@ -293,10 +293,126 @@ window.printModule = {
     },
 
     triggerPrint() {
-        document.body.classList.add('is-printing-doc');
-        setTimeout(() => {
+        const sheet = document.getElementById('print-sheet');
+        if (!sheet) {
+            document.body.classList.add('is-printing-doc');
             window.print();
-        }, 50);
+            return;
+        }
+
+        try {
+            // Remove any previous print isolation frame
+            let iframe = document.getElementById('print-isolation-frame');
+            if (iframe) iframe.remove();
+
+            // Create dedicated clean print frame containing ONLY the A4 document
+            iframe = document.createElement('iframe');
+            iframe.id = 'print-isolation-frame';
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            iframe.style.visibility = 'hidden';
+            iframe.style.pointerEvents = 'none';
+            document.body.appendChild(iframe);
+
+            const iframeDoc = iframe.contentWindow.document;
+            const docTitle = this.currentDoc 
+                ? `${this.currentDoc.code} - ${this.currentDoc.customer_name || 'เคอีควิป'}`
+                : 'เอกสารบิล - ร้านเคอีควิป Kequiv';
+
+            iframeDoc.open();
+            iframeDoc.write(`<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>${docTitle}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css?v=2.7.4">
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 10mm 12mm 12mm 12mm;
+        }
+        *, *::before, *::after {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            box-sizing: border-box !important;
+        }
+        html, body {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            color: #1f1d1a !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
+            font-family: 'Courier Prime', 'Bai Jamjuree', 'Sarabun', monospace;
+        }
+        .print-container {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-height: 0 !important;
+            height: auto !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: #ffffff !important;
+        }
+        table {
+            border-collapse: collapse !important;
+            width: 100% !important;
+        }
+        tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+        .avoid-page-break {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+        .bg-\\[\\#faf6ee\\] {
+            background-color: #faf6ee !important;
+        }
+        .bg-\\[\\#ede4d3\\] {
+            background-color: #ede4d3 !important;
+        }
+        .border-\\[\\#1f1d1a\\] {
+            border-color: #1f1d1a !important;
+        }
+        .border-\\[\\#292524\\] {
+            border-color: #292524 !important;
+        }
+    </style>
+</head>
+<body class="bg-white p-0 m-0">
+    <div class="print-container">
+        ${sheet.innerHTML}
+    </div>
+</body>
+</html>`);
+            iframeDoc.close();
+
+            // Wait for styles and DOM to settle inside iframe then trigger print
+            setTimeout(() => {
+                try {
+                    iframe.contentWindow.focus();
+                    iframe.contentWindow.print();
+                } catch (e) {
+                    document.body.classList.add('is-printing-doc');
+                    window.print();
+                }
+            }, 250);
+        } catch (err) {
+            console.warn('Iframe print error, falling back to window.print():', err);
+            document.body.classList.add('is-printing-doc');
+            window.print();
+        }
     },
 
     shareCurrentToLine() {

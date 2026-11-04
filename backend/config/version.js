@@ -3,10 +3,22 @@
  */
 
 module.exports = {
-    version: '2.7.3',
+    version: '2.7.4',
     releaseDate: '2026-11-04',
-    codename: 'Zero-Distortion True A4 Single-Page Print Layout',
+    codename: 'Isolated Pure A4 Print Frame & CSS Header Fix',
     changelog: [
+        {
+            version: '2.7.4',
+            date: '2026-11-04',
+            title: 'Isolated Pure A4 Print Frame & Zero Header Collision',
+            features: [
+                'แก้ปัญหาหัวบิลโดนปุ่มพรีวิวขี่ทับ (Zero Header Collision) ด้วยระบบ Isolated Print Frame แยกแผ่นพิมพ์อิสระ 100%',
+                'ป้องกันแถบพรีวิวและปุ่มสั่งพิมพ์หลุดเข้าไปในหน้าพิมพ์หรือเซฟ PDF โดยเด็ดขาด',
+                'แก้ไขข้อผิดพลาดไวยากรณ์ CSS (Orphaned Brace at line 75) ที่ทำให้ Safari ละเลยกฎ @media print',
+                'เพิ่ม Cache-Busting Versioning (?v=2.7.4) และ Inline Print Isolation Shield ใน HTML ป้องกันการแคชไฟล์เดิม',
+                'การันตีการพิมพ์และส่งออกเป็น PDF ได้เฉพาะตัวเอกสารบิล A4 หน้าเดียวจบ คมชัดสวยงามไร้สิ่งแปลกปลอม'
+            ]
+        },
         {
             version: '2.7.3',
             date: '2026-11-04',

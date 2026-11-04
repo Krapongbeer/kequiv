@@ -6,7 +6,29 @@
     <title>เคอีควิป KEQUIV - ระบบไอที กล้องวงจรปิด และงานระบบครบวงจร</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=2.7.4">
+    <style>
+        @media print {
+            #storefront-view,
+            #cms-view,
+            #backoffice-view,
+            #print-modal-header,
+            .no-print,
+            .line-floating-btn,
+            #toast-container,
+            #login-overlay,
+            header,
+            aside,
+            nav,
+            footer {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                max-height: 0 !important;
+                overflow: hidden !important;
+            }
+        }
+    </style>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -1324,7 +1346,7 @@
     <div id="modal-print" class="modal-container fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-2 sm:p-4">
         <div id="print-modal-inner" class="relative bg-slate-100 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[96vh] flex flex-col overflow-hidden">
             <!-- Print Modal Header -->
-            <div class="no-print p-3 sm:p-4 bg-white border-b border-slate-200 flex items-center justify-between sticky top-0 z-20">
+            <div id="print-modal-header" class="no-print p-3 sm:p-4 bg-white border-b border-slate-200 flex items-center justify-between sticky top-0 z-20">
                 <div class="flex items-center gap-2 sm:gap-3">
                     <span class="text-xl">🖨️</span>
                     <div>
