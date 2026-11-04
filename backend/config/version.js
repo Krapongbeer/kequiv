@@ -3,10 +3,22 @@
  */
 
 module.exports = {
-    version: '2.7.2',
-    releaseDate: '2026-11-03',
-    codename: 'Bill Header Layout Alignment & 2x2 Balanced Metadata Grid',
+    version: '2.7.3',
+    releaseDate: '2026-11-04',
+    codename: 'Zero-Distortion True A4 Single-Page Print Layout',
     changelog: [
+        {
+            version: '2.7.3',
+            date: '2026-11-04',
+            title: 'Zero-Distortion True A4 Single-Page Print Layout',
+            features: [
+                'แก้ปัญหาการสั่งพิมพ์/เซฟ PDF หน้ากระดาษเพี้ยนและขี่กัน โดยซ่อนส่วนประกอบ Storefront, CMS, และ Backoffice ตอนพิมพ์ 100%',
+                'รื้อถอน nested flexbox ในโมดอลขณะสั่งพิมพ์ เพื่อให้เอกสารจัดเรียงแบบ Block Flow ตามมาตรฐานการพิมพ์กระดาษ A4 สากล',
+                'เพิ่ม print-color-adjust: exact เพื่อล็อกสีพื้นหลังตารางสไตล์พิมพ์ดีด (#faf6ee, #ede4d3) และเส้นขอบคมชัดครบถ้วน',
+                'ปรับระยะขอบ @page (12mm 15mm 15mm 15mm) ให้ตรงกับกรอบแสดงผลบนหน้าจอแบบ 1:1 พอดีกระดาษ 1 แผ่นจบ ไม่ล้นหน้า 2',
+                'ป้องกันรูปสินค้าที่โหลดไม่ติดไม่ให้แสดงกรอบข้อผิดพลาด [?] และป้องกันการตัดขาดส่วนลายเซ็นและสรุปยอด'
+            ]
+        },
         {
             version: '2.7.2',
             date: '2026-11-03',

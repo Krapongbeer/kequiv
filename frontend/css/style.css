@@ -410,56 +410,192 @@ table, th, td {
     box-shadow: 0 12px 24px -8px rgba(2, 132, 199, 0.18);
 }
 
+/* =============================================================
+   A4 PRINT STYLES - ZERO DISTORTION & EXACT A4 PAGE FIT
+   ============================================================= */
+
 @page {
     size: A4 portrait;
-    margin: 8mm 10mm;
+    margin: 12mm 15mm 15mm 15mm;
 }
 
 @media print {
-    html, body {
-        background: white !important;
+    /* 1. Global Reset & Full Color / Background Preservation */
+    *, *::before, *::after {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        box-sizing: border-box !important;
+    }
+
+    html, html.dark, body, body.dark {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
         background-image: none !important;
+        color: #1f1d1a !important;
         margin: 0 !important;
         padding: 0 !important;
         width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
         height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
         overflow: visible !important;
+        overflow-x: visible !important;
+        overflow-y: visible !important;
+        -webkit-font-smoothing: antialiased;
     }
-    .no-print, header, aside, #app-sidebar, #app-header, .modal-backdrop, #login-overlay, #sidebar-backdrop {
+
+    /* 2. Completely Hide All Other UI: Storefront, CMS, Backoffice, Floating Buttons, Backdrops, Modals */
+    #storefront-view,
+    #cms-view,
+    #backoffice-view,
+    #app-sidebar,
+    #app-header,
+    #app-content,
+    #toast-container,
+    #login-overlay,
+    #sidebar-backdrop,
+    .line-floating-btn,
+    .modal-backdrop,
+    .modal-container:not(#modal-print),
+    .no-print,
+    header,
+    aside,
+    nav,
+    footer,
+    #store-mobile-menu {
         display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
     }
+
+    /* 3. Pure Static Block Layout for Modal & Inner Shell */
     #modal-print {
-        position: static !important;
         display: block !important;
+        visibility: visible !important;
+        position: static !important;
         background: transparent !important;
         backdrop-filter: none !important;
         padding: 0 !important;
         margin: 0 !important;
         width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
         overflow: visible !important;
+        inset: auto !important;
+        z-index: auto !important;
+        box-shadow: none !important;
+        border: none !important;
     }
+
     #print-modal-inner {
+        display: block !important;
+        visibility: visible !important;
         position: static !important;
         max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
         max-height: none !important;
         box-shadow: none !important;
         border: none !important;
-        background: white !important;
+        border-radius: 0 !important;
+        background: transparent !important;
         overflow: visible !important;
         padding: 0 !important;
         margin: 0 !important;
     }
+
+    /* Dismantle Flexbox wrapper completely in print */
     #print-modal-inner > div {
-        background: white !important;
+        display: block !important;
+        visibility: visible !important;
+        background: transparent !important;
         padding: 0 !important;
+        margin: 0 !important;
         overflow: visible !important;
-    }
-    .print-container {
         width: 100% !important;
-        min-height: auto !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        flex: none !important;
+    }
+
+    /* 4. The Print Sheet: Matches On-Screen Preview 1:1 */
+    #print-sheet,
+    .print-container {
+        display: block !important;
+        visibility: visible !important;
+        position: relative !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 0 !important;
+        height: auto !important;
         margin: 0 !important;
         padding: 0 !important;
         box-shadow: none !important;
-        background: white !important;
+        border: none !important;
+        border-radius: 0 !important;
+        background: #ffffff !important;
+        color: #1f1d1a !important;
+        overflow: visible !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+        page-break-before: avoid !important;
+        break-before: avoid !important;
+    }
+
+    /* 5. Force Table Structure Integrity & Background Colors */
+    table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    thead {
+        display: table-header-group !important;
+    }
+
+    tbody {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    th, td {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Vintage Typewriter Colors preserved exactly */
+    .bg-\[\#faf6ee\] {
+        background-color: #faf6ee !important;
+    }
+    .bg-\[\#ede4d3\] {
+        background-color: #ede4d3 !important;
+    }
+    .border-\[\#1f1d1a\] {
+        border-color: #1f1d1a !important;
+    }
+    .border-\[\#292524\] {
+        border-color: #292524 !important;
+    }
+
+    /* Avoid page breaking across signature block or totals */
+    .avoid-page-break {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 }

@@ -55,7 +55,7 @@ window.printModule = {
             ` : ''}
 
             <!-- 1. Header Section: Company Profile & Document Title (Vintage Typewriter Style) -->
-            <div class="flex items-start justify-between gap-4 pb-2.5 border-b-2 border-[#1f1d1a] relative">
+            <div class="flex items-start justify-between gap-4 pb-2.5 border-b-2 border-[#1f1d1a] relative avoid-page-break">
                 <!-- Left: Company Info (Aligned flush with Branch Address) -->
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-3.5">
@@ -112,7 +112,7 @@ window.printModule = {
             </div>
 
             <!-- 2. Compact Customer & Project Block -->
-            <div class="grid grid-cols-2 gap-3 py-2 border-b-2 border-[#1f1d1a] text-xs font-mono">
+            <div class="grid grid-cols-2 gap-3 py-2 border-b-2 border-[#1f1d1a] text-xs font-mono avoid-page-break">
                 <!-- Customer Box -->
                 <div class="bg-[#faf6ee] p-2.5 rounded border-2 border-[#292524]">
                     <div class="flex items-center justify-between mb-1 pb-0.5 border-b border-stone-300">
@@ -169,7 +169,7 @@ window.printModule = {
                                 <td class="border-x border-stone-800 px-2.5 py-1.5 align-middle">
                                     <div class="flex items-center gap-2">
                                         ${item.image_url ? `
-                                            <img src="${item.image_url}" alt="รูปสินค้า" class="w-8 h-8 object-cover rounded border border-stone-300 shrink-0 bg-white shadow-xs">
+                                            <img src="${item.image_url}" alt="รูปสินค้า" class="w-8 h-8 object-cover rounded border border-stone-300 shrink-0 bg-white shadow-xs" onerror="this.style.display='none'">
                                         ` : ''}
                                         <div class="min-w-0">
                                             <div class="font-medium text-stone-900 leading-snug break-words">${item.product_name}</div>
@@ -208,7 +208,7 @@ window.printModule = {
             </div>
 
             <!-- 4. Thai Baht Text Bar & Financial Summary -->
-            <div class="grid grid-cols-12 gap-2.5 mt-2.5 text-xs font-mono">
+            <div class="grid grid-cols-12 gap-2.5 mt-2.5 text-xs font-mono avoid-page-break">
                 <!-- Left 7 cols: Thai Baht Text + Bank Details + Notes -->
                 <div class="col-span-7 space-y-1.5">
                     <!-- Thai Baht Text Box -->
@@ -270,7 +270,7 @@ window.printModule = {
             </div>
 
             <!-- 5. Signatures Box -->
-            <div class="grid grid-cols-2 gap-6 mt-4 pt-3 border-t-2 border-[#1f1d1a] text-xs font-mono">
+            <div class="grid grid-cols-2 gap-6 mt-4 pt-3 border-t-2 border-[#1f1d1a] text-xs font-mono avoid-page-break">
                 <!-- Customer Signature -->
                 <div class="text-center">
                     <div class="h-10 flex items-end justify-center">
@@ -293,7 +293,10 @@ window.printModule = {
     },
 
     triggerPrint() {
-        window.print();
+        document.body.classList.add('is-printing-doc');
+        setTimeout(() => {
+            window.print();
+        }, 50);
     },
 
     shareCurrentToLine() {
@@ -334,3 +337,10 @@ window.printModule = {
         window.open(lineUrl, '_blank');
     }
 };
+
+// Global cleanup after print dialog closes
+if (typeof window !== 'undefined') {
+    window.addEventListener('afterprint', () => {
+        document.body.classList.remove('is-printing-doc');
+    });
+}
