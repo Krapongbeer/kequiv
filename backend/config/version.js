@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.12',
+    version: '2.9.13',
     releaseDate: '2026-11-05',
-    codename: 'Restore Classic Layout: Customer (Left) & Project (Right)',
+    codename: 'Fix Customer Project Deletion Route Mismatch & Special Char Escaping',
     changelog: [
+        {
+            version: '2.9.13',
+            date: '2026-11-05',
+            title: 'Fix Customer Project Deletion Route Mismatch & Special Char Escaping',
+            features: [
+                'แก้ไขปัญหาปุ่มลบโครงการ/สาขาของลูกค้ากดลบไม่ได้ (Fix Project Delete 404 Route Mismatch): ปรับให้รองรับ Endpoint ทั้ง /api/customers/:customerId/projects/:projectId และ /api/customers/projects/:projectId',
+                'ป้องกัน JavaScript Error จากชื่อโครงการที่มีอักขระพิเศษหรือวงเล็บ ด้วย JSON Safe Escaping',
+                'บันทึกประวัติการลบโครงการลงในระบบ Audit Log (PROJECT_DELETED) โดยอัตโนมัติ'
+            ]
+        },
         {
             version: '2.9.12',
             date: '2026-11-05',

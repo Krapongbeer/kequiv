@@ -301,7 +301,7 @@ window.customersModule = {
                             ${p.contact_person ? `<div class="text-slate-600 mt-0.5">👤 ผู้ติดต่อ: ${p.contact_person}</div>` : ''}
                             ${p.note ? `<div class="text-slate-400 italic mt-0.5">📝 ${p.note}</div>` : ''}
                         </div>
-                        <button onclick="window.customersModule.deleteProject(${p.id}, '${p.project_name}')" class="btn-paper text-[11px] py-1 px-2 text-rose-700 border-rose-300 hover:bg-rose-50">
+                        <button type="button" onclick="window.customersModule.deleteProject(${p.id}, ${JSON.stringify(p.project_name || '').replace(/"/g, '&quot;')})" class="btn-paper text-[11px] py-1 px-2.5 text-rose-700 border-rose-300 hover:bg-rose-50 shadow-xs">
                             ลบ
                         </button>
                     </div>

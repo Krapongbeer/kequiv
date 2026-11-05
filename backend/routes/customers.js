@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { supabase, isSupabaseConfigured } = require('../supabase');
+const { logAudit } = require('../services/auditService');
 
 // Helper to safely insert into Supabase with automatic sequence recovery on duplicate key (23505)
 async function insertWithSequenceRetry(client, table, payload, maxRetries = 5) {
@@ -436,8 +437,8 @@ router.post('/:id/projects', async (req, res) => {
     }
 });
 
-// DELETE customer project (Soft delete)
-router.delete('/projects/:projectId', async (req, res) => {
+// DELETE customer project (Soft delete) - supports both /:customerId/projects/:projectId and /projects/:projectId
+const deleteProjectHandler = async (req, res) => {
     try {
         const projectId = req.params.projectId;
 
@@ -448,15 +449,20 @@ router.delete('/projects/:projectId', async (req, res) => {
                 .eq('id', projectId);
 
             if (error) throw new Error(error.message);
+            await logAudit(req, 'PROJECT_DELETED', { targetType: 'project', targetId: projectId, details: `ลบโครงการ #${projectId}` });
             return res.json({ success: true, message: 'ลบโครงการเรียบร้อยแล้ว' });
         }
 
         // SQLite Fallback
         db.prepare("UPDATE customer_projects SET deleted_at = datetime('now') WHERE id = ?").run(projectId);
+        await logAudit(req, 'PROJECT_DELETED', { targetType: 'project', targetId: projectId, details: `ลบโครงการ #${projectId}` });
         res.json({ success: true, message: 'ลบโครงการเรียบร้อยแล้ว' });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
-});
+};
+
+router.delete('/:customerId/projects/:projectId', deleteProjectHandler);
+router.delete('/projects/:projectId', deleteProjectHandler);
 
 module.exports = router;
