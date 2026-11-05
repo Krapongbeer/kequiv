@@ -71,6 +71,44 @@ router.get('/next-code', async (req, res) => {
     }
 });
 
+// GET next codes for ALL types (quotation, billing, receipt) for any date (present, past, or future)
+router.get('/next-codes-all', async (req, res) => {
+    try {
+        const { date = new Date().toISOString() } = req.query;
+
+        if (isSupabaseConfigured && supabase) {
+            const [qt, inv, re] = await Promise.all([
+                getNextDocumentCodeSupabase(supabase, 'quotation', date),
+                getNextDocumentCodeSupabase(supabase, 'billing', date),
+                getNextDocumentCodeSupabase(supabase, 'receipt', date)
+            ]);
+            return res.json({
+                success: true,
+                data: {
+                    quotation: qt,
+                    billing: inv,
+                    receipt: re
+                }
+            });
+        }
+
+        const qt = getNextDocumentCode(db, 'quotation', date);
+        const inv = getNextDocumentCode(db, 'billing', date);
+        const re = getNextDocumentCode(db, 'receipt', date);
+
+        res.json({
+            success: true,
+            data: {
+                quotation: qt,
+                billing: inv,
+                receipt: re
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // GET all documents with filter
 router.get('/', async (req, res) => {
     try {

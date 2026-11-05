@@ -115,6 +115,7 @@ const api = {
 
     // Documents
     getNextCode: (type, date) => request(`/documents/next-code?type=${encodeURIComponent(type)}&date=${encodeURIComponent(date)}`),
+    getNextCodesAll: (date) => request(`/documents/next-codes-all?date=${encodeURIComponent(date || '')}`),
     getDocuments: (filters = {}) => {
         const params = new URLSearchParams();
         Object.entries(filters).forEach(([k, v]) => {

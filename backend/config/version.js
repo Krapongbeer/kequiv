@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.15',
+    version: '2.9.16',
     releaseDate: '2026-11-05',
-    codename: 'Secure Anti-Guessing Public Document Share with Secret Access Tokens',
+    codename: 'Future Document Code Generator, Quick Remark Presets & Clean LINE Share Message',
     changelog: [
+        {
+            version: '2.9.16',
+            date: '2026-11-05',
+            title: 'Future Document Code Generator, Quick Remark Presets & Clean LINE Share Message',
+            features: [
+                'ระบบสร้างเลขเอกสารล่วงหน้า (เลขอนาคต): เลือกวัน/เดือน/ปี แล้วคำนวณเลขพร้อมกันทั้ง 3 ประเภท (QT, INV, RE) ทันที พร้อมปุ่มสลับประเภทและปุ่มกันเลขเข้าคลังสำรอง',
+                'ปุ่มข้อความด่วนหมายเหตุท้ายเอกสาร: เพิ่มปุ่มกดเลือก "+ ราคาสุทธิ", "+ ยืนราคา" (ยืนราคา 30 วัน ส่งของภายใน 30 วัน หลังได้รับใบสั่งซื้อ) และ "+ รับประกัน" (รับประกันสินค้า 1 ปี)',
+                'ปรับข้อความแชร์เข้า LINE ให้กระชับ สวยงาม และไม่มีลิงก์เว็บซ้ำซ้อน ป้องกัน LINE แสดงการ์ดตัวอย่างซ้อน 2 ใบ'
+            ]
+        },
         {
             version: '2.9.15',
             date: '2026-11-05',

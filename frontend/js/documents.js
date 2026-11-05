@@ -499,7 +499,7 @@ window.documentsModule = {
                                 <input type="hidden" name="code_mode" value="auto">
                             ` : `
                                 <div class="space-y-2">
-                                    <div class="flex items-center gap-4 text-xs">
+                                    <div class="flex items-center gap-3 text-xs flex-wrap">
                                         <label class="inline-flex items-center gap-1.5 cursor-pointer">
                                             <input type="radio" name="code_mode" value="auto" ${!useReservedCode ? 'checked' : ''} onchange="window.documentsModule.toggleCodeMode('auto')" class="text-sky-600">
                                             <span class="font-medium text-slate-700">รันเลขอัตโนมัติ (ปัจจุบัน)</span>
@@ -507,6 +507,10 @@ window.documentsModule = {
                                         <label class="inline-flex items-center gap-1.5 cursor-pointer">
                                             <input type="radio" name="code_mode" value="reserved" ${useReservedCode ? 'checked' : ''} onchange="window.documentsModule.toggleCodeMode('reserved')" class="text-purple-600">
                                             <span class="font-semibold text-purple-700">ใช้เลขสำรอง (สำหรับออกบิลย้อนหลัง)</span>
+                                        </label>
+                                        <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                                            <input type="radio" name="code_mode" value="future" onchange="window.documentsModule.toggleCodeMode('future')" class="text-emerald-600">
+                                            <span class="font-semibold text-emerald-700">✨ ออกเอกสารล่วงหน้า (เลขอนาคต)</span>
                                         </label>
                                     </div>
 
@@ -529,6 +533,69 @@ window.documentsModule = {
                                                 </option>
                                             `).join('')}
                                         </select>
+                                    </div>
+
+                                    <!-- Container for Future Code Generation -->
+                                    <div id="code-future-container" class="hidden space-y-2.5 p-3.5 bg-emerald-50/80 border border-emerald-300 rounded-xl">
+                                        <div class="flex flex-wrap items-center justify-between gap-2">
+                                            <label class="text-xs font-bold text-emerald-950 flex items-center gap-1">
+                                                <span>📅 เลือกวัน/เดือน/ปี ที่ต้องการออกเอกสารล่วงหน้า:</span>
+                                            </label>
+                                            <div class="flex items-center gap-1 flex-wrap">
+                                                <button type="button" onclick="window.documentsModule.setFutureOffset(7)" class="text-[10px] px-2 py-0.5 bg-white border border-emerald-300 rounded text-emerald-800 hover:bg-emerald-100 font-medium">+7 วัน</button>
+                                                <button type="button" onclick="window.documentsModule.setFutureOffset(15)" class="text-[10px] px-2 py-0.5 bg-white border border-emerald-300 rounded text-emerald-800 hover:bg-emerald-100 font-medium">+15 วัน</button>
+                                                <button type="button" onclick="window.documentsModule.setFutureOffset(30)" class="text-[10px] px-2 py-0.5 bg-white border border-emerald-300 rounded text-emerald-800 hover:bg-emerald-100 font-medium">+30 วัน</button>
+                                                <button type="button" onclick="window.documentsModule.setFutureNextMonth()" class="text-[10px] px-2 py-0.5 bg-white border border-emerald-300 rounded text-emerald-800 hover:bg-emerald-100 font-bold">เดือนหน้า</button>
+                                            </div>
+                                        </div>
+
+                                        <input type="date" id="future-date-picker" class="w-full px-3 py-1.5 text-xs bg-white border border-emerald-300 rounded-lg text-emerald-950 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20" onchange="window.documentsModule.onFutureDatePicked(this.value)">
+
+                                        <!-- Live Calculated Future Codes for ALL 3 types (QT, INV, RE) -->
+                                        <div>
+                                            <div class="flex items-center justify-between text-[11px] text-emerald-900 font-bold mb-1.5">
+                                                <span>⚡ เลขที่ระบบสร้างขึ้นล่วงหน้าทั้ง 3 ประเภท:</span>
+                                                <span class="text-[10px] text-emerald-700 font-normal">(คลิกการ์ดเพื่อสลับประเภทเอกสาร)</span>
+                                            </div>
+                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                                <!-- QT Card -->
+                                                <div id="card-future-qt" onclick="window.documentsModule.selectFutureType('quotation')" class="cursor-pointer p-2.5 bg-white rounded-lg border-2 border-emerald-500 shadow-xs transition hover:shadow-md">
+                                                    <div class="flex items-center justify-between text-[11px] font-bold">
+                                                        <span class="text-sky-900">📄 ใบเสนอราคา (QT)</span>
+                                                        <span id="badge-active-qt" class="text-[9px] bg-emerald-600 text-white px-1.5 py-0.2 rounded font-sans">กำลังใช้</span>
+                                                    </div>
+                                                    <div id="future-code-qt" class="text-sm font-bold font-mono text-sky-700 mt-1">กำลังคำนวณ...</div>
+                                                </div>
+
+                                                <!-- INV Card -->
+                                                <div id="card-future-inv" onclick="window.documentsModule.selectFutureType('billing')" class="cursor-pointer p-2.5 bg-white rounded-lg border-2 border-slate-200 shadow-xs transition hover:border-emerald-400 hover:shadow-md">
+                                                    <div class="flex items-center justify-between text-[11px] font-bold">
+                                                        <span class="text-amber-900">📑 ใบแจ้งหนี้ (INV)</span>
+                                                        <span id="badge-active-inv" class="text-[9px] bg-emerald-600 text-white px-1.5 py-0.2 rounded font-sans hidden">กำลังใช้</span>
+                                                    </div>
+                                                    <div id="future-code-inv" class="text-sm font-bold font-mono text-amber-700 mt-1">กำลังคำนวณ...</div>
+                                                </div>
+
+                                                <!-- RE Card -->
+                                                <div id="card-future-re" onclick="window.documentsModule.selectFutureType('receipt')" class="cursor-pointer p-2.5 bg-white rounded-lg border-2 border-slate-200 shadow-xs transition hover:border-emerald-400 hover:shadow-md">
+                                                    <div class="flex items-center justify-between text-[11px] font-bold">
+                                                        <span class="text-emerald-900">🧾 ใบเสร็จรับเงิน (RE)</span>
+                                                        <span id="badge-active-re" class="text-[9px] bg-emerald-600 text-white px-1.5 py-0.2 rounded font-sans hidden">กำลังใช้</span>
+                                                    </div>
+                                                    <div id="future-code-re" class="text-sm font-bold font-mono text-emerald-700 mt-1">กำลังคำนวณ...</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex flex-wrap items-center justify-between pt-1 gap-2 text-[11px] text-emerald-800">
+                                            <span class="flex items-center gap-1 font-mono">
+                                                <span>💡 เลขที่เลือก:</span>
+                                                <b id="future-selected-display" class="font-bold underline text-emerald-950">-</b>
+                                            </span>
+                                            <button type="button" onclick="window.documentsModule.reserveAllFutureCodes()" class="text-[11px] font-bold text-emerald-900 hover:underline bg-white px-2 py-0.5 rounded border border-emerald-300 shadow-xs inline-flex items-center gap-1">
+                                                <span>📥 กันเลขทั้ง 3 นี้เข้าคลังสำรอง</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             `}
@@ -653,9 +720,13 @@ window.documentsModule = {
                             </div>
 
                             <div>
-                                <div class="flex items-center justify-between mb-1.5">
+                                <div class="flex items-center justify-between mb-1.5 flex-wrap gap-1">
                                     <label class="text-xs font-bold text-slate-700">หมายเหตุท้ายเอกสาร</label>
-                                    <button type="button" onclick="window.documentsModule.insertPreset('remark', 'ราคาสินค้าและบริการเป็นราคาสุทธิ')" class="text-[11px] bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded text-slate-600 transition">+ ราคาสุทธิ</button>
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <button type="button" onclick="window.documentsModule.insertPreset('remark', 'ราคาสินค้าและบริการเป็นราคาสุทธิ')" class="text-[11px] bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded text-slate-700 border border-slate-300 transition font-medium" title="เพิ่มข้อความราคาสุทธิ">+ ราคาสุทธิ</button>
+                                        <button type="button" onclick="window.documentsModule.insertPreset('remark', 'ยืนราคา 30 วัน ส่งของภายใน 30 วัน หลังได้รับใบสั่งซื้อ')" class="text-[11px] bg-sky-50 hover:bg-sky-100 px-2 py-0.5 rounded text-sky-800 border border-sky-300 transition font-medium" title="เพิ่มเงื่อนไขยืนราคาและส่งของ">+ ยืนราคา</button>
+                                        <button type="button" onclick="window.documentsModule.insertPreset('remark', 'รับประกันสินค้า 1 ปี')" class="text-[11px] bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded text-emerald-800 border border-emerald-300 transition font-medium" title="เพิ่มเงื่อนไขการรับประกัน">+ รับประกัน</button>
+                                    </div>
                                 </div>
                                 <textarea id="doc-remark" rows="2" class="w-full p-2.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none text-slate-700">${remark !== undefined ? remark : (app.state.company ? app.state.company.default_remark || '' : '')}</textarea>
                             </div>
@@ -962,20 +1033,179 @@ window.documentsModule = {
         }
     },
 
+    futureCodesCache: null,
+
     toggleCodeMode(mode) {
         const autoBox = document.getElementById('code-auto-container');
         const reservedBox = document.getElementById('code-reserved-container');
+        const futureBox = document.getElementById('code-future-container');
 
         if (mode === 'reserved') {
             if (autoBox) autoBox.classList.add('hidden');
             if (reservedBox) reservedBox.classList.remove('hidden');
+            if (futureBox) futureBox.classList.add('hidden');
+        } else if (mode === 'future') {
+            if (autoBox) autoBox.classList.add('hidden');
+            if (reservedBox) reservedBox.classList.add('hidden');
+            if (futureBox) futureBox.classList.remove('hidden');
+
+            const picker = document.getElementById('future-date-picker');
+            if (picker) {
+                if (!picker.value) {
+                    const d = new Date();
+                    d.setDate(d.getDate() + 7);
+                    const y = d.getFullYear();
+                    const m = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    picker.value = `${y}-${m}-${day}`;
+                }
+                this.onFutureDatePicked(picker.value);
+            }
         } else {
             if (autoBox) autoBox.classList.remove('hidden');
             if (reservedBox) reservedBox.classList.add('hidden');
+            if (futureBox) futureBox.classList.add('hidden');
+
+            // Reset Section 2 issue date to today if returning to auto
+            const issueDateEl = document.getElementById('doc-issue-date');
+            if (issueDateEl) {
+                const today = new Date().toISOString().slice(0, 10);
+                issueDateEl.value = today;
+                this.onDateChanged(today);
+            }
+        }
+    },
+
+    setFutureOffset(days) {
+        const d = new Date();
+        d.setDate(d.getDate() + days);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const val = `${y}-${m}-${day}`;
+        const picker = document.getElementById('future-date-picker');
+        if (picker) {
+            picker.value = val;
+            this.onFutureDatePicked(val);
+        }
+    },
+
+    setFutureNextMonth() {
+        const now = new Date();
+        const nextM = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        const y = nextM.getFullYear();
+        const m = String(nextM.getMonth() + 1).padStart(2, '0');
+        const val = `${y}-${m}-01`;
+        const picker = document.getElementById('future-date-picker');
+        if (picker) {
+            picker.value = val;
+            this.onFutureDatePicked(val);
+        }
+    },
+
+    async onFutureDatePicked(dateStr) {
+        if (!dateStr) return;
+        try {
+            const qtEl = document.getElementById('future-code-qt');
+            const invEl = document.getElementById('future-code-inv');
+            const reEl = document.getElementById('future-code-re');
+            if (qtEl) qtEl.textContent = '...';
+            if (invEl) invEl.textContent = '...';
+            if (reEl) reEl.textContent = '...';
+
+            const res = await api.getNextCodesAll(dateStr);
+            this.futureCodesCache = res.data;
+
+            if (qtEl) qtEl.textContent = res.data.quotation.code;
+            if (invEl) invEl.textContent = res.data.billing.code;
+            if (reEl) reEl.textContent = res.data.receipt.code;
+
+            // Sync with Section 2 issue date
+            const issueDateEl = document.getElementById('doc-issue-date');
+            if (issueDateEl) issueDateEl.value = dateStr;
+
+            this.updateFutureTypeHighlight();
+        } catch (e) {
+            console.error('Error fetching future codes:', e);
+        }
+    },
+
+    selectFutureType(type) {
+        const typeSelect = document.getElementById('doc-type-select');
+        if (typeSelect) {
+            typeSelect.value = type;
+        }
+        this.updateFutureTypeHighlight();
+    },
+
+    updateFutureTypeHighlight() {
+        const typeSelect = document.getElementById('doc-type-select');
+        const curType = typeSelect ? typeSelect.value : 'quotation';
+
+        const cards = {
+            quotation: { card: document.getElementById('card-future-qt'), badge: document.getElementById('badge-active-qt'), code: this.futureCodesCache?.quotation?.code },
+            billing: { card: document.getElementById('card-future-inv'), badge: document.getElementById('badge-active-inv'), code: this.futureCodesCache?.billing?.code },
+            receipt: { card: document.getElementById('card-future-re'), badge: document.getElementById('badge-active-re'), code: this.futureCodesCache?.receipt?.code }
+        };
+
+        Object.entries(cards).forEach(([t, item]) => {
+            if (item.card) {
+                if (t === curType) {
+                    item.card.classList.add('border-emerald-500', 'bg-emerald-50/50');
+                    item.card.classList.remove('border-slate-200');
+                    if (item.badge) item.badge.classList.remove('hidden');
+                } else {
+                    item.card.classList.remove('border-emerald-500', 'bg-emerald-50/50');
+                    item.card.classList.add('border-slate-200');
+                    if (item.badge) item.badge.classList.add('hidden');
+                }
+            }
+        });
+
+        const activeCode = cards[curType]?.code || '-';
+        const displayEl = document.getElementById('future-selected-display');
+        if (displayEl) displayEl.textContent = activeCode;
+
+        const autoPreviewEl = document.getElementById('auto-code-preview');
+        if (autoPreviewEl && activeCode !== '-') {
+            autoPreviewEl.value = activeCode;
+        }
+    },
+
+    async reserveAllFutureCodes() {
+        const picker = document.getElementById('future-date-picker');
+        const dateStr = (picker && picker.value) ? picker.value : new Date().toISOString().slice(0, 10);
+        
+        try {
+            if (window.app) app.toast('กำลังกันเลขออนาคตทั้ง 3 ประเภท...', 'info');
+            
+            const d = new Date(dateStr);
+            const dateLabel = isNaN(d.getTime()) ? dateStr : `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+            const noteText = `กันเลขออนาคตสำหรับวันที่ ${dateLabel}`;
+
+            await Promise.all([
+                api.reserveBatch({ doc_type: 'quotation', count: 1, note: noteText, year_month: this.futureCodesCache?.quotation?.yearMonth }),
+                api.reserveBatch({ doc_type: 'billing', count: 1, note: noteText, year_month: this.futureCodesCache?.billing?.yearMonth }),
+                api.reserveBatch({ doc_type: 'receipt', count: 1, note: noteText, year_month: this.futureCodesCache?.receipt?.yearMonth })
+            ]);
+
+            if (window.app) app.toast('กันเลขออนาคตทั้ง 3 ประเภท (QT, INV, RE) เข้าคลังเลขสำรองเรียบร้อยแล้ว! 📥⚡', 'success');
+
+            // Refresh the future codes display
+            await this.onFutureDatePicked(dateStr);
+        } catch (e) {
+            if (window.app) app.toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
         }
     },
 
     async onDocTypeChanged(type) {
+        const form = document.getElementById('doc-create-form');
+        const codeMode = form ? form.code_mode?.value : 'auto';
+        if (codeMode === 'future') {
+            this.updateFutureTypeHighlight();
+            return;
+        }
+
         const dateInput = document.getElementById('doc-issue-date');
         const issueDate = dateInput ? dateInput.value : new Date().toISOString().slice(0, 10);
 
@@ -1097,13 +1327,22 @@ window.documentsModule = {
                 app.toast('กรุณาเลือกเลขที่กันไว้ หรือเปลี่ยนเป็นรันเลขอัตโนมัติ', 'warning');
                 return;
             }
+        } else if (code_mode === 'future') {
+            const futurePicker = document.getElementById('future-date-picker');
+            if (futurePicker && futurePicker.value) {
+                form.issue_date.value = futurePicker.value;
+            }
         }
+
+        const effectiveIssueDate = (code_mode === 'future' && document.getElementById('future-date-picker')?.value)
+            ? document.getElementById('future-date-picker').value
+            : issue_date;
 
         if (!customer_id) {
             app.toast('กรุณาเลือกลูกค้า', 'warning');
             return;
         }
-        if (!issue_date) {
+        if (!effectiveIssueDate) {
             app.toast('กรุณาระบุวันที่ออกเอกสาร', 'warning');
             return;
         }
@@ -1129,13 +1368,13 @@ window.documentsModule = {
         const editId = document.getElementById('doc-edit-id')?.value;
 
         const payload = {
-            code_mode,
+            code_mode: code_mode === 'future' ? 'auto' : code_mode,
             specified_code,
             type,
             customer_id: parseInt(customer_id, 10),
             project_id: project_id ? parseInt(project_id, 10) : null,
             project_name_custom,
-            issue_date,
+            issue_date: effectiveIssueDate,
             due_date,
             items: validItems,
             discount_total,
