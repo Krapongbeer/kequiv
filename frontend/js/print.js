@@ -168,23 +168,9 @@ window.printModule = {
                 </div>
             </div>
 
-            <!-- 2. Balanced & Compact Customer & Project Block -->
+            <!-- 2. Balanced & Compact Project & Customer Block (โครงการอยู่ซ้าย, ลูกค้าอยู่ขวา) -->
             <div class="grid grid-cols-2 gap-2.5 py-1.5 border-b-2 border-[#1f1d1a] font-mono avoid-page-break">
-                <!-- Customer Box -->
-                <div class="bg-[#faf6ee] px-2.5 py-1.5 rounded border border-stone-800 text-[10.5px]">
-                    <div class="flex items-center justify-between mb-1 pb-0.5 border-b border-stone-300">
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-stone-600 font-typewriter">ลูกค้า / CUSTOMER</span>
-                        ${doc.customer_tax_id ? `<span class="text-[9.5px] text-stone-700 font-mono font-bold">Tax: ${escapeHtml(doc.customer_tax_id)}</span>` : ''}
-                    </div>
-                    <div class="font-bold text-stone-900 text-[11px] leading-snug">${escapeHtml(doc.customer_name) || '-'}</div>
-                    <div class="text-[10px] text-stone-600 mt-0.5 leading-tight whitespace-pre-line">${doc.customer_address ? doc.customer_address.split('\n').map(l => escapeHtml(l.trim())).filter(Boolean).join('\n') : '-'}</div>
-                    <div class="text-[10px] text-stone-600 mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono">
-                        ${doc.customer_phone ? `<div>โทร: <b>${escapeHtml(doc.customer_phone)}</b></div>` : ''}
-                        ${doc.customer_email ? `<div class="break-all">อีเมล: <b>${escapeHtml(doc.customer_email)}</b></div>` : ''}
-                    </div>
-                </div>
-
-                <!-- Project / Site Box -->
+                <!-- Left: Project / Site Box -->
                 <div class="bg-[#faf6ee] px-2.5 py-1.5 rounded border border-stone-800 text-[10.5px]">
                     <div class="flex items-center justify-between mb-1 pb-0.5 border-b border-stone-300">
                         <span class="text-[9px] font-bold uppercase tracking-wider text-stone-600 font-typewriter">
@@ -202,6 +188,20 @@ window.printModule = {
                             ผู้ประสานงาน: <b>${escapeHtml(doc.project_contact_person)}</b>
                         </div>
                     ` : ''}
+                </div>
+
+                <!-- Right: Customer Box -->
+                <div class="bg-[#faf6ee] px-2.5 py-1.5 rounded border border-stone-800 text-[10.5px]">
+                    <div class="flex items-center justify-between mb-1 pb-0.5 border-b border-stone-300">
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-stone-600 font-typewriter">ลูกค้า / CUSTOMER</span>
+                        ${doc.customer_tax_id ? `<span class="text-[9.5px] text-stone-700 font-mono font-bold">Tax: ${escapeHtml(doc.customer_tax_id)}</span>` : ''}
+                    </div>
+                    <div class="font-bold text-stone-900 text-[11px] leading-snug">${escapeHtml(doc.customer_name) || '-'}</div>
+                    <div class="text-[10px] text-stone-600 mt-0.5 leading-tight whitespace-pre-line">${doc.customer_address ? doc.customer_address.split('\n').map(l => escapeHtml(l.trim())).filter(Boolean).join('\n') : '-'}</div>
+                    <div class="text-[10px] text-stone-600 mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono">
+                        ${doc.customer_phone ? `<div>โทร: <b>${escapeHtml(doc.customer_phone)}</b></div>` : ''}
+                        ${doc.customer_email ? `<div class="break-all">อีเมล: <b>${escapeHtml(doc.customer_email)}</b></div>` : ''}
+                    </div>
                 </div>
             </div>
 

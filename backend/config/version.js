@@ -3,10 +3,19 @@
  */
 
 module.exports = {
-    version: '2.9.10',
+    version: '2.9.11',
     releaseDate: '2026-11-05',
-    codename: 'Balanced Header Layout & Persistent Multi-User Cloud Audit Trail',
+    codename: 'Swap Project (Left) & Customer (Right) Across Bill Forms and Print Sheets',
     changelog: [
+        {
+            version: '2.9.11',
+            date: '2026-11-05',
+            title: 'Swap Project (Left) & Customer (Right) Across Bill Forms and Print Sheets',
+            features: [
+                'สลับตำแหน่งการจัดวางข้อมูล: เอา "โครงการ / หัวบิลย่อย" (Project) ไว้ฝั่งซ้าย และ "ข้อมูลลูกค้า" (Customer) ไว้ฝั่งขวา',
+                'มีผลครอบคลุมทั้งหน้าฟอร์มออกบิล/แก้ไขบิล (Create/Edit Document Form) และหน้าใบเสร็จ/ใบเสนอราคา A4 สำหรับพิมพ์และแชร์ (Print Preview, PDF, PNG Export)'
+            ]
+        },
         {
             version: '2.9.10',
             date: '2026-11-05',
