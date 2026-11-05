@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.9.5',
+    version: '2.9.6',
     releaseDate: '2026-11-05',
-    codename: 'Unified Desktop Pill Toolbar & Responsive Print Preview Action Strip',
+    codename: 'Interactive Security Audit Trail UI & Visual Activity Logs',
     changelog: [
+        {
+            version: '2.9.6',
+            date: '2026-11-05',
+            title: 'Interactive Security Audit Trail UI & Visual Activity Logs',
+            features: [
+                'เพิ่มหน้าต่างตรวจสอบประวัติความปลอดภัยบนหน้าเว็บ (Security Audit Logs UI Viewer): แสดงผลในแท็บการตั้งค่า (Settings)',
+                'แสดงตาราง Audit Trail ละเอียด: วันที่/เวลา, ผู้ใช้, กิจกรรม (Badge สีระบุประเภทเหตุการณ์), IP Address, และรายละเอียดการทำรายการ',
+                'ปุ่มรีเฟรชประวัติความปลอดภัยแบบเรียลไทม์ (Real-time Log Refresh)',
+                'จำกัดสิทธิ์เข้าถึงเฉพาะผู้ดูแลระบบ (Admin-only RBAC Enforcement)'
+            ]
+        },
         {
             version: '2.9.5',
             date: '2026-11-05',

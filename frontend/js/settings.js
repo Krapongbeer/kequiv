@@ -162,9 +162,27 @@ window.settingsModule = {
                     </div>
                 </form>
             </div>
+
+            <!-- Security Audit Trail Card (Admin View) -->
+            <div class="max-w-4xl mx-auto typewriter-card rounded-xl p-6 md:p-8 font-mono bg-white mt-6">
+                <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-200 mb-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 font-typewriter flex items-center gap-2">
+                            <span>🛡️</span> บันทึกความปลอดภัยระบบ (Security Audit Trail)
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">บันทึกประวัติการล็อกอิน, การเปลี่ยนรหัสผ่าน, การดาวน์โหลด Backup และการยกเลิกบิล</p>
+                    </div>
+                    <button type="button" onclick="window.settingsModule.loadAuditLogs()" class="btn-paper text-xs py-1.5 px-3 border border-slate-300 hover:border-sky-500 flex items-center gap-1.5 shadow-xs">
+                        <span>🔄</span> รีเฟรชบันทึก
+                    </button>
+                </div>
+
+                <div id="audit-logs-table-container" class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs"></div>
+            </div>
         `;
 
         this.renderBankAccounts();
+        this.loadAuditLogs();
     },
 
     renderBankAccounts() {
@@ -275,8 +293,74 @@ window.settingsModule = {
             const res = await api.changePassword(oldPwd, newPwd);
             app.toast(res.message, 'success');
             document.getElementById('form-change-password')?.reset();
+            this.loadAuditLogs();
         } catch (err) {
             app.toast(err.message, 'error');
+        }
+    },
+
+    async loadAuditLogs() {
+        const container = document.getElementById('audit-logs-table-container');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="p-8 text-center text-slate-400 font-mono text-xs">
+                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-sky-600 mb-2"></div>
+                <div>กำลังโหลดบันทึกความปลอดภัย...</div>
+            </div>
+        `;
+
+        try {
+            const res = await api.getAuditLogs({ limit: 50 });
+            const logs = res.data || [];
+            if (logs.length === 0) {
+                container.innerHTML = '<div class="p-6 text-center text-slate-400 font-mono text-xs">ยังไม่มีบันทึกกิจกรรมความปลอดภัยในระบบ</div>';
+                return;
+            }
+
+            const actionBadges = {
+                LOGIN_SUCCESS: '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">เข้าสู่ระบบสำเร็จ</span>',
+                LOGIN_FAILED: '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">เข้าสู่ระบบไม่สำเร็จ</span>',
+                LOGOUT: '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">ออกจากระบบ</span>',
+                PASSWORD_CHANGED: '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">เปลี่ยนรหัสผ่าน</span>',
+                DOCUMENT_CANCELLED: '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">ยกเลิกเอกสาร</span>',
+                BACKUP_DOWNLOAD: '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200">สำรองฐานข้อมูล</span>',
+                COMPANY_PROFILE_UPDATED: '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-100 text-cyan-800 border border-cyan-200">อัปเดตข้อมูลร้าน</span>'
+            };
+
+            container.innerHTML = `
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold">
+                                <th class="p-2.5 whitespace-nowrap">เวลา</th>
+                                <th class="p-2.5 whitespace-nowrap">ผู้ใช้</th>
+                                <th class="p-2.5 whitespace-nowrap">กิจกรรม</th>
+                                <th class="p-2.5 whitespace-nowrap">IP Address</th>
+                                <th class="p-2.5">รายละเอียด</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            ${logs.map(log => `
+                                <tr class="hover:bg-slate-50 font-mono">
+                                    <td class="p-2.5 whitespace-nowrap text-slate-500">${log.created_at || '-'}</td>
+                                    <td class="p-2.5 whitespace-nowrap font-bold text-slate-800">${log.username || 'system'}</td>
+                                    <td class="p-2.5 whitespace-nowrap">${actionBadges[log.action] || `<span class="px-2 py-0.5 rounded text-[10px] bg-slate-100 text-slate-700">${log.action}</span>`}</td>
+                                    <td class="p-2.5 whitespace-nowrap text-slate-500 text-[11px]">${log.ip_address || '-'}</td>
+                                    <td class="p-2.5 text-slate-600 text-[11px] max-w-xs truncate" title="${log.details || ''}">${log.details || '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } catch (err) {
+            container.innerHTML = `
+                <div class="p-6 text-center text-slate-500 font-mono text-xs">
+                    <p class="font-bold text-slate-700">🔒 บันทึกความปลอดภัยสำหรับผู้ดูแลระบบ (Admin Only)</p>
+                    <p class="text-[11px] text-slate-400 mt-1">${err.message || 'จำเป็นต้องใช้สิทธิ์แอดมินในการดูข้อมูลส่วนนี้'}</p>
+                </div>
+            `;
         }
     }
 };
