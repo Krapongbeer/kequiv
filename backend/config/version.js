@@ -3,10 +3,22 @@
  */
 
 module.exports = {
-    version: '2.9.6',
+    version: '2.9.7',
     releaseDate: '2026-11-05',
-    codename: 'Interactive Security Audit Trail UI & Visual Activity Logs',
+    codename: 'Dedicated Security Audit Log Menu & Interactive Compliance Dashboard',
     changelog: [
+        {
+            version: '2.9.7',
+            date: '2026-11-05',
+            title: 'Dedicated Security Audit Log Menu & Interactive Compliance Dashboard',
+            features: [
+                'เพิ่มเมนูหลัก "7. ประวัติความปลอดภัย (Audit Log)" บนแถบเมนูด้านซ้าย (Sidebar Navigation)',
+                'แดชบอร์ดตรวจสอบกิจกรรมความปลอดภัยแบบเจาะลึก (Interactive Audit Log Viewer): ตรวจสอบ Login Success, Login Failed, Password Change, Document Cancel, Backup และ Profile Update',
+                'การ์ดสถิติความปลอดภัย (Security KPI Summary Cards): แสดงยอดสถิติจำนวนครั้งการเข้าสู่ระบบสำเร็จ, ตรวจจับการล็อกอินล้มเหลว และการเปลี่ยนรหัสผ่าน',
+                'ฟิลเตอร์คัดกรองตามประเภทกิจกรรม และช่องค้นหาตามชื่อผู้ใช้งานแบบเรียลไทม์',
+                'ระบบส่งออกประวัติความปลอดภัยเป็นไฟล์ CSV (1-Click CSV Export)'
+            ]
+        },
         {
             version: '2.9.6',
             date: '2026-11-05',

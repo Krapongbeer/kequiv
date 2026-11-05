@@ -474,6 +474,8 @@ const app = {
             window.reservationsModule.loadList();
         } else if (tabName === 'settings' && window.settingsModule) {
             window.settingsModule.load();
+        } else if (tabName === 'audit-logs' && window.auditModule) {
+            window.auditModule.load();
         }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
