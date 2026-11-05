@@ -16,19 +16,35 @@ router.get('/status', (req, res) => {
 });
 
 // POST /api/line/webhook - Public Webhook for LINE Platform
-router.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
+router.post('/webhook', async (req, res) => {
     try {
         const signature = req.headers['x-line-signature'];
-        const bodyBuffer = req.body;
-        const bodyString = Buffer.isBuffer(bodyBuffer) ? bodyBuffer.toString('utf8') : JSON.stringify(bodyBuffer);
+        
+        let bodyString = '';
+        if (req.rawBody) {
+            bodyString = req.rawBody.toString('utf8');
+        } else if (Buffer.isBuffer(req.body)) {
+            bodyString = req.body.toString('utf8');
+        } else if (typeof req.body === 'string') {
+            bodyString = req.body;
+        } else {
+            bodyString = JSON.stringify(req.body);
+        }
 
-        if (!lineService.verifySignature(bodyString, signature)) {
+        if (!signature || !lineService.verifySignature(bodyString, signature)) {
             console.warn('⚠️ Invalid LINE Webhook Signature rejected');
             return res.status(403).json({ success: false, error: 'Invalid signature' });
         }
 
-        const data = JSON.parse(bodyString);
+        const data = (typeof req.body === 'object' && !Buffer.isBuffer(req.body) && req.body !== null) 
+            ? req.body 
+            : JSON.parse(bodyString || '{}');
         const events = data.events || [];
+
+        // Instant 200 OK for verification events from LINE Developers console
+        if (events.length === 0) {
+            return res.status(200).json({ success: true, message: 'Webhook verified' });
+        }
 
         for (const ev of events) {
             if (ev.type === 'message' && ev.message && ev.message.type === 'text') {

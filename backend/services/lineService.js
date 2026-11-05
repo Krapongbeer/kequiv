@@ -5,8 +5,8 @@
 
 const crypto = require('crypto');
 
-const LINE_CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-const LINE_CHANNEL_SECRET = process.env.LINE_CHANNEL_SECRET;
+const LINE_CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN || 'cTrlmMLUEr9styCUlka2DancJQhOIGxM8rpaTS/HsDyfhFT1DL1vRkYWUP879KrL365E20TL0eGYqXolUZohQLjaArEThT8SxRtC5zSbdSMFi6Kjwa0VdRk7FJJJFtHSHcJSZDnenLO4C44kYu4MEAdB04t89/1O/w1cDnyilFU=';
+const LINE_CHANNEL_SECRET = process.env.LINE_CHANNEL_SECRET || '0ec9e8a7f84f1cd909bf40ecdbc4024c';
 
 /**
  * Verify HMAC-SHA256 signature from LINE Webhook
