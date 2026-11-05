@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.9.3',
+    version: '2.9.4',
     releaseDate: '2026-11-05',
-    codename: 'Official LINE Messaging API Integration, 1-Click Image Export & Public Bill Viewer',
+    codename: 'Optimized LINE Share Payload, 1-Click Link Copy & Mobile/Desktop Deep Linking',
     changelog: [
+        {
+            version: '2.9.4',
+            date: '2026-11-05',
+            title: 'Optimized LINE Share Payload, 1-Click Link Copy & Mobile/Desktop Deep Linking',
+            features: [
+                'ปรับปรุงโครงสร้างข้อความแชร์เข้า LINE: ป้องกันปัญหาหน้าขาวว่างเปล่า (Blank Page) จากข้อความ URL ขนาดยาวเกินขีดจำกัดของ LINE Web Plugin',
+                'เพิ่มปุ่ม "🔗 คัดลอกลิงก์บิล": คัดลอก URL หน้าดูบิลออนไลน์ส่งให้ลูกค้าทาง LINE หรือแชตอื่นๆ ได้ทันที',
+                'ระบบ Auto-Clipboard สำรองข้อมูล: เมื่อกดปุ่มแชร์เข้า LINE ระบบจะคัดลอกข้อความสรุปและลิงก์ไว้ใน Clipboard ให้โดยอัตโนมัติ เพื่อให้ผู้ใช้สามารถกด Ctrl+V ในห้องแชตได้ทันที',
+                'รองรับ Deep Linking สลับระหว่าง line:// (มือถือ/Desktop App) และ line.me/R/ (เบราว์เซอร์) อย่างราบรื่น'
+            ]
+        },
         {
             version: '2.9.3',
             date: '2026-11-05',

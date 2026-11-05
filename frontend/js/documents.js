@@ -277,28 +277,24 @@ window.documentsModule = {
             const bank = (company.bank_accounts && company.bank_accounts[0]) ? company.bank_accounts[0] : null;
 
             let msg = `🔔 [แจ้งเตือนยอดครบกำหนดชำระ] ${company.name || 'ร้านเคอีควิป'}\n\n`;
-            msg += `เรียน: ${doc.customer_name || 'ลูกค้าผู้มีอุปการคุณ'}\n`;
-            if (doc.project_name_custom || doc.project_name) {
-                msg += `โครงการ: ${doc.project_name_custom || doc.project_name}\n`;
-            }
-            msg += `เอกสารเลขที่: ${doc.code}\n`;
-            msg += `ลงวันที่: ${app.formatDateThai(doc.issue_date, true)}\n`;
-            if (doc.due_date) {
-                msg += `ครบกำหนดชำระ: ${app.formatDateThai(doc.due_date, true)}\n`;
-            }
-            msg += `ยอดเงินที่ต้องชำระ: ฿${app.formatCurrency(doc.grand_total)} บาท\n`;
-            msg += `(${app.thaiBahtText(doc.grand_total)})\n\n`;
-            if (bank) {
-                msg += `ช่องทางโอนชำระเงิน:\n`;
-                msg += `ธนาคาร: ${bank.bank}\n`;
-                msg += `เลขที่บัญชี: ${bank.account_no}\n`;
-                msg += `ชื่อบัญชี: ${bank.account_name}\n\n`;
-            }
-            msg += `เมื่อโอนชำระแล้ว กรุณาส่งสลิปหลักฐานกลับมาได้เลยครับ\nขอบพระคุณครับ 🙏`;
+            const host = window.location.origin;
+            const shareUrl = `${host}/share/${doc.code}`;
+            let msg = `📄 [${typeLabel}] ร้านเคอีควิป Kequiv\n`;
+            msg += `เลขที่: ${doc.code}\n`;
+            msg += `ลูกค้า: ${doc.customer_name || 'ลูกค้าผู้มีอุปการคุณ'}\n`;
+            msg += `ยอดเงิน: ฿${app.formatCurrency(doc.grand_total)} บาท\n`;
+            msg += `\n👉 เปิดดูเอกสารฉบับเต็ม & โหลด PDF:\n${shareUrl}\n\nขอบพระคุณครับ 🙏`;
 
-            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(msg)}`;
+            // Auto copy to clipboard
+            try {
+                await navigator.clipboard.writeText(msg);
+            } catch (err) {}
+
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const encoded = encodeURIComponent(msg);
+            const lineUrl = isMobile ? `line://msg/text/?${encoded}` : `https://line.me/R/msg/text/?${encoded}`;
             window.open(lineUrl, '_blank');
-            app.toast('เปิดหน้าแชร์ LINE เรียบร้อยแล้ว', 'success');
+            app.toast('เปิด LINE เรียบร้อย! (และคัดลอกข้อความสรุปพร้อมลิงก์ไว้ให้แล้ว สามารถกด Ctrl+V ในแชตได้ทันที) 📋💬', 'success');
         } catch (e) {
             app.toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
         }

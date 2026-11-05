@@ -576,45 +576,66 @@ window.printModule = {
         }
     },
 
-    shareCurrentToLine() {
+    async copyShareLink() {
         if (!this.currentDoc) {
-            app.toast('ไม่พบข้อมูลเอกสารสำหรับแชร์', 'warning');
+            if (window.app) app.toast('ไม่พบข้อมูลเอกสารสำหรับคัดลอกลิงก์', 'warning');
+            return;
+        }
+        const host = window.location.origin;
+        const shareUrl = `${host}/share/${this.currentDoc.code}`;
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+            if (window.app) app.toast(`คัดลอกลิงก์บิลสำเร็จ! (${shareUrl}) 🔗`, 'success');
+        } catch (e) {
+            // Fallback prompt
+            prompt('คัดลอกลิงก์ดูบิลด้านล่างนี้ได้เลยครับ:', shareUrl);
+        }
+    },
+
+    async shareCurrentToLine() {
+        if (!this.currentDoc) {
+            if (window.app) app.toast('ไม่พบข้อมูลเอกสารสำหรับแชร์', 'warning');
             return;
         }
         const doc = this.currentDoc;
         const titles = { quotation: 'ใบเสนอราคา', billing: 'ใบแจ้งหนี้/วางบิล', receipt: 'ใบเสร็จรับเงิน' };
         const title = titles[doc.type] || 'เอกสารธุรกิจ';
-
-        let msg = `📄 [${title}] ร้านเคอีควิป Kequiv\n`;
-        msg += `เลขที่: ${doc.code}\n`;
-        msg += `ลูกค้า: ${doc.customer_name || '-'}\n`;
-        if (doc.project_name_custom || doc.project_name) {
-            msg += `โครงการ: ${doc.project_name_custom || doc.project_name}\n`;
-        }
-        msg += `วันที่: ${app.formatDateThai(doc.issue_date, true)}\n`;
-        msg += `----------------------------\n`;
-        if (doc.items && doc.items.length > 0) {
-            doc.items.forEach((it, idx) => {
-                msg += `${idx + 1}. ${it.product_name} x ${it.quantity} ${it.unit} = ฿${app.formatCurrency(it.total_price)}\n`;
-            });
-            msg += `----------------------------\n`;
-        }
-        msg += `💰 ยอดรวมสุทธิ: ฿${app.formatCurrency(doc.grand_total)} บาท\n`;
-        msg += `(${doc.grand_total_thai || ''})\n\n`;
-
-        if (doc.company && doc.company.bank_accounts && doc.company.bank_accounts.length > 0) {
-            msg += `💳 ข้อมูลโอนเงิน:\n`;
-            doc.company.bank_accounts.forEach(b => {
-                msg += `${b.bank} เลขที่: ${b.account_no} (${b.account_name})\n`;
-            });
-        }
-
         const host = window.location.origin;
-        msg += `\n👉 เปิดดูใบเสนอราคาฉบับเต็ม & โหลด PDF:\n${host}/share/${doc.code}\n\n`;
-        msg += `ขอบพระคุณที่ไว้วางใจในบริการของเราครับ 🙏`;
+        const shareUrl = `${host}/share/${doc.code}`;
 
-        const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(msg)}`;
-        window.open(lineUrl, '_blank');
+        // 1. สร้างข้อความกระชับ (ป้องกัน LINE Web Plugin เออเร่อ/หน้าขาวจาก URL ขนาดยาวเกินกำหนด)
+        let compactMsg = `📄 [${title}] ร้านเคอีควิป Kequiv\n`;
+        compactMsg += `เลขที่: ${doc.code}\n`;
+        compactMsg += `ลูกค้า: ${doc.customer_name || '-'}\n`;
+        compactMsg += `💰 ยอดรวมสุทธิ: ฿${app.formatCurrency(doc.grand_total)} บาท\n`;
+        compactMsg += `\n👉 เปิดดูบิลฉบับเต็ม & โหลด PDF:\n${shareUrl}\n\n`;
+        compactMsg += `ขอบพระคุณที่ไว้วางใจในบริการของเราครับ 🙏`;
+
+        // 2. คัดลอกข้อความลง Clipboard อัตโนมัติเผื่อนำไปวาง (Ctrl+V) ได้ทันที
+        try {
+            await navigator.clipboard.writeText(compactMsg);
+        } catch (clipErr) {
+            console.warn('Clipboard write fallback:', clipErr);
+        }
+
+        // 3. ตรวจสอบอุปกรณ์เพื่อเปิด LINE อย่างถูกต้อง (ไม่ให้ค้างหน้าขาว)
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const encoded = encodeURIComponent(compactMsg);
+        
+        // ถ้าเป็นมือถือ หรือมี LINE Desktop สามารถเรียกผ่าน line:// ได้ตรงๆ
+        const lineAppUrl = `line://msg/text/?${encoded}`;
+        const lineWebUrl = `https://line.me/R/msg/text/?${encoded}`;
+
+        if (isMobile) {
+            window.location.href = lineAppUrl;
+        } else {
+            // บนคอมพิวเตอร์: เปิดหน้าต่างแชร์ และคัดลอกข้อความเตรียมไว้
+            window.open(lineWebUrl, '_blank');
+        }
+
+        if (window.app) {
+            app.toast('เปิด LINE เรียบร้อย! (และคัดลอกข้อความพร้อมลิงก์ไว้ให้แล้ว กด Ctrl+V วางในแชตได้ทันที) 📋💬', 'success');
+        }
     },
 
     async exportAsImage() {
