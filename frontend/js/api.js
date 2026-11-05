@@ -42,6 +42,7 @@ async function request(endpoint, options = {}) {
 const api = {
     // Auth
     login: (username, password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
+    logout: () => request('/auth/logout', { method: 'POST' }),
     getCurrentUser: () => request('/auth/me'),
     changePassword: (oldPassword, newPassword) => request('/auth/change-password', { method: 'POST', body: JSON.stringify({ oldPassword, newPassword }) }),
 

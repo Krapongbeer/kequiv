@@ -51,11 +51,22 @@ window.printModule = {
         };
         const titleInfo = titles[doc.type] || { th: 'เอกสารธุรกิจ', en: 'DOCUMENT', code: 'DOC' };
 
+        // XSS Sanitizer for Print Module
+        const escapeHtml = (str) => {
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        };
+
         // Helper: Format payment terms cleanly preserving numbered points and preventing word drops
         const formatPaymentTerms = (terms) => {
             if (!terms) return '';
-            // If string contains 1. 2. 3. without proper line breaks, split them neatly
-            let text = terms.replace(/(\d+\.\s*)/g, '\n$1').trim();
+            const safe = escapeHtml(terms);
+            let text = safe.replace(/(\d+\.\s*)/g, '\n$1').trim();
             const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
             return lines.map(line => {
                 const safeLine = line.replace(/\b(QT|INV|RE)(\d{6})-(\d{3})\b/g, '<span class="whitespace-nowrap inline-block font-mono font-medium text-stone-900">$1$2-$3</span>');
@@ -66,8 +77,8 @@ window.printModule = {
         // Helper: Format remarks preserving lines, separating stacked references, and preventing code hyphens from breaking
         const formatRemarks = (remark) => {
             if (!remark) return '';
-            // If multiple "อ้างอิงจากเอกสาร" or thank-you messages are merged into one line, separate them
-            let text = remark.replace(/(?<!^)(อ้างอิงจากเอกสาร\s+)/g, '\n$1');
+            const safe = escapeHtml(remark);
+            let text = safe.replace(/(?<!^)(อ้างอิงจากเอกสาร\s+)/g, '\n$1');
             text = text.replace(/(?<!^)(ขอบพระคุณ)/g, '\n$1').trim();
             const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
             return lines.map(line => {
@@ -163,13 +174,13 @@ window.printModule = {
                 <div class="bg-[#faf6ee] px-2.5 py-1.5 rounded border border-stone-800 text-[10.5px]">
                     <div class="flex items-center justify-between mb-1 pb-0.5 border-b border-stone-300">
                         <span class="text-[9px] font-bold uppercase tracking-wider text-stone-600 font-typewriter">ลูกค้า / CUSTOMER</span>
-                        ${doc.customer_tax_id ? `<span class="text-[9.5px] text-stone-700 font-mono font-bold">Tax: ${doc.customer_tax_id}</span>` : ''}
+                        ${doc.customer_tax_id ? `<span class="text-[9.5px] text-stone-700 font-mono font-bold">Tax: ${escapeHtml(doc.customer_tax_id)}</span>` : ''}
                     </div>
-                    <div class="font-bold text-stone-900 text-[11px] leading-snug">${doc.customer_name || '-'}</div>
-                    <div class="text-[10px] text-stone-600 mt-0.5 leading-tight whitespace-pre-line">${doc.customer_address || '-'}</div>
+                    <div class="font-bold text-stone-900 text-[11px] leading-snug">${escapeHtml(doc.customer_name) || '-'}</div>
+                    <div class="text-[10px] text-stone-600 mt-0.5 leading-tight whitespace-pre-line">${doc.customer_address ? doc.customer_address.split('\n').map(l => escapeHtml(l.trim())).filter(Boolean).join('\n') : '-'}</div>
                     <div class="text-[10px] text-stone-600 mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono">
-                        ${doc.customer_phone ? `<div>โทร: <b>${doc.customer_phone}</b></div>` : ''}
-                        ${doc.customer_email ? `<div class="break-all">อีเมล: <b>${doc.customer_email}</b></div>` : ''}
+                        ${doc.customer_phone ? `<div>โทร: <b>${escapeHtml(doc.customer_phone)}</b></div>` : ''}
+                        ${doc.customer_email ? `<div class="break-all">อีเมล: <b>${escapeHtml(doc.customer_email)}</b></div>` : ''}
                     </div>
                 </div>
 
@@ -181,14 +192,14 @@ window.printModule = {
                         </span>
                     </div>
                     <div class="font-bold text-indigo-950 text-[11px] leading-snug">
-                        ${doc.project_name_custom || doc.project_name || 'หัวบิลมาตรฐาน (ไม่มีโครงการย่อย)'}
+                        ${escapeHtml(doc.project_name_custom || doc.project_name) || 'หัวบิลมาตรฐาน (ไม่มีโครงการย่อย)'}
                     </div>
                     <div class="text-[10px] text-stone-600 mt-0.5 leading-tight whitespace-pre-line">
-                        ${doc.project_site_address ? `หน้างาน: ${doc.project_site_address}` : 'ที่อยู่ตามข้อมูลลูกค้า'}
+                        ${doc.project_site_address ? doc.project_site_address.split('\n').map(l => escapeHtml(l.trim())).filter(Boolean).join('\n') : 'ที่อยู่ตามข้อมูลลูกค้า'}
                     </div>
                     ${doc.project_contact_person ? `
                         <div class="text-[10px] text-stone-600 mt-1 font-mono">
-                            ผู้ประสานงาน: <b>${doc.project_contact_person}</b>
+                            ผู้ประสานงาน: <b>${escapeHtml(doc.project_contact_person)}</b>
                         </div>
                     ` : ''}
                 </div>
@@ -258,8 +269,8 @@ window.printModule = {
                                     !item.image_url.includes('null');
 
                                 const parts = (item.product_name || '').split('\n');
-                                const title = parts[0] || '';
-                                const desc = parts.slice(1).join('\n');
+                                const title = escapeHtml(parts[0] || '');
+                                const desc = parts.slice(1).map(l => escapeHtml(l.trim())).filter(Boolean).join('<br>');
                                 const intQty = Math.round(Number(item.quantity) || 0);
 
                                 return `
@@ -272,12 +283,12 @@ window.printModule = {
                                                 ` : ''}
                                                 <div class="min-w-0 flex-1">
                                                     <div class="font-medium text-stone-900 leading-snug break-words">${title}</div>
-                                                    ${desc ? `<div class="text-[9.5px] text-stone-600 mt-0.5 leading-tight whitespace-pre-line font-sans">${desc}</div>` : ''}
+                                                    ${desc ? `<div class="text-[9.5px] text-stone-600 mt-0.5 leading-tight font-sans">${desc}</div>` : ''}
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="border-x border-stone-800 px-2 py-1 text-right font-mono align-middle">${intQty}</td>
-                                        <td class="border-x border-stone-800 px-2 py-1 text-center text-stone-700 align-middle">${item.unit || 'ชิ้น'}</td>
+                                        <td class="border-x border-stone-800 px-2 py-1 text-center text-stone-700 align-middle">${escapeHtml(item.unit || 'ชิ้น')}</td>
                                         <td class="border-x border-stone-800 px-2 py-1 text-right font-mono align-middle">
                                             ${Number(item.unit_price) > 0 ? app.formatCurrency(item.unit_price) : (Number(item.total_price) === 0 ? '<span class="text-emerald-700 font-bold">ฟรี</span>' : '0.00')}
                                         </td>
@@ -306,9 +317,10 @@ window.printModule = {
 
                             // 3. Note / Gift / Warranty rows (ALWAYS ANCHORED AT THE VERY BOTTOM OF THE 12-ROW TABLE)
                             const renderedNotes = noteItems.map(item => {
-                                const cleanNote = item.product_name.startsWith('*') 
+                                const rawNote = item.product_name.startsWith('*') 
                                     ? item.product_name.substring(1).trim() 
                                     : item.product_name.trim();
+                                const cleanNote = escapeHtml(rawNote);
 
                                 return `
                                     <tr class="border-b border-stone-300 bg-[#faf6ee]/80 text-stone-900 font-mono h-6">

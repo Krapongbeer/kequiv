@@ -18,12 +18,28 @@ const { pingSupabase, startKeepAliveSchedule, getStatus: getKeepAliveStatus } = 
 // Middlewares & Security Headers
 app.disable('x-powered-by');
 
-// Security Headers (Clickjacking, MIME Sniffing, XSS, Referrer)
+// Security Headers (Clickjacking, MIME Sniffing, XSS, Referrer, CSP, HSTS, Permissions)
 app.use((req, res, next) => {
     res.setHeader('X-Frame-Options', 'SAMEORIGIN');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    
+    // Content Security Policy
+    res.setHeader('Content-Security-Policy', [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
+        "font-src 'self' https://fonts.gstatic.com data:",
+        "img-src 'self' data: https: blob:",
+        "connect-src 'self' https://*.supabase.co https://*.vercel.app http://localhost:3000 http://127.0.0.1:3000",
+        "frame-ancestors 'self'",
+        "base-uri 'self'",
+        "form-action 'self'"
+    ].join('; '));
+
     next();
 });
 
@@ -112,7 +128,9 @@ app.get('/api/version', (req, res) => {
 // Presets endpoint (Public)
 app.get('/api/presets', (req, res) => {
     res.json({
-        units: ['ชิ้น', 'งาน', 'เมตร', 'ตร.ม.', 'ชุด', 'ม้วน', 'กล่อง', 'เที่ยว', 'lot', 'งวด', 'วัน', 'เดือน', 'ต้น', 'แผ่น', 'ถุง'],
+        units: [
+            'เครื่อง', 'ตัว', 'อัน', 'เส้น', 'ชุด', 'กล่อง', 'ม้วน', 'ชิ้น', 'งาน', 'เมตร', 'ตร.ม.', 'แผ่น', 'เที่ยว', 'lot', 'งวด', 'วัน', 'เดือน', 'ถุง'
+        ],
         payment_terms: [
             'ชำระเงินสดทันทีเมื่อส่งมอบงาน',
             'เครดิต 15 วัน',
@@ -122,6 +140,8 @@ app.get('/api/presets', (req, res) => {
         ],
         remarks: [
             'ขอบพระคุณที่ไว้วางใจในบริการของเรา',
+            'สินค้ารับประกันศูนย์ 1 ปี (ตามเงื่อนไขผู้ผลิต)',
+            'สินค้ารับประกันศูนย์ 3 ปี (ตามเงื่อนไขผู้ผลิต)',
             'ราคานี้รวมค่าขนส่งถึงหน้างานแล้ว',
             'กรุณาตรวจสอบความถูกต้องของสินค้าและบริการทันทีที่ได้รับ',
             'ราคาสินค้าและบริการเป็นราคาสุทธิ'
@@ -145,6 +165,16 @@ app.use((req, res, next) => {
         return res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
     }
     next();
+});
+
+// Global Error Handler Middleware (Cybersecurity Information Leakage Guard)
+app.use((err, req, res, next) => {
+    console.error('Unhandled server error:', err);
+    const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL;
+    res.status(err.status || 500).json({
+        success: false,
+        error: isProd ? 'เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้ง' : (err.message || 'Internal Server Error')
+    });
 });
 
 // Run User Provisioning, Daily Auto-Buffer & Supabase Keep-Alive on startup

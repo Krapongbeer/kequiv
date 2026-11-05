@@ -3,10 +3,25 @@
  */
 
 module.exports = {
-    version: '2.9.0',
+    version: '2.9.1',
     releaseDate: '2026-11-05',
-    codename: 'Cybersecurity Hardening, Persistent Supabase Auth & Strict RBAC Engine',
+    codename: 'IT Hardware Core Showcase & Comprehensive Cybersecurity Hardening (Med/Low)',
     changelog: [
+        {
+            version: '2.9.1',
+            date: '2026-11-05',
+            title: 'IT Hardware Core Showcase & Comprehensive Cybersecurity Hardening (Med/Low)',
+            features: [
+                'ยกระดับการขายอุปกรณ์ไอทีและฮาร์ดแวร์ขึ้นเป็นธุรกิจหลัก (Primary Hero Focus): จัดทำเซกชัน "ศูนย์จำหน่ายอุปกรณ์ไอทีและฮาร์ดแวร์ครบวงจร" พร้อม 6 แคตตาล็อกสินค้ามาตรฐาน',
+                'เพิ่มแคตตาล็อกอุปกรณ์ไอที: คอมพิวเตอร์ประกอบ & โน้ตบุ๊กองค์กร, เราเตอร์ สวิตช์ PoE & ตู้แร็ค, จอมอนิเตอร์ ปริ้นเตอร์ & อุปกรณ์ต่อพ่วง, เซิร์ฟเวอร์ NAS & ฮาร์ดดิสก์ CCTV, สายสัญญาณ LAN/Fiber, และชุดกล้องวงจรปิด',
+                'ปรับแถบนำทาง (Navbar) และเมนูมือถือ เพิ่มเมนู "🖥️ จำหน่ายอุปกรณ์ไอที" เป็นอันดับแรก พร้อมตัวเลือกขอใบเสนอราคาอุปกรณ์ไอที',
+                'เพิ่มหน่วยนับและข้อกำหนดอุปกรณ์ไอทีในระบบออกบิล: เพิ่มหน่วย "เครื่อง", "ตัว", "อัน", "เส้น" และหมายเหตุการรับประกันศูนย์ 1-3 ปี ใน Presets',
+                'ป้องกัน Stored XSS ในระบบพิมพ์และออกบิล A4 (XSS Sanitization Guard): กรองและหลบอักขระพิเศษ (HTML Escape) ในข้อมูลลูกค้า โครงการ และรายการสินค้า ป้องกันการฝังโค้ดอันตรายในเอกสาร',
+                'ติดตั้งชุด Security Headers ครบวงจร: เพิ่ม Content-Security-Policy (CSP), Strict-Transport-Security (HSTS), และ Permissions-Policy ป้องกันการโจมตีแบบ Clickjacking, Sniffing และ Script Injection',
+                'เพิ่มระบบออกจากระบบฝั่งเซิร์ฟเวอร์ (POST /api/auth/logout): เคลียร์เซสชันและโทเค็นอย่างสมบูรณ์แบบ',
+                'กรองข้อมูลข้อผิดพลาดใน Production (Safe Error Responses): ปกปิดรายละเอียดโครงสร้างฐานข้อมูลและ Internal Stack Traces ไม่ให้หลุดไปยัง Client'
+            ]
+        },
         {
             version: '2.9.0',
             date: '2026-11-05',

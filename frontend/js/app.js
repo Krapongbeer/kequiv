@@ -278,11 +278,24 @@ const app = {
     },
 
     handleLogout() {
+        if (window.api && typeof window.api.logout === 'function') {
+            window.api.logout().catch(() => {});
+        }
         localStorage.removeItem('kequiv_token');
         localStorage.removeItem('kequiv_user');
         this.state.currentUser = null;
         this.toast('ออกจากระบบเรียบร้อยแล้ว', 'info');
         this.openStorefront();
+    },
+
+    escapeHtml(str) {
+        if (str == null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     },
 
     updateUserUI(user) {

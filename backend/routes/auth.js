@@ -79,6 +79,15 @@ router.get('/me', (req, res) => {
     }
 });
 
+// POST /api/auth/logout (Session Termination)
+router.post('/logout', (req, res) => {
+    // Clear any credentials / server session references
+    res.json({
+        success: true,
+        message: 'ออกจากระบบเรียบร้อยแล้ว'
+    });
+});
+
 // POST /api/auth/change-password
 router.post('/change-password', async (req, res) => {
     try {

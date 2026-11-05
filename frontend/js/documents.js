@@ -164,9 +164,9 @@ window.documentsModule = {
                                         <div class="mt-1">${app.getDocTypeBadge(d.type)}</div>
                                     </td>
                                     <td class="px-3.5 py-3 min-w-[240px]">
-                                        <div class="font-bold text-slate-900 text-xs">${d.customer_name || '-'}</div>
+                                        <div class="font-bold text-slate-900 text-xs">${app.escapeHtml ? app.escapeHtml(d.customer_name) : (d.customer_name || '-')}</div>
                                         ${d.project_name_custom || d.project_name ? `
-                                            <div class="text-[11px] text-sky-800 font-medium mt-0.5">📌 ${d.project_name_custom || d.project_name}</div>
+                                            <div class="text-[11px] text-sky-800 font-medium mt-0.5">📌 ${app.escapeHtml ? app.escapeHtml(d.project_name_custom || d.project_name) : (d.project_name_custom || d.project_name)}</div>
                                         ` : ''}
                                     </td>
                                     <td class="px-3.5 py-3 text-xs text-slate-600 whitespace-nowrap">
