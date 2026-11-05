@@ -21,10 +21,13 @@ const app = {
     },
 
     async init() {
-        console.log('Kequiv v2.3 Initializing...');
+        console.log('Kequiv Initializing...');
 
         // Initialize Theme (Dark/Light mode)
         this.initTheme();
+
+        // Load Version & Changelog dynamically
+        this.loadVersionInfo();
 
         // Initialize Storefront if loaded
         if (window.storefront && typeof window.storefront.init === 'function') {
@@ -289,8 +292,75 @@ const app = {
         }
     },
 
+    async loadVersionInfo() {
+        try {
+            const res = await api.getVersion();
+            if (!res || !res.success || !res.data) return;
+            const vData = res.data;
+            this.state.versionInfo = vData;
+
+            // 1. Update all version badges across the UI
+            document.querySelectorAll('.badge-version').forEach(el => {
+                el.innerHTML = `<span>⚡ v${vData.version}</span>`;
+                el.title = `Kequiv v${vData.version} (${vData.codename || ''}) - คลิกเพื่อดูประวัติการอัปเดต`;
+            });
+
+            // 2. Render version modal dynamically
+            this.renderVersionModal(vData);
+        } catch (e) {
+            console.warn('Could not load dynamic version info:', e.message);
+        }
+    },
+
+    renderVersionModal(vData) {
+        const modal = document.getElementById('modal-version');
+        if (!modal) return;
+
+        const changelog = vData.changelog || [];
+
+        modal.innerHTML = `
+            <div class="typewriter-card bg-white rounded-xl shadow-2xl max-w-xl w-full p-6 font-mono text-slate-800">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-2xl">⚡</span>
+                        <div>
+                            <h3 class="font-bold text-slate-900 font-typewriter text-lg flex items-center gap-2">
+                                <span>ระบบ Kequiv เวอร์ชัน ${vData.version}</span>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-300">ล่าสุด</span>
+                            </h3>
+                            <p class="text-xs text-sky-700 font-mono font-bold mt-0.5">${vData.codename || 'Official Release'} (${app.formatDateThai ? app.formatDateThai(vData.releaseDate) : vData.releaseDate})</p>
+                        </div>
+                    </div>
+                    <button onclick="app.closeModal('modal-version')" class="text-slate-400 hover:text-slate-800 text-lg p-1" title="ปิด">✕</button>
+                </div>
+
+                <div class="space-y-3.5 max-h-[65vh] overflow-y-auto text-xs pr-1.5">
+                    ${changelog.map((ver, idx) => `
+                        <div class="p-3.5 rounded-lg border transition ${idx === 0 ? 'bg-sky-50/90 border-sky-300 shadow-xs' : 'bg-slate-50 border-slate-200'}">
+                            <div class="flex items-center justify-between font-bold ${idx === 0 ? 'text-sky-950' : 'text-slate-900'} mb-1.5 pb-1 border-b ${idx === 0 ? 'border-sky-200' : 'border-slate-200'}">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 rounded text-[11px] font-bold ${idx === 0 ? 'bg-sky-600 text-white' : 'bg-slate-200 text-slate-800'}">v${ver.version}</span>
+                                    <span class="text-xs font-typewriter">${ver.title || ''}</span>
+                                </div>
+                                <span class="text-[10px] text-slate-500 font-normal shrink-0 ml-2">${app.formatDateThai ? app.formatDateThai(ver.date) : ver.date}</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-700 text-[11px] leading-relaxed">
+                                ${(ver.features || []).map(f => `<li>${f}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    },
+
     openVersionModal() {
-        this.openModal('modal-version');
+        if (!this.state.versionInfo) {
+            this.loadVersionInfo().then(() => this.openModal('modal-version'));
+        } else {
+            this.renderVersionModal(this.state.versionInfo);
+            this.openModal('modal-version');
+        }
     },
 
     // -----------------------------------------------------------------
