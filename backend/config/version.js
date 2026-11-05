@@ -3,10 +3,19 @@
  */
 
 module.exports = {
-    version: '2.9.11',
+    version: '2.9.12',
     releaseDate: '2026-11-05',
-    codename: 'Swap Project (Left) & Customer (Right) Across Bill Forms and Print Sheets',
+    codename: 'Restore Classic Layout: Customer (Left) & Project (Right)',
     changelog: [
+        {
+            version: '2.9.12',
+            date: '2026-11-05',
+            title: 'Restore Classic Layout: Customer (Left) & Project (Right)',
+            features: [
+                'ย้อนกลับไปใช้การจัดวางแบบดั้งเดิมที่คุ้นเคย: "ข้อมูลลูกค้า" (Customer) อยู่ฝั่งซ้าย และ "โครงการ / หัวบิลย่อย" (Project) อยู่ฝั่งขวา',
+                'ปรับปรุงให้ตรงกันทั้งหน้าฟอร์มสร้าง/แก้ไขเอกสาร และหน้าพรีวิวบิลพิมพ์ A4 / PDF / ภาพแชร์'
+            ]
+        },
         {
             version: '2.9.11',
             date: '2026-11-05',
