@@ -24,9 +24,10 @@ router.post('/login', async (req, res) => {
 
         const auth = await authenticateUser(username, password);
         if (!auth.success) {
-            await logAudit(req, 'AUTH_LOGIN_FAILED', {
+            await logAudit(req, 'LOGIN_FAILED', {
                 targetType: 'auth',
-                details: `Failed login attempt for username: ${username}`
+                username: username,
+                details: `พยายามเข้าสู่ระบบไม่สำเร็จด้วยชื่อ: ${username}`
             });
             return res.status(401).json({
                 success: false,
@@ -49,10 +50,11 @@ router.post('/login', async (req, res) => {
             { expiresIn: '7d' }
         );
 
-        await logAudit(req, 'AUTH_LOGIN_SUCCESS', {
+        await logAudit(req, 'LOGIN_SUCCESS', {
             targetType: 'auth',
             targetId: user.id,
-            details: { username: user.username, role: user.role }
+            username: user.username,
+            details: `เข้าสู่ระบบสำเร็จในฐานะ: ${user.name || user.username} (${user.role})`
         });
 
         res.json({
@@ -101,10 +103,11 @@ router.post('/logout', async (req, res) => {
             try {
                 const decoded = jwt.verify(token, JWT_SECRET);
                 if (decoded && decoded.username) {
-                    await logAudit(req, 'AUTH_LOGOUT', {
+                    await logAudit(req, 'LOGOUT', {
                         targetType: 'auth',
                         targetId: decoded.id,
-                        details: `User ${decoded.username} logged out`
+                        username: decoded.username,
+                        details: `ผู้ใช้ ${decoded.username} ออกจากระบบ`
                     });
                 }
             } catch (_) {}

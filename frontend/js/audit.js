@@ -79,8 +79,10 @@ window.auditModule = {
                             <option value="all">ทั้งหมด ทุกกิจกรรม (All Events)</option>
                             <option value="LOGIN_SUCCESS">🟢 เข้าสู่ระบบสำเร็จ (LOGIN_SUCCESS)</option>
                             <option value="LOGIN_FAILED">🔴 เข้าสู่ระบบไม่สำเร็จ (LOGIN_FAILED)</option>
-                            <option value="PASSWORD_CHANGED">🟡 เปลี่ยนรหัสผ่าน (PASSWORD_CHANGED)</option>
+                            <option value="DOCUMENT_CREATED">📄 สร้างเอกสารใหม่ (DOCUMENT_CREATED)</option>
+                            <option value="DOCUMENT_UPDATED">✏️ แก้ไขเอกสาร (DOCUMENT_UPDATED)</option>
                             <option value="DOCUMENT_CANCELLED">❌ ยกเลิกเอกสาร (DOCUMENT_CANCELLED)</option>
+                            <option value="PASSWORD_CHANGED">🟡 เปลี่ยนรหัสผ่าน (PASSWORD_CHANGED)</option>
                             <option value="BACKUP_DOWNLOAD">💾 ดาวน์โหลดสำรองข้อมูล (BACKUP_DOWNLOAD)</option>
                             <option value="COMPANY_PROFILE_UPDATED">⚙️ แก้ไขข้อมูลร้านค้า (COMPANY_PROFILE_UPDATED)</option>
                             <option value="LOGOUT">⚪ ออกจากระบบ (LOGOUT)</option>
@@ -141,8 +143,8 @@ window.auditModule = {
         let pwdCount = 0;
 
         this.logs.forEach(l => {
-            if (l.action === 'LOGIN_SUCCESS') successCount++;
-            if (l.action === 'LOGIN_FAILED') failedCount++;
+            if (l.action === 'LOGIN_SUCCESS' || l.action === 'AUTH_LOGIN_SUCCESS') successCount++;
+            if (l.action === 'LOGIN_FAILED' || l.action === 'AUTH_LOGIN_FAILED') failedCount++;
             if (l.action === 'PASSWORD_CHANGED') pwdCount++;
         });
 
@@ -168,12 +170,20 @@ window.auditModule = {
 
         const actionBadges = {
             LOGIN_SUCCESS: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span>🟢</span> เข้าสู่ระบบสำเร็จ</span>',
+            AUTH_LOGIN_SUCCESS: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span>🟢</span> เข้าสู่ระบบสำเร็จ</span>',
             LOGIN_FAILED: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><span>🔴</span> เข้าสู่ระบบไม่สำเร็จ</span>',
+            AUTH_LOGIN_FAILED: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><span>🔴</span> เข้าสู่ระบบไม่สำเร็จ</span>',
             LOGOUT: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-slate-50 text-slate-700 border border-slate-200"><span>⚪</span> ออกจากระบบ</span>',
+            AUTH_LOGOUT: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-slate-50 text-slate-700 border border-slate-200"><span>⚪</span> ออกจากระบบ</span>',
+            DOCUMENT_CREATED: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200"><span>📄</span> สร้างเอกสาร</span>',
+            DOCUMENT_UPDATED: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200"><span>✏️</span> แก้ไขเอกสาร</span>',
             PASSWORD_CHANGED: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><span>🔑</span> เปลี่ยนรหัสผ่าน</span>',
             DOCUMENT_CANCELLED: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><span>❌</span> ยกเลิกเอกสาร</span>',
+            DOCUMENT_VOID: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><span>❌</span> ยกเลิกเอกสาร</span>',
             BACKUP_DOWNLOAD: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200"><span>💾</span> สำรองฐานข้อมูล</span>',
-            COMPANY_PROFILE_UPDATED: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200"><span>⚙️</span> แก้ไขข้อมูลร้าน</span>'
+            COMPANY_PROFILE_UPDATED: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200"><span>⚙️</span> แก้ไขข้อมูลร้าน</span>',
+            CUSTOMER_CREATED: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200"><span>👥</span> เพิ่มลูกค้า</span>',
+            CUSTOMER_UPDATED: '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200"><span>✏️</span> แก้ไขลูกค้า</span>'
         };
 
         wrap.innerHTML = `

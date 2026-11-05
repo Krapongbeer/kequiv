@@ -392,6 +392,12 @@ router.post('/', async (req, res) => {
             const { error: itemErr } = await supabase.from('document_items').insert(itemRows);
             if (itemErr) throw new Error(itemErr.message);
 
+            await logAudit(req, 'DOCUMENT_CREATED', {
+                targetType: 'document',
+                targetId: newDoc.id,
+                details: `สร้างเอกสาร ${finalCode} (${type}) ยอดรวม ฿${totals.grand_total}`
+            });
+
             return res.json({
                 success: true,
                 message: 'บันทึกเอกสารเรียบร้อยแล้ว',
@@ -446,6 +452,12 @@ router.post('/', async (req, res) => {
             }
 
             db.exec('COMMIT');
+
+            await logAudit(req, 'DOCUMENT_CREATED', {
+                targetType: 'document',
+                targetId: docId,
+                details: `สร้างเอกสาร ${finalCode} (${type}) ยอดรวม ฿${totals.grand_total}`
+            });
 
             res.json({
                 success: true,
@@ -748,6 +760,12 @@ router.post('/:id/convert', async (req, res) => {
 
             db.exec('COMMIT');
 
+            await logAudit(req, 'DOCUMENT_CREATED', {
+                targetType: 'document',
+                targetId: docId,
+                details: `สร้างเอกสาร ${finalCode} (${type}) ยอดรวม ฿${totals.grand_total}`
+            });
+
             res.json({
                 success: true,
                 message: `แปลงเป็น ${target_type} สำเร็จ (เลขที่ ${newCode})`,
@@ -793,10 +811,10 @@ router.post('/:id/cancel', async (req, res) => {
                 })
                 .eq('id', id);
 
-            await logAudit(req, 'DOCUMENT_VOID', {
+            await logAudit(req, 'DOCUMENT_CANCELLED', {
                 targetType: 'document',
                 targetId: doc.id,
-                details: `Document ${doc.code} voided/cancelled. Reason: ${reason || 'ยกเลิกตามคำขอ'}`
+                details: `ยกเลิกเอกสาร ${doc.code} (เหตุผล: ${reason || 'ยกเลิกตามคำขอ'})`
             });
 
             return res.json({ success: true, message: `ยกเลิกเอกสาร ${doc.code} เรียบร้อยแล้ว` });
@@ -820,10 +838,10 @@ router.post('/:id/cancel', async (req, res) => {
             WHERE id = ?
         `).run(reason || 'ยกเลิกตามคำขอ', id);
 
-        await logAudit(req, 'DOCUMENT_VOID', {
+        await logAudit(req, 'DOCUMENT_CANCELLED', {
             targetType: 'document',
             targetId: doc.id,
-            details: `Document ${doc.code} voided/cancelled. Reason: ${reason || 'ยกเลิกตามคำขอ'}`
+            details: `ยกเลิกเอกสาร ${doc.code} (เหตุผล: ${reason || 'ยกเลิกตามคำขอ'})`
         });
 
         res.json({ success: true, message: `ยกเลิกเอกสาร ${doc.code} เรียบร้อยแล้ว` });

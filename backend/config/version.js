@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.9',
+    version: '2.9.10',
     releaseDate: '2026-11-05',
-    codename: 'Fix Document Module Variable Collision & Enforce Top-of-Page Scroll Position',
+    codename: 'Balanced Header Layout & Persistent Multi-User Cloud Audit Trail',
     changelog: [
+        {
+            version: '2.9.10',
+            date: '2026-11-05',
+            title: 'Balanced Header Layout & Persistent Multi-User Cloud Audit Trail',
+            features: [
+                'ปรับปรุง Layout แถบนำทางด้านบนให้สมดุล: ย้ายปุ่มสลับโหมดมืด/สว่าง (Theme Toggle) ไปอยู่ชิดขวาสุดของ Header พร้อมคั่นด้วย Vertical Divider และลบปุ่มหน้าร้านที่ซ้ำซ้อน',
+                'ระบบเก็บบันทึกประวัติกิจกรรมแบบกระจายศูนย์บนคลาวด์ถาวร (Persistent Multi-User Cloud Audit Trail): แก้ปัญหา Log ของผู้ใช้ (เช่น ampui) ไม่แสดงผลข้ามเครื่อง/ข้ามเซิร์ฟเวอร์',
+                'บันทึกกิจกรรมครอบคลุมทุกการกระทำ: เข้าสู่ระบบ (LOGIN_SUCCESS / LOGIN_FAILED), ออกจากระบบ (LOGOUT), สร้างเอกสารใหม่ (DOCUMENT_CREATED), แก้ไขเอกสาร (DOCUMENT_UPDATED), ยกเลิกเอกสาร (DOCUMENT_CANCELLED), เปลี่ยนรหัสผ่าน และสำรองข้อมูล'
+            ]
+        },
         {
             version: '2.9.9',
             date: '2026-11-05',
