@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.9.4',
+    version: '2.9.5',
     releaseDate: '2026-11-05',
-    codename: 'Optimized LINE Share Payload, 1-Click Link Copy & Mobile/Desktop Deep Linking',
+    codename: 'Unified Desktop Pill Toolbar & Responsive Print Preview Action Strip',
     changelog: [
+        {
+            version: '2.9.5',
+            date: '2026-11-05',
+            title: 'Unified Desktop Pill Toolbar & Responsive Print Preview Action Strip',
+            features: [
+                'ปรับปรุงโครงสร้างแถบเครื่องมือพิมพ์ (Print Preview Toolbar) ให้สวยงาม เรียบร้อยระดับพรีเมียม ไม่มีการหักบรรทัดกระจัดกระจาย',
+                'จัดกลุ่มเครื่องมือคัดลอก/แชร์ (Copy & Share Pill Group) สไตล์ macOS/Figma บนคอมพิวเตอร์',
+                'แถบทางลัดสำหรับอุปกรณ์มือถือและแท็บเล็ต (Responsive Action Strip) จัดปุ่มเต็มแถบ ใช้งานสะดวกด้วยมือเดียว',
+                'เน้นปุ่มพิมพ์/PDF (Primary Ocean CTA) และแยกปุ่มปิด ✕ อย่างชัดเจนด้วย Vertical Divider'
+            ]
+        },
         {
             version: '2.9.4',
             date: '2026-11-05',
