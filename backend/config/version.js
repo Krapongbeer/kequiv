@@ -3,10 +3,22 @@
  */
 
 module.exports = {
-    version: '2.9.2',
+    version: '2.9.3',
     releaseDate: '2026-11-05',
-    codename: 'Token Versioning Revocation, Audit Logging Trail & Environment Bootstrap Credentials',
+    codename: 'Official LINE Messaging API Integration, 1-Click Image Export & Public Bill Viewer',
     changelog: [
+        {
+            version: '2.9.3',
+            date: '2026-11-05',
+            title: 'Official LINE Messaging API Integration, 1-Click Image Export & Public Bill Viewer',
+            features: [
+                'เชื่อมต่อระบบ LINE Messaging API ของร้าน @vcv6921d อย่างเป็นทางการ (Official Verified Bot Connection)',
+                'เพิ่มปุ่ม "📸 บันทึกเป็นรูปภาพ" (Save as Image): แปลงใบเสนอราคา A4 เป็นรูปภาพ .PNG คมชัดสูง (300DPI) ส่งต่อให้ลูกค้าใน LINE ได้ทันที',
+                'เพิ่มปุ่ม "📋 คัดลอกภาพบิล" (Copy Image to Clipboard): คลิกเดียวคัดลอกรูปภาพลงคลิปบอร์ด กด Ctrl+V หรือ Cmd+V วางส่งในแชต LINE ทันทีโดยไม่ต้องเซฟไฟล์',
+                'ระบบเปิดดูใบเสนอราคาออนไลน์สำหรับลูกค้า (/share/:code): แสดงผลบนมือถือสวยงาม พร้อมปุ่มให้ลูกค้าดาวน์โหลด PDF หรือบันทึกเป็นรูปภาพได้ด้วยตนเอง',
+                'ระบบ LINE Webhook & Push Message (/api/line): รองรับการตอบกลับข้อความอัตโนมัติ และส่งการ์ด Flex Message ใบเสนอราคาเข้าแชตลูกค้า'
+            ]
+        },
         {
             version: '2.9.2',
             date: '2026-11-05',

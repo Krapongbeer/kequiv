@@ -5,7 +5,8 @@ const path = require('path');
 const rateLimit = require('express-rate-limit');
 
 // Ensure db and schema are initialized
-require('./db');
+const db = require('./db');
+const { supabase, isSupabaseConfigured } = require('./supabase');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -96,6 +97,97 @@ app.use('/api/auth/login', authLimiter);
 app.use('/api/auth', require('./routes/auth').router);
 app.use('/api/leads', leadLimiter, require('./routes/leads'));
 app.use('/api/cms', require('./routes/cms'));
+app.use('/api/line', require('./routes/line'));
+
+// Public Document Share & View Endpoints (for LINE & Mobile Customers)
+app.get('/api/documents/public/:code', async (req, res) => {
+    try {
+        const { code } = req.params;
+        const cleanCode = (code || '').trim().toUpperCase();
+
+        if (isSupabaseConfigured && supabase) {
+            const { data: doc, error } = await supabase
+                .from('documents')
+                .select(`
+                    *,
+                    customer:customers(name, tax_id, address, phone, email),
+                    project:customer_projects(project_name, site_address, contact_person),
+                    items:document_items(*)
+                `)
+                .eq('code', cleanCode)
+                .is('deleted_at', null)
+                .single();
+
+            if (!error && doc) {
+                const { data: company } = await supabase.from('company_profile').select('*').eq('id', 1).single();
+                let bank_accounts = [];
+                if (company && company.bank_info) {
+                    try {
+                        bank_accounts = typeof company.bank_info === 'string' ? JSON.parse(company.bank_info) : company.bank_info;
+                    } catch (_) {}
+                }
+                return res.json({
+                    success: true,
+                    data: {
+                        ...doc,
+                        customer_name: doc.customer?.name || '-',
+                        customer_tax_id: doc.customer?.tax_id || '',
+                        customer_address: doc.customer?.address || '',
+                        customer_phone: doc.customer?.phone || '',
+                        customer_email: doc.customer?.email || '',
+                        project_name: doc.project?.project_name || null,
+                        project_site_address: doc.project?.site_address || null,
+                        project_contact_person: doc.project?.contact_person || null,
+                        company: {
+                            ...(company || {}),
+                            bank_accounts
+                        }
+                    }
+                });
+            }
+        }
+
+        // SQLite Fallback
+        const doc = db.prepare(`
+            SELECT d.*, 
+                   c.name as customer_name, c.tax_id as customer_tax_id, c.address as customer_address, 
+                   c.phone as customer_phone, c.email as customer_email,
+                   p.project_name, p.site_address as project_site_address, p.contact_person as project_contact_person
+            FROM documents d
+            LEFT JOIN customers c ON c.id = d.customer_id
+            LEFT JOIN customer_projects p ON p.id = d.project_id
+            WHERE d.code = ? AND d.deleted_at IS NULL
+        `).get(cleanCode);
+
+        if (!doc) {
+            return res.status(404).json({ success: false, error: 'ไม่พบเอกสารนี้ในระบบ' });
+        }
+
+        doc.items = db.prepare(`
+            SELECT * FROM document_items 
+            WHERE document_id = ? 
+            ORDER BY sort_order ASC, id ASC
+        `).all(doc.id);
+
+        const company = db.prepare('SELECT * FROM company_profile WHERE id = 1').get();
+        let bank_accounts = [];
+        if (company && company.bank_info) {
+            try {
+                bank_accounts = JSON.parse(company.bank_info);
+            } catch (_) {}
+        }
+        doc.company = { ...(company || {}), bank_accounts };
+
+        res.json({ success: true, data: doc });
+    } catch (err) {
+        res.status(500).json({ success: false, error: 'เกิดข้อผิดพลาดในการโหลดเอกสาร' });
+    }
+});
+
+// Standalone Public Viewer Route for LINE links (/share/:code)
+app.get('/share/:code', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'share.html'));
+});
 
 // Health & Supabase Keep-Alive Heartbeat endpoints (Public / External ping)
 app.get('/api/health', (req, res) => {

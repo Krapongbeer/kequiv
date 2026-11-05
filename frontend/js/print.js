@@ -608,10 +608,97 @@ window.printModule = {
                 msg += `${b.bank} เลขที่: ${b.account_no} (${b.account_name})\n`;
             });
         }
-        msg += `\nขอบพระคุณที่ไว้วางใจในบริการของเราครับ`;
+
+        const host = window.location.origin;
+        msg += `\n👉 เปิดดูใบเสนอราคาฉบับเต็ม & โหลด PDF:\n${host}/share/${doc.code}\n\n`;
+        msg += `ขอบพระคุณที่ไว้วางใจในบริการของเราครับ 🙏`;
 
         const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(msg)}`;
         window.open(lineUrl, '_blank');
+    },
+
+    async exportAsImage() {
+        if (!this.currentDoc) {
+            if (window.app) app.toast('ไม่พบข้อมูลเอกสารสำหรับบันทึกรูปภาพ', 'warning');
+            return;
+        }
+
+        const sheet = document.getElementById('print-sheet');
+        if (!sheet) return;
+
+        if (typeof html2canvas === 'undefined') {
+            if (window.app) app.toast('กำลังโหลดระบบสร้างรูปภาพ กรุณาลองใหม่อีกครั้งใน 2 วินาที', 'info');
+            return;
+        }
+
+        try {
+            if (window.app) app.toast('กำลังสร้างรูปภาพบิล A4...', 'info');
+            const canvas = await html2canvas(sheet, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#faf6ee',
+                logging: false
+            });
+
+            const docCode = this.currentDoc.code || 'Document';
+            const link = document.createElement('a');
+            link.download = `Kequiv${docCode}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            if (window.app) app.toast('บันทึกรูปภาพสำเร็จ! สามารถส่งเข้า LINE ได้ทันที 📸', 'success');
+        } catch (err) {
+            console.error('Image export error:', err);
+            if (window.app) app.toast('เกิดข้อผิดพลาดในการสร้างรูปภาพ', 'error');
+        }
+    },
+
+    async copyImageToClipboard() {
+        if (!this.currentDoc) {
+            if (window.app) app.toast('ไม่พบข้อมูลเอกสารสำหรับคัดลอกรูปภาพ', 'warning');
+            return;
+        }
+
+        const sheet = document.getElementById('print-sheet');
+        if (!sheet) return;
+
+        if (typeof html2canvas === 'undefined') {
+            if (window.app) app.toast('กำลังโหลดระบบสร้างรูปภาพ กรุณาลองใหม่อีกครั้งใน 2 วินาที', 'info');
+            return;
+        }
+
+        if (!navigator.clipboard || !window.ClipboardItem) {
+            if (window.app) app.toast('เบราว์เซอร์นี้ไม่รองรับการคัดลอกรูปภาพลง Clipboard แนะนำให้ใช้ปุ่ม "บันทึกเป็นรูปภาพ" แทนครับ', 'warning');
+            return;
+        }
+
+        try {
+            if (window.app) app.toast('กำลังคัดลอกภาพบิล...', 'info');
+            const canvas = await html2canvas(sheet, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#faf6ee',
+                logging: false
+            });
+
+            canvas.toBlob(async (blob) => {
+                if (!blob) {
+                    if (window.app) app.toast('ไม่สามารถสร้างรูปภาพได้', 'error');
+                    return;
+                }
+                try {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': blob })
+                    ]);
+                    if (window.app) app.toast('คัดลอกภาพบิลสำเร็จ! กด Ctrl+V (หรือ Cmd+V) วางส่งในแชต LINE ได้ทันที 📋', 'success');
+                } catch (clipErr) {
+                    console.warn('Clipboard write error:', clipErr);
+                    this.exportAsImage();
+                }
+            }, 'image/png');
+        } catch (err) {
+            console.error('Copy image error:', err);
+            if (window.app) app.toast('เกิดข้อผิดพลาดในการคัดลอกรูปภาพ', 'error');
+        }
     }
 };
 

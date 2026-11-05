@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ใบเสนอราคา - ร้านเคอีควิป KEQUIV</title>
+    <!-- Open Graph for LINE Rich Preview -->
+    <meta property="og:title" content="ใบเสนอราคา - ร้านเคอีควิป KEQUIV">
+    <meta property="og:description" content="เอกสารธุรกิจทางการ ตรวจสอบรายการสินค้า/บริการ และดาวน์โหลด PDF">
+    <meta property="og:image" content="https://kequiv.vercel.app/img/logo.png">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts & Tailwind -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&family=Sarabun:wght@400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="/css/style.css?v=2.9.3">
+
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; padding: 0 !important; }
+            #public-sheet-container { padding: 0 !important; }
+            .print-container { box-shadow: none !important; margin: 0 !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-mono selection:bg-cyan-500 selection:text-white">
+
+    <!-- Top Action Bar (Mobile & Desktop) -->
+    <header class="no-print sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3 shadow-xs">
+        <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+                <img src="/img/logo.png" alt="Kequiv Logo" class="h-8 w-auto">
+                <div>
+                    <h1 class="text-xs sm:text-sm font-bold text-slate-900 font-typewriter">เคอีควิป KEQUIV</h1>
+                    <p id="doc-title-meta" class="text-[10px] text-slate-500">กำลังโหลดเอกสาร...</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="downloadAsImage()" class="btn-paper text-xs py-1.5 px-3 border border-slate-300 hover:border-sky-500 flex items-center gap-1.5 shadow-xs">
+                    <span>📸</span> <span class="hidden sm:inline">บันทึกเป็น</span>รูปภาพ
+                </button>
+                <button onclick="window.print()" class="btn-ocean text-xs py-1.5 px-3 flex items-center gap-1.5 shadow-xs font-bold">
+                    <span>📥</span> <span class="hidden sm:inline">ดาวน์โหลด</span> PDF
+                </button>
+                <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" class="btn-line text-xs py-1.5 px-3 flex items-center gap-1.5 shadow-xs">
+                    <span>💬</span> แชต LINE
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="public-sheet-container" class="flex-1 flex justify-center p-2 sm:p-6 overflow-x-auto">
+        <div id="print-sheet" class="print-container shadow-xl">
+            <div class="p-16 text-center text-slate-500 font-mono text-xs">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600 mb-3"></div>
+                <p>กำลังเตรียมข้อมูลเอกสาร...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Notice -->
+    <footer class="no-print py-4 text-center text-xs text-slate-500 font-mono border-t border-slate-200 bg-white">
+        <p>เคอีควิป KEQUIV • จำหน่ายอุปกรณ์ไอที กล้องวงจรปิด และงานระบบครบวงจร</p>
+        <p class="text-[10px] text-slate-400 mt-0.5">LINE OA: @vcv6921d • โทร: 091-480-2472</p>
+    </footer>
+
+    <!-- App Scripts -->
+    <script src="/js/print.js?v=2.9.3"></script>
+    <script>
+        window.app = {
+            formatCurrency: (n) => Number(n || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            formatDateThai: (d, long = false) => {
+                if (!d) return '-';
+                const date = new Date(d);
+                if (isNaN(date.getTime())) return d;
+                const day = date.getDate();
+                const mIdx = date.getMonth();
+                const y = date.getFullYear() + 543;
+                const mShort = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+                const mLong = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+                return `${day} ${long ? mLong[mIdx] : mShort[mIdx]} ${y}`;
+            }
+        };
+
+        let loadedDoc = null;
+
+        async function loadPublicDocument() {
+            const parts = window.location.pathname.split('/');
+            const code = parts[parts.length - 1] || new URLSearchParams(window.location.search).get('code');
+
+            if (!code) {
+                document.getElementById('print-sheet').innerHTML = '<div class="p-8 text-center text-rose-600">ไม่พบรหัสเอกสาร</div>';
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/documents/public/${encodeURIComponent(code)}`);
+                const json = await res.json();
+                if (!json.success || !json.data) {
+                    throw new Error(json.error || 'ไม่พบเอกสาร');
+                }
+
+                loadedDoc = json.data;
+                document.title = `${loadedDoc.type === 'quotation' ? 'ใบเสนอราคา' : 'เอกสาร'} ${loadedDoc.code} - ร้านเคอีควิป`;
+                document.getElementById('doc-title-meta').textContent = `เอกสารเลขที่ ${loadedDoc.code} (${app.formatDateThai(loadedDoc.issue_date)})`;
+                window.printModule.renderSheet(loadedDoc);
+            } catch (err) {
+                document.getElementById('print-sheet').innerHTML = `
+                    <div class="p-12 text-center text-rose-700 font-mono">
+                        <div class="text-3xl mb-2">📄</div>
+                        <p class="font-bold text-base">ไม่สามารถเปิดเอกสารได้</p>
+                        <p class="text-xs text-slate-500 mt-1">${err.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function downloadAsImage() {
+            const sheet = document.getElementById('print-sheet');
+            if (!sheet || !loadedDoc) return;
+
+            try {
+                const canvas = await html2canvas(sheet, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#faf6ee'
+                });
+
+                const link = document.createElement('a');
+                link.download = `Kequiv${loadedDoc.code || 'Doc'}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (e) {
+                alert('เกิดข้อผิดพลาดในการสร้างรูปภาพ กรุณาลองใหม่อีกครั้ง');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadPublicDocument);
+    </script>
+</body>
+</html>
