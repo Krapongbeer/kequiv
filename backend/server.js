@@ -104,11 +104,22 @@ app.use('/api/leads', leadLimiter, require('./routes/leads'));
 app.use('/api/cms', require('./routes/cms'));
 app.use('/api/line', require('./routes/line'));
 
+const shareLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // 10 minutes
+    max: 60, // max 60 views per 10 min per IP (prevents automated scraping)
+    message: { success: false, error: 'มีการเรียกดูเอกสารบ่อยเกินไป กรุณารอสักครู่' }
+});
+
 // Public Document Share & View Endpoints (for LINE & Mobile Customers)
-app.get('/api/documents/public/:code', async (req, res) => {
+app.get('/api/documents/public/:code', shareLimiter, async (req, res) => {
     try {
         const { code } = req.params;
         const cleanCode = (code || '').trim().toUpperCase();
+
+        // Security Validation: Strict code format (prevents injection & probing)
+        if (!/^[A-Z]{2,4}\d{4,8}-[0-9A-Z]{2,6}$/.test(cleanCode) && !/^[A-Z0-9-]{4,20}$/.test(cleanCode)) {
+            return res.status(400).json({ success: false, error: 'รูปแบบรหัสเอกสารไม่ถูกต้อง' });
+        }
 
         if (isSupabaseConfigured && supabase) {
             const { data: doc, error } = await supabase

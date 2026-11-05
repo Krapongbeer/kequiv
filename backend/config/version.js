@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.9.7',
+    version: '2.9.8',
     releaseDate: '2026-11-05',
-    codename: 'Dedicated Security Audit Log Menu & Interactive Compliance Dashboard',
+    codename: 'Public Share Link Security Hardening & Anti-Scraping Protection',
     changelog: [
+        {
+            version: '2.9.8',
+            date: '2026-11-05',
+            title: 'Public Share Link Security Hardening & Anti-Scraping Protection',
+            features: [
+                'ยกระดับความปลอดภัยลิงก์แชร์ดูบิลสาธารณะ (Zero Risk Public Sandbox): ออกแบบเป็นระบบ Read-Only 100% แยกส่วนจากระบบจัดการหลังบ้านโดยเด็ดขาด',
+                'ระบบป้องกันการเจาะข้อมูลผ่าน Regex Format Sanitization: ตรวจสอบแพตเทิร์นรหัสเอกสาร ปฏิเสธค่าแปลกปลอมหรืออักขระพิเศษทันทีก่อนเข้าถึงฐานข้อมูล',
+                'เพิ่ม Rate Limiting ป้องกันการสุ่มเจาะเลขบิล (Anti-Enumeration / Anti-Scraping): จำกัดการเรียกดูไม่เกิน 60 ครั้งต่อ 10 นาทีต่อ IP',
+                'ระบบป้องกันการฝังมัลแวร์และ XSS: ควบคุมการ Render เอกสารด้วย HTML Escaping และ Content Security Policy (CSP)'
+            ]
+        },
         {
             version: '2.9.7',
             date: '2026-11-05',
