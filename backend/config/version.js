@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.9.17',
+    version: '2.9.18',
     releaseDate: '2026-11-05',
-    codename: 'Password Visibility Toggle & Direct LINE App URI Scheme (Zero Referrer Leak)',
+    codename: 'Desktop & Mobile Universal LINE Web Share (No QR Block, UTF-8 Thai Support & Zero Extra Links)',
     changelog: [
+        {
+            version: '2.9.18',
+            date: '2026-11-05',
+            title: 'Desktop & Mobile Universal LINE Web Share (No QR Block, UTF-8 Thai Support & Zero Extra Links)',
+            features: [
+                'แก้ปัญหาการส่งเข้า LINE บนคอมพิวเตอร์ (Desktop Web Share Support): ส่งผ่าน Official LINE Share Endpoint โดยตรง สามารถเลือกเพื่อน/แชตส่งได้ทันทีบนคอม ไม่ติดแจ้งเตือนให้สแกนมือถือ',
+                'กำจัดปัญหาภาษาต่างดาว (UTF-8 Encoding): เข้ารหัสข้อความภาษาไทยอย่างถูกต้อง แสดงผลคมชัดสวยงาม',
+                'กำจัดลิงก์หน้าแรกส่วนเกินอย่างถาวร: กำหนด url=shareUrl โดยตรง ทำให้ LINE แสดงพรีวิวเฉพาะการ์ดเอกสารใบนั้นใบเดียว ไม่มีการดึงหน้าแรกมาต่อท้าย',
+                'คัดลอกข้อความลงคลิปบอร์ดอัตโนมัติ: เผื่อกรณีต้องการกดวาง (Ctrl+V) ในหน้าต่างแชต LINE ใดๆ ได้ทันที'
+            ]
+        },
         {
             version: '2.9.17',
             date: '2026-11-05',

@@ -611,7 +611,7 @@ window.printModule = {
         const keyParam = doc.share_key ? `?k=${doc.share_key}` : '';
         const shareUrl = `${host}/share/${doc.code}${keyParam}`;
 
-        // 1. สร้างข้อความกระชับ (ป้องกัน LINE Web Plugin เออเร่อ/หน้าขาวจาก URL ขนาดยาวเกินกำหนด)
+        // 1. ข้อความสำหรับ Clipboard (แบบมาตรฐานฉบับสมบูรณ์)
         let compactMsg = `📄 [${title}] ร้านเคอีควิป Kequiv\n`;
         compactMsg += `เลขที่: ${doc.code}\n`;
         compactMsg += `ลูกค้า: ${doc.customer_name || '-'}\n`;
@@ -619,27 +619,38 @@ window.printModule = {
         compactMsg += `\n👉 เปิดดูบิลฉบับเต็ม & โหลด PDF:\n${shareUrl}\n\n`;
         compactMsg += `ขอบพระคุณที่ไว้วางใจในบริการของเราครับ 🙏`;
 
-        // 2. คัดลอกข้อความลง Clipboard อัตโนมัติเผื่อนำไปวาง (Ctrl+V) ได้ทันที (ข้อความสะอาด 100% ไม่มีลิงก์เว็บเกิน)
+        // คัดลอกลง Clipboard อัตโนมัติ (สามารถกด Ctrl+V ใน LINE ได้ทันที)
         try {
             await navigator.clipboard.writeText(compactMsg);
         } catch (clipErr) {
             console.warn('Clipboard write fallback:', clipErr);
         }
 
-        // 3. เรียกเปิดแอป LINE โดยตรงผ่าน URI Scheme (line://msg/text/...)
-        // เพื่อป้องกันไม่ให้เว็บเบราว์เซอร์ส่ง HTTP Referrer ไปให้ LINE Web Plugin แอบแปะ https://kequiv.vercel.app/ ต่อท้าย
-        const encoded = encodeURIComponent(compactMsg);
-        const lineAppUrl = `line://msg/text/?${encoded}`;
+        // 2. ข้อความสำหรับ LINE Web Share Endpoint (ส่งผ่าน API มาตรฐานของ LINE ทั้งบนคอมพิวเตอร์และมือถือ)
+        // ข้อความจะถูกส่งคู่กับ url=shareUrl โดยตรง เพื่อไม่ให้ LINE ดึง Referrer (https://kequiv.vercel.app/) ไปใส่ซ้ำ
+        let lineShareText = `📄 [${title}] ร้านเคอีควิป Kequiv\n`;
+        lineShareText += `เลขที่: ${doc.code}\n`;
+        lineShareText += `ลูกค้า: ${doc.customer_name || '-'}\n`;
+        lineShareText += `💰 ยอดรวมสุทธิ: ฿${app.formatCurrency(doc.grand_total)} บาท\n\n`;
+        lineShareText += `ขอบพระคุณที่ไว้วางใจในบริการของเราครับ 🙏\n`;
+        lineShareText += `👉 เปิดดูบิลฉบับเต็ม & โหลด PDF:`;
 
-        // Trigger ผ่าน anchor click (รองรับทั้งมือถือ และ Desktop ที่มีแอป LINE)
-        const link = document.createElement('a');
-        link.href = lineAppUrl;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+        const shareEndpoint = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(lineShareText)}`;
+
+        // เปิดหน้าต่างส่งของ LINE ที่รองรับทั้งบนคอมพิวเตอร์ (ไม่ขึ้น QR Code สแกนมือถือ) และมือถือ
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+            window.location.href = shareEndpoint;
+        } else {
+            const w = 550;
+            const h = 650;
+            const left = Math.max(0, (window.screen.width / 2) - (w / 2));
+            const top = Math.max(0, (window.screen.height / 2) - (h / 2));
+            window.open(shareEndpoint, 'LineSharePopup', `width=${w},height=${h},top=${top},left=${left},scrollbars=yes,resizable=yes`);
+        }
 
         if (window.app) {
-            app.toast('คัดลอกข้อความและเปิด LINE เรียบร้อย! (สามารถกด Ctrl+V วางในแชตได้ทันที) 📋💬', 'success');
+            app.toast('เปิดหน้าต่างส่ง LINE เรียบร้อย! (และคัดลอกข้อความไว้ในคลิปบอร์ดให้แล้ว กด Ctrl+V ได้เลย) 📋💬', 'success');
         }
     },
 

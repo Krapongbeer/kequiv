@@ -296,14 +296,28 @@ window.documentsModule = {
                 await navigator.clipboard.writeText(msg);
             } catch (err) {}
 
-            const encoded = encodeURIComponent(msg);
-            const lineAppUrl = `line://msg/text/?${encoded}`;
-            const link = document.createElement('a');
-            link.href = lineAppUrl;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            app.toast('เปิด LINE เรียบร้อย! (และคัดลอกข้อความสรุปพร้อมลิงก์ไว้ให้แล้ว สามารถกด Ctrl+V ในแชตได้ทันที) 📋💬', 'success');
+            let lineShareText = `🔔 [แจ้งเตือนยอดครบกำหนดชำระ] ${company.name || 'ร้านเคอีควิป'}\n`;
+            lineShareText += `📄 [${typeLabel}] เลขที่: ${doc.code}\n`;
+            lineShareText += `ลูกค้า: ${doc.customer_name || 'ลูกค้าผู้มีอุปการคุณ'}\n`;
+            lineShareText += `ยอดเงิน: ฿${app.formatCurrency(doc.grand_total)} บาท\n`;
+            if (bank) {
+                lineShareText += `ธนาคาร: ${bank.bank} (${bank.account_no})\n`;
+            }
+            lineShareText += `\nขอบพระคุณที่ไว้วางใจในบริการของเราครับ 🙏\n`;
+            lineShareText += `👉 เปิดดูเอกสารฉบับเต็ม & โหลด PDF:`;
+
+            const shareEndpoint = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(lineShareText)}`;
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            if (isMobile) {
+                window.location.href = shareEndpoint;
+            } else {
+                const w = 550;
+                const h = 650;
+                const left = Math.max(0, (window.screen.width / 2) - (w / 2));
+                const top = Math.max(0, (window.screen.height / 2) - (h / 2));
+                window.open(shareEndpoint, 'LineSharePopup', `width=${w},height=${h},top=${top},left=${left},scrollbars=yes,resizable=yes`);
+            }
+            app.toast('เปิดหน้าต่างส่ง LINE เรียบร้อย! (และคัดลอกข้อความสรุปพร้อมลิงก์ไว้ให้แล้ว สามารถกด Ctrl+V ในแชตได้ทันที) 📋💬', 'success');
         } catch (e) {
             app.toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
         }
