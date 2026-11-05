@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.16',
+    version: '2.9.17',
     releaseDate: '2026-11-05',
-    codename: 'Future Document Code Generator, Quick Remark Presets & Clean LINE Share Message',
+    codename: 'Password Visibility Toggle & Direct LINE App URI Scheme (Zero Referrer Leak)',
     changelog: [
+        {
+            version: '2.9.17',
+            date: '2026-11-05',
+            title: 'Password Visibility Toggle & Direct LINE App URI Scheme (Zero Referrer Leak)',
+            features: [
+                'ปุ่มเปิด/ปิดดูรหัสผ่านหน้าล็อกอิน (Password Visibility Toggle): เพิ่มไอคอนดวงตา 👁️ ให้กดเปิดดูรหัสผ่านที่พิมพ์ได้ทันที ป้องกันการพิมพ์ผิด',
+                'กำจัดลิงก์เว็บไซต์ซ้ำซ้อนใน LINE เด็ดขาด (Zero Referrer Leak): ปรับการส่งข้อความผ่าน Direct URI Scheme (line://msg/text/...) ป้องกันไม่ให้ LINE Web Plugin แอบแนบ https://kequiv.vercel.app/ ต่อท้ายข้อความ',
+                'อัปเดตระบบ Cache-Busting สคริปต์ JavaScript ทุกไฟล์เพื่อบังคับให้เบราว์เซอร์โหลดเวอร์ชันล่าสุดทันที'
+            ]
+        },
         {
             version: '2.9.16',
             date: '2026-11-05',

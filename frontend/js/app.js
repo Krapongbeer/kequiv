@@ -236,6 +236,19 @@ const app = {
         }
     },
 
+    togglePasswordVisibility() {
+        const input = document.getElementById('login-password');
+        const icon = document.getElementById('icon-toggle-password');
+        if (!input) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            if (icon) icon.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            if (icon) icon.textContent = '👁️';
+        }
+    },
+
     async handleLogin() {
         const username = document.getElementById('login-username')?.value?.trim();
         const password = document.getElementById('login-password')?.value;

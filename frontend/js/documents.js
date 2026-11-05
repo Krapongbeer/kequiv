@@ -289,17 +289,20 @@ window.documentsModule = {
             if (bank) {
                 msg += `ธนาคาร: ${bank.bank} (${bank.account_no})\n`;
             }
-            msg += `\n👉 เปิดดูเอกสารฉบับเต็ม & โหลด PDF:\n${shareUrl}\n\nขอบพระคุณครับ 🙏`;
+            msg += `\n👉 เปิดดูเอกสารฉบับเต็ม & โหลด PDF:\n${shareUrl}\n\nขอบพระคุณที่ไว้วางใจในบริการของเราครับ 🙏`;
 
             // Auto copy to clipboard
             try {
                 await navigator.clipboard.writeText(msg);
             } catch (err) {}
 
-            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
             const encoded = encodeURIComponent(msg);
-            const lineUrl = isMobile ? `line://msg/text/?${encoded}` : `https://line.me/R/msg/text/?${encoded}`;
-            window.open(lineUrl, '_blank');
+            const lineAppUrl = `line://msg/text/?${encoded}`;
+            const link = document.createElement('a');
+            link.href = lineAppUrl;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
             app.toast('เปิด LINE เรียบร้อย! (และคัดลอกข้อความสรุปพร้อมลิงก์ไว้ให้แล้ว สามารถกด Ctrl+V ในแชตได้ทันที) 📋💬', 'success');
         } catch (e) {
             app.toast('เกิดข้อผิดพลาด: ' + e.message, 'error');

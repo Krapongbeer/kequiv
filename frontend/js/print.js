@@ -619,30 +619,27 @@ window.printModule = {
         compactMsg += `\n👉 เปิดดูบิลฉบับเต็ม & โหลด PDF:\n${shareUrl}\n\n`;
         compactMsg += `ขอบพระคุณที่ไว้วางใจในบริการของเราครับ 🙏`;
 
-        // 2. คัดลอกข้อความลง Clipboard อัตโนมัติเผื่อนำไปวาง (Ctrl+V) ได้ทันที
+        // 2. คัดลอกข้อความลง Clipboard อัตโนมัติเผื่อนำไปวาง (Ctrl+V) ได้ทันที (ข้อความสะอาด 100% ไม่มีลิงก์เว็บเกิน)
         try {
             await navigator.clipboard.writeText(compactMsg);
         } catch (clipErr) {
             console.warn('Clipboard write fallback:', clipErr);
         }
 
-        // 3. ตรวจสอบอุปกรณ์เพื่อเปิด LINE อย่างถูกต้อง (ไม่ให้ค้างหน้าขาว)
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        // 3. เรียกเปิดแอป LINE โดยตรงผ่าน URI Scheme (line://msg/text/...)
+        // เพื่อป้องกันไม่ให้เว็บเบราว์เซอร์ส่ง HTTP Referrer ไปให้ LINE Web Plugin แอบแปะ https://kequiv.vercel.app/ ต่อท้าย
         const encoded = encodeURIComponent(compactMsg);
-        
-        // ถ้าเป็นมือถือ หรือมี LINE Desktop สามารถเรียกผ่าน line:// ได้ตรงๆ
         const lineAppUrl = `line://msg/text/?${encoded}`;
-        const lineWebUrl = `https://line.me/R/msg/text/?${encoded}`;
 
-        if (isMobile) {
-            window.location.href = lineAppUrl;
-        } else {
-            // บนคอมพิวเตอร์: เปิดหน้าต่างแชร์ และคัดลอกข้อความเตรียมไว้
-            window.open(lineWebUrl, '_blank');
-        }
+        // Trigger ผ่าน anchor click (รองรับทั้งมือถือ และ Desktop ที่มีแอป LINE)
+        const link = document.createElement('a');
+        link.href = lineAppUrl;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
 
         if (window.app) {
-            app.toast('เปิด LINE เรียบร้อย! (และคัดลอกข้อความพร้อมลิงก์ไว้ให้แล้ว กด Ctrl+V วางในแชตได้ทันที) 📋💬', 'success');
+            app.toast('คัดลอกข้อความและเปิด LINE เรียบร้อย! (สามารถกด Ctrl+V วางในแชตได้ทันที) 📋💬', 'success');
         }
     },
 
