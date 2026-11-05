@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.9.1',
+    version: '2.9.2',
     releaseDate: '2026-11-05',
-    codename: 'IT Hardware Core Showcase & Comprehensive Cybersecurity Hardening (Med/Low)',
+    codename: 'Token Versioning Revocation, Audit Logging Trail & Environment Bootstrap Credentials',
     changelog: [
+        {
+            version: '2.9.2',
+            date: '2026-11-05',
+            title: 'Token Versioning Revocation, Audit Logging Trail & Environment Bootstrap Credentials',
+            features: [
+                'ระบบเพิกถอนเซสชันทันทีเมื่อเปลี่ยนรหัสผ่าน (Token Versioning & Instant Session Revocation): เพิ่ม token_version ใน Token และฐานข้อมูล เมื่อเปลี่ยนรหัสผ่าน Token เดิมทั้งหมดจะถูกยกเลิกทันที ไม่สามารถนำมาใช้งานได้อีก',
+                'บันทึกประวัติการทำธุรกรรมความปลอดภัย (Security & Compliance Audit Logging): บันทึก Log เมื่อมีการล็อกอิน, ล็อกอินล้มเหลว, เปลี่ยนรหัสผ่าน, ดาวน์โหลด Backup ข้อมูล, ยกเลิกบิล และอัปเดตข้อมูลบริษัท พร้อม IP Address และ User-Agent',
+                'เปิด API ตรวจสอบ Audit Log สำหรับผู้ดูแลระบบ (GET /api/reports/audit-logs): ตรวจสอบย้อนหลังได้ว่าใครทำอะไร เมื่อไหร่ จาก IP ใด',
+                'ขจัดรหัสผ่าน Hardcoded ในโค้ดโดยสมบูรณ์: รองรับการกำหนดรหัสผ่านเริ่มต้นผ่านตัวแปรสภาพแวดล้อม INITIAL_ADMIN_PASSWORD และ INITIAL_EDITOR_PASSWORD'
+            ]
+        },
         {
             version: '2.9.1',
             date: '2026-11-05',

@@ -2,11 +2,17 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { supabase, isSupabaseConfigured } = require('../supabase');
+const { logAudit } = require('../services/auditService');
 
 // GET /api/backup/export
 // Downloads full JSON snapshot of all database records
 router.get('/export', async (req, res) => {
     try {
+        await logAudit(req, 'BACKUP_EXPORT', {
+            targetType: 'backup',
+            details: `Database snapshot exported by ${req.user ? req.user.username : 'admin'}`
+        });
+
         let snapshot = {
             exported_at: new Date().toISOString(),
             system: 'Kequiv Web',

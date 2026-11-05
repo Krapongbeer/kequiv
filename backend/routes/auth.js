@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { authenticateUser, changeUserPassword } = require('../services/userService');
+const { authenticateUser, changeUserPassword, incrementUserTokenVersion } = require('../services/userService');
+const { logAudit } = require('../services/auditService');
 
 // Cryptographically secure JWT secret (from environment variable or secure Supabase hash fallback)
 const JWT_SECRET = process.env.JWT_SECRET ||
@@ -23,6 +24,10 @@ router.post('/login', async (req, res) => {
 
         const auth = await authenticateUser(username, password);
         if (!auth.success) {
+            await logAudit(req, 'AUTH_LOGIN_FAILED', {
+                targetType: 'auth',
+                details: `Failed login attempt for username: ${username}`
+            });
             return res.status(401).json({
                 success: false,
                 error: auth.error || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
@@ -31,17 +36,24 @@ router.post('/login', async (req, res) => {
 
         const user = auth.user;
 
-        // Generate hardened token valid for 7 days
+        // Generate hardened token valid for 7 days with token_version for instant revocation
         const token = jwt.sign(
             {
                 id: user.id,
                 username: user.username,
                 name: user.name,
-                role: user.role
+                role: user.role,
+                token_version: user.token_version || 1
             },
             JWT_SECRET,
             { expiresIn: '7d' }
         );
+
+        await logAudit(req, 'AUTH_LOGIN_SUCCESS', {
+            targetType: 'auth',
+            targetId: user.id,
+            details: { username: user.username, role: user.role }
+        });
 
         res.json({
             success: true,
@@ -51,7 +63,8 @@ router.post('/login', async (req, res) => {
                 id: user.id,
                 username: user.username,
                 name: user.name,
-                role: user.role
+                role: user.role,
+                token_version: user.token_version || 1
             }
         });
     } catch (err) {
@@ -79,13 +92,31 @@ router.get('/me', (req, res) => {
     }
 });
 
-// POST /api/auth/logout (Session Termination)
-router.post('/logout', (req, res) => {
-    // Clear any credentials / server session references
-    res.json({
-        success: true,
-        message: 'ออกจากระบบเรียบร้อยแล้ว'
-    });
+// POST /api/auth/logout (Session Termination & Optional Token Revocation)
+router.post('/logout', async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const token = authHeader.split(' ')[1];
+            try {
+                const decoded = jwt.verify(token, JWT_SECRET);
+                if (decoded && decoded.username) {
+                    await logAudit(req, 'AUTH_LOGOUT', {
+                        targetType: 'auth',
+                        targetId: decoded.id,
+                        details: `User ${decoded.username} logged out`
+                    });
+                }
+            } catch (_) {}
+        }
+
+        res.json({
+            success: true,
+            message: 'ออกจากระบบเรียบร้อยแล้ว'
+        });
+    } catch (err) {
+        res.json({ success: true, message: 'ออกจากระบบเรียบร้อยแล้ว' });
+    }
 });
 
 // POST /api/auth/change-password
@@ -115,12 +146,22 @@ router.post('/change-password', async (req, res) => {
 
         const result = await changeUserPassword(decoded.username, oldPassword, newPassword);
         if (!result.success) {
+            await logAudit(req, 'AUTH_PASSWORD_CHANGE_FAILED', {
+                targetType: 'auth',
+                details: `Password change failed for ${decoded.username}: ${result.error}`
+            });
             return res.status(400).json({ success: false, error: result.error });
         }
 
+        await logAudit(req, 'AUTH_PASSWORD_CHANGE_SUCCESS', {
+            targetType: 'auth',
+            targetId: decoded.id,
+            details: `Password successfully changed and sessions revoked for ${decoded.username}`
+        });
+
         res.json({
             success: true,
-            message: 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว (มีผลถาวรในระบบ)'
+            message: 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว เซสชันเดิมทั้งหมดถูกยกเลิกเพื่อความปลอดภัย'
         });
     } catch (err) {
         console.error('Change password error:', err);

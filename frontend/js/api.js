@@ -50,6 +50,7 @@ const api = {
     getVersion: () => request('/version'),
 
     // Backup & Reports
+    getAuditLogs: (params = {}) => request(`/reports/audit-logs?${new URLSearchParams(params).toString()}`),
     exportBackupUrl: () => {
         const token = localStorage.getItem('kequiv_token');
         return `/api/backup/export?auth=${encodeURIComponent(token || '')}`;

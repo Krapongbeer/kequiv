@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../db');
 const { supabase, isSupabaseConfigured } = require('../supabase');
 const { requireAdmin } = require('../middleware/auth');
+const { logAudit } = require('../services/auditService');
 
 // GET company profile
 router.get('/', async (req, res) => {
@@ -125,6 +126,13 @@ router.put('/', requireAdmin, async (req, res) => {
         if (updated && updated.bank_info) {
             updated.bank_accounts = JSON.parse(updated.bank_info);
         }
+
+        await logAudit(req, 'COMPANY_PROFILE_UPDATE', {
+            targetType: 'company',
+            targetId: '1',
+            details: `Company profile and banking information updated by ${req.user ? req.user.username : 'admin'}`
+        });
+
         res.json({ success: true, data: updated });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });

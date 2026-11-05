@@ -5,6 +5,7 @@ const { getNextDocumentCode, commitDocumentCode } = require('../utils/docNumber'
 const { getNextDocumentCodeSupabase, commitDocumentCodeSupabase } = require('../utils/docNumberSupabase');
 const { thaiBahtText } = require('../utils/thaiBahtText');
 const { supabase, isSupabaseConfigured } = require('../supabase');
+const { logAudit } = require('../services/auditService');
 
 // Helper to calculate totals from items
 function calculateItemsTotal(items, docDiscountTotal = 0) {
@@ -792,6 +793,12 @@ router.post('/:id/cancel', async (req, res) => {
                 })
                 .eq('id', id);
 
+            await logAudit(req, 'DOCUMENT_VOID', {
+                targetType: 'document',
+                targetId: doc.id,
+                details: `Document ${doc.code} voided/cancelled. Reason: ${reason || 'ยกเลิกตามคำขอ'}`
+            });
+
             return res.json({ success: true, message: `ยกเลิกเอกสาร ${doc.code} เรียบร้อยแล้ว` });
         }
 
@@ -812,6 +819,12 @@ router.post('/:id/cancel', async (req, res) => {
                 updated_at = datetime('now')
             WHERE id = ?
         `).run(reason || 'ยกเลิกตามคำขอ', id);
+
+        await logAudit(req, 'DOCUMENT_VOID', {
+            targetType: 'document',
+            targetId: doc.id,
+            details: `Document ${doc.code} voided/cancelled. Reason: ${reason || 'ยกเลิกตามคำขอ'}`
+        });
 
         res.json({ success: true, message: `ยกเลิกเอกสาร ${doc.code} เรียบร้อยแล้ว` });
     } catch (err) {

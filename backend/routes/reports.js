@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { supabase, isSupabaseConfigured } = require('../supabase');
+const { requireAdmin } = require('../middleware/auth');
+const { getAuditLogs } = require('../services/auditService');
 
 // GET /api/reports/export-csv
 // Exports documents to CSV with UTF-8 BOM for Thai Excel
@@ -115,6 +117,18 @@ router.get('/export-csv', async (req, res) => {
         res.send(csvContent);
     } catch (err) {
         console.error('CSV Export error:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// GET /api/reports/audit-logs (Security & Compliance Audit Trail - Admin only)
+router.get('/audit-logs', requireAdmin, async (req, res) => {
+    try {
+        const { limit = 100, action, username } = req.query;
+        const logs = await getAuditLogs({ limit, action, username });
+        res.json({ success: true, data: logs });
+    } catch (err) {
+        console.error('Audit logs fetch error:', err);
         res.status(500).json({ success: false, error: err.message });
     }
 });
