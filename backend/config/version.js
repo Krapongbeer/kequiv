@@ -3,10 +3,19 @@
  */
 
 module.exports = {
-    version: '2.9.13',
+    version: '2.9.14',
     releaseDate: '2026-11-05',
-    codename: 'Fix Customer Project Deletion Route Mismatch & Special Char Escaping',
+    codename: 'Clean Blank Project Box when No Sub-Project is Selected',
     changelog: [
+        {
+            version: '2.9.14',
+            date: '2026-11-05',
+            title: 'Clean Blank Project Box when No Sub-Project is Selected',
+            features: [
+                'ลบข้อความ "หัวบิลมาตรฐาน (ไม่มีโครงการย่อย)" และ "ที่อยู่ตามข้อมูลลูกค้า" ออกจากหน้าบิลพิมพ์',
+                'หากไม่มีการระบุหรือเลือกโครงการย่อย กล่องโครงการจะถูกเว้นว่างไว้อย่างสะอาดเรียบร้อยตามคำขอ'
+            ]
+        },
         {
             version: '2.9.13',
             date: '2026-11-05',

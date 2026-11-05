@@ -191,17 +191,23 @@ window.printModule = {
                             โครงการ / หัวบิล (PROJECT & SITE)
                         </span>
                     </div>
-                    <div class="font-bold text-indigo-950 text-[11px] leading-snug">
-                        ${escapeHtml(doc.project_name_custom || doc.project_name) || 'หัวบิลมาตรฐาน (ไม่มีโครงการย่อย)'}
-                    </div>
-                    <div class="text-[10px] text-stone-600 mt-0.5 leading-tight whitespace-pre-line">
-                        ${doc.project_site_address ? doc.project_site_address.split('\n').map(l => escapeHtml(l.trim())).filter(Boolean).join('\n') : 'ที่อยู่ตามข้อมูลลูกค้า'}
-                    </div>
-                    ${doc.project_contact_person ? `
-                        <div class="text-[10px] text-stone-600 mt-1 font-mono">
-                            ผู้ประสานงาน: <b>${escapeHtml(doc.project_contact_person)}</b>
+                    ${(doc.project_name_custom || doc.project_name) ? `
+                        <div class="font-bold text-indigo-950 text-[11px] leading-snug">
+                            ${escapeHtml(doc.project_name_custom || doc.project_name)}
                         </div>
-                    ` : ''}
+                        ${doc.project_site_address ? `
+                            <div class="text-[10px] text-stone-600 mt-0.5 leading-tight whitespace-pre-line">
+                                ${doc.project_site_address.split('\n').map(l => escapeHtml(l.trim())).filter(Boolean).join('\n')}
+                            </div>
+                        ` : ''}
+                        ${doc.project_contact_person ? `
+                            <div class="text-[10px] text-stone-600 mt-1 font-mono">
+                                ผู้ประสานงาน: <b>${escapeHtml(doc.project_contact_person)}</b>
+                            </div>
+                        ` : ''}
+                    ` : `
+                        <div class="min-h-[42px]">&nbsp;</div>
+                    `}
                 </div>
             </div>
 

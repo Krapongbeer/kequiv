@@ -565,7 +565,7 @@ window.documentsModule = {
                                 <span class="text-[10px] text-slate-400">สำหรับจัดกลุ่มบิล</span>
                             </label>
                             <select id="doc-project-select" name="project_id" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none" onchange="window.documentsModule.onProjectSelected(this.value)">
-                                <option value="">-- ใช้หัวบิลทั่วไปของลูกค้า (ไม่ระบุโครงการ) --</option>
+                                <option value="">-- ไม่ระบุโครงการ / หัวบิลย่อย --</option>
                             </select>
                             <div class="mt-2">
                                 <input type="text" id="project-name-custom" name="project_name_custom" value="${projectNameCustom || ''}" placeholder="หรือพิมพ์ระบุชื่อหัวบิล/โครงการที่นี่..." class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:border-sky-500">
