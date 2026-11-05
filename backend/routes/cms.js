@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 /**
  * GET /api/cms/content - Get all website key-value settings
@@ -19,9 +19,9 @@ router.get('/content', (req, res) => {
 });
 
 /**
- * PUT /api/cms/content - Update website settings (Protected)
+ * PUT /api/cms/content - Update website settings (Admin only)
  */
-router.put('/content', requireAuth, (req, res) => {
+router.put('/content', requireAdmin, (req, res) => {
     try {
         const updates = req.body;
         if (!updates || typeof updates !== 'object') {
@@ -52,7 +52,7 @@ router.get('/services', (req, res) => {
     }
 });
 
-router.post('/services', requireAuth, (req, res) => {
+router.post('/services', requireAdmin, (req, res) => {
     try {
         const { category, title, description, icon, bullets, sort_order } = req.body;
         if (!title || !category) {
@@ -69,7 +69,7 @@ router.post('/services', requireAuth, (req, res) => {
     }
 });
 
-router.put('/services/:id', requireAuth, (req, res) => {
+router.put('/services/:id', requireAdmin, (req, res) => {
     try {
         const { id } = req.params;
         const { category, title, description, icon, bullets, sort_order } = req.body;
@@ -84,7 +84,7 @@ router.put('/services/:id', requireAuth, (req, res) => {
     }
 });
 
-router.delete('/services/:id', requireAuth, (req, res) => {
+router.delete('/services/:id', requireAdmin, (req, res) => {
     try {
         const { id } = req.params;
         db.prepare('DELETE FROM website_services WHERE id = ?').run(id);
@@ -106,7 +106,7 @@ router.get('/portfolio', (req, res) => {
     }
 });
 
-router.post('/portfolio', requireAuth, (req, res) => {
+router.post('/portfolio', requireAdmin, (req, res) => {
     try {
         const { category, title, location, description, tag, status, gradient, sort_order } = req.body;
         if (!title || !category) {
@@ -123,7 +123,7 @@ router.post('/portfolio', requireAuth, (req, res) => {
     }
 });
 
-router.put('/portfolio/:id', requireAuth, (req, res) => {
+router.put('/portfolio/:id', requireAdmin, (req, res) => {
     try {
         const { id } = req.params;
         const { category, title, location, description, tag, status, gradient, sort_order } = req.body;
@@ -138,7 +138,7 @@ router.put('/portfolio/:id', requireAuth, (req, res) => {
     }
 });
 
-router.delete('/portfolio/:id', requireAuth, (req, res) => {
+router.delete('/portfolio/:id', requireAdmin, (req, res) => {
     try {
         const { id } = req.params;
         db.prepare('DELETE FROM website_portfolio WHERE id = ?').run(id);

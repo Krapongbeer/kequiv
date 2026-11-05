@@ -154,7 +154,20 @@ CREATE TABLE IF NOT EXISTS website_portfolio (
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 11. System Users (Authentication & Role-Based Access Control)
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'editor', -- 'admin' or 'editor'
+    password_hash TEXT NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes for performance & integrity
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_customers_deleted ON customers(deleted_at);
 CREATE INDEX IF NOT EXISTS idx_projects_customer ON customer_projects(customer_id, deleted_at);
 CREATE INDEX IF NOT EXISTS idx_docs_type_status ON documents(type, status, deleted_at);

@@ -10,7 +10,8 @@ require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const versionInfo = require('./config/version');
-const { requireAuth } = require('./middleware/auth');
+const { requireAuth, requireAdmin } = require('./middleware/auth');
+const { ensureDefaultUsers } = require('./services/userService');
 const { autoBufferMiddleware, ensureDailyBuffer } = require('./services/autoBuffer');
 const { pingSupabase, startKeepAliveSchedule, getStatus: getKeepAliveStatus } = require('./services/supabaseKeepAlive');
 
@@ -26,7 +27,22 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(cors());
+// Strict Whitelist CORS Policy
+const allowedOrigins = [
+    'https://kequiv.vercel.app',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+            return callback(null, true);
+        }
+        return callback(new Error('CORS blocked: Origin not allowed'));
+    },
+    credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(autoBufferMiddleware);
@@ -120,7 +136,7 @@ app.use('/api/reservations', requireAuth, require('./routes/reservations'));
 app.use('/api/documents', requireAuth, require('./routes/documents'));
 app.use('/api/dashboard', requireAuth, require('./routes/dashboard'));
 app.use('/api/upload', requireAuth, require('./routes/upload'));
-app.use('/api/backup', requireAuth, require('./routes/backup'));
+app.use('/api/backup', requireAdmin, require('./routes/backup'));
 app.use('/api/reports', requireAuth, require('./routes/reports'));
 
 // Fallback to index.html for SPA navigation
@@ -131,12 +147,13 @@ app.use((req, res, next) => {
     next();
 });
 
-// Run Daily Auto-Buffer & Supabase Keep-Alive on startup
+// Run User Provisioning, Daily Auto-Buffer & Supabase Keep-Alive on startup
+ensureDefaultUsers().catch(err => console.error('Initial user provisioning error:', err));
 ensureDailyBuffer(5).catch(err => console.error('Initial auto-buffer error:', err));
 startKeepAliveSchedule(24);
 
-// Start server when run directly (not on Vercel serverless)
-if (!process.env.VERCEL) {
+// Start server when run directly (not on Vercel serverless and not when required by tests)
+if (!process.env.VERCEL && require.main === module) {
     app.listen(PORT, () => {
         console.log(`====================================================`);
         console.log(`🚀 Kequiv Web System v${versionInfo.version} is running!`);

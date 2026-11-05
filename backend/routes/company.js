@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { supabase, isSupabaseConfigured } = require('../supabase');
+const { requireAdmin } = require('../middleware/auth');
 
 // GET company profile
 router.get('/', async (req, res) => {
@@ -46,8 +47,8 @@ router.get('/', async (req, res) => {
     }
 });
 
-// PUT update company profile
-router.put('/', async (req, res) => {
+// PUT update company profile (Admin only)
+router.put('/', requireAdmin, async (req, res) => {
     try {
         const {
             name, tax_id, address, phone, email, line_id,

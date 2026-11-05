@@ -23,6 +23,19 @@ function requireAuth(req, res, next) {
     }
 }
 
+function requireAdmin(req, res, next) {
+    requireAuth(req, res, () => {
+        if (req.user && req.user.role === 'admin') {
+            return next();
+        }
+        return res.status(403).json({
+            success: false,
+            error: 'สิทธิ์ไม่เพียงพอ: สงวนสิทธิ์สำหรับผู้ดูแลระบบ (Admin) เท่านั้น'
+        });
+    });
+}
+
 module.exports = {
-    requireAuth
+    requireAuth,
+    requireAdmin
 };

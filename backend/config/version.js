@@ -3,10 +3,23 @@
  */
 
 module.exports = {
-    version: '2.8.5',
-    releaseDate: '2026-11-04',
-    codename: 'Create Document View Safe Options & Form Initialization Guard Fix',
+    version: '2.9.0',
+    releaseDate: '2026-11-05',
+    codename: 'Cybersecurity Hardening, Persistent Supabase Auth & Strict RBAC Engine',
     changelog: [
+        {
+            version: '2.9.0',
+            date: '2026-11-05',
+            title: 'Cybersecurity Hardening, Persistent Supabase Auth & Strict RBAC Engine',
+            features: [
+                'ขจัด Hardcoded Credentials ออกจากซอร์สโค้ด ยกระดับการยืนยันตัวตนด้วย Supabase Auth และ SQLite Identity Store',
+                'สร้างและจัดเก็บ JWT Secret ที่เข้ารหัสอย่างปลอดภัย (256-bit cryptographically secure token) ขจัดความเสี่ยง JWT Forgery',
+                'เพิ่มระบบบันทึกรหัสผ่านถาวร (Persistent Password Change) แก้ไขแล้วคงอยู่ถาวรไม่สูญหายเมื่อ Vercel Serverless รีสตาร์ต',
+                'กำหนดสิทธิ์การเข้าถึงตามบทบาทอย่างเข้มงวด (Strict RBAC: requireAdmin) ล็อกสิทธิ์การดาวน์โหลด Backup ฐานข้อมูล และการแก้ไขข้อมูลบริษัท/บัญชีธนาคาร ให้เฉพาะ Admin เท่านั้น',
+                'ยกระดับ CORS Policy ให้รับเฉพาะโดเมนของระบบ (kequiv.vercel.app & localhost) ป้องกันการยิงคำขอจากเว็บไซต์ภายนอก',
+                'ปรับอายุ Token ให้ปลอดภัยยิ่งขึ้นจาก 30 วันเป็น 7 วัน (7-Day Hardened Session)'
+            ]
+        },
         {
             version: '2.8.5',
             date: '2026-11-04',

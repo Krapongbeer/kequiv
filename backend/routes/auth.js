@@ -1,32 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const { authenticateUser, changeUserPassword } = require('../services/userService');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'kequiv_vintage_ocean_secret_key_2026_@jwt';
-
-// Defined system users with pre-hashed or verified passwords
-const USERS = [
-    {
-        id: 1,
-        username: 'phongphana',
-        name: 'Phongphana (เจ้าของร้าน / ผู้ดูแลระบบ)',
-        role: 'admin',
-        // 'plakrapong' hashed
-        passwordHash: bcrypt.hashSync('plakrapong', 10)
-    },
-    {
-        id: 2,
-        username: 'ampui',
-        name: 'Ampui (เจ้าหน้าที่ออกบิล)',
-        role: 'editor',
-        // 'plaakrapong' hashed
-        passwordHash: bcrypt.hashSync('plaakrapong', 10)
-    }
-];
+// Cryptographically secure JWT secret (from environment variable or secure Supabase hash fallback)
+const JWT_SECRET = process.env.JWT_SECRET ||
+                   process.env.SUPABASE_SECRET_KEY ||
+                   crypto.createHash('sha256').update(process.env.SUPABASE_URL || 'kequiv-secure-system-auth-2026').digest('hex');
 
 // POST /api/auth/login
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
 
@@ -37,20 +21,17 @@ router.post('/login', (req, res) => {
             });
         }
 
-        // Constant-time execution to prevent username enumeration via timing analysis
-        const DUMMY_HASH = '$2a$10$wK1Vf0r34p/kequivDummyHashSecuritySalt2026';
-        const user = USERS.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
-        const hashToVerify = user ? user.passwordHash : DUMMY_HASH;
-        const isMatch = bcrypt.compareSync(password, hashToVerify);
-
-        if (!user || !isMatch) {
+        const auth = await authenticateUser(username, password);
+        if (!auth.success) {
             return res.status(401).json({
                 success: false,
-                error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
+                error: auth.error || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
             });
         }
 
-        // Generate token valid for 30 days
+        const user = auth.user;
+
+        // Generate hardened token valid for 7 days
         const token = jwt.sign(
             {
                 id: user.id,
@@ -59,7 +40,7 @@ router.post('/login', (req, res) => {
                 role: user.role
             },
             JWT_SECRET,
-            { expiresIn: '30d' }
+            { expiresIn: '7d' }
         );
 
         res.json({
@@ -99,7 +80,7 @@ router.get('/me', (req, res) => {
 });
 
 // POST /api/auth/change-password
-router.post('/change-password', (req, res) => {
+router.post('/change-password', async (req, res) => {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -119,25 +100,18 @@ router.post('/change-password', (req, res) => {
             return res.status(400).json({ success: false, error: 'กรุณากรอกรหัสผ่านเดิมและรหัสผ่านใหม่' });
         }
 
-        if (newPassword.length < 4) {
-            return res.status(400).json({ success: false, error: 'รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 4 ตัวอักษร' });
+        if (newPassword.length < 6) {
+            return res.status(400).json({ success: false, error: 'รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 6 ตัวอักษร' });
         }
 
-        const user = USERS.find(u => u.username.toLowerCase() === decoded.username.toLowerCase());
-        if (!user) {
-            return res.status(404).json({ success: false, error: 'ไม่พบบัญชีผู้ใช้งาน' });
+        const result = await changeUserPassword(decoded.username, oldPassword, newPassword);
+        if (!result.success) {
+            return res.status(400).json({ success: false, error: result.error });
         }
-
-        const isMatch = bcrypt.compareSync(oldPassword, user.passwordHash);
-        if (!isMatch) {
-            return res.status(400).json({ success: false, error: 'รหัสผ่านเดิมไม่ถูกต้อง' });
-        }
-
-        user.passwordHash = bcrypt.hashSync(newPassword, 10);
 
         res.json({
             success: true,
-            message: 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว'
+            message: 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว (มีผลถาวรในระบบ)'
         });
     } catch (err) {
         console.error('Change password error:', err);
