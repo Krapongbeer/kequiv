@@ -276,13 +276,18 @@ window.documentsModule = {
             const company = doc.company || {};
             const bank = (company.bank_accounts && company.bank_accounts[0]) ? company.bank_accounts[0] : null;
 
-            let msg = `🔔 [แจ้งเตือนยอดครบกำหนดชำระ] ${company.name || 'ร้านเคอีควิป'}\n\n`;
+            const titles = { quotation: 'ใบเสนอราคา', billing: 'ใบแจ้งหนี้/วางบิล', receipt: 'ใบเสร็จรับเงิน' };
+            const typeLabel = titles[doc.type] || 'เอกสารธุรกิจ';
             const host = window.location.origin;
             const shareUrl = `${host}/share/${doc.code}`;
-            let msg = `📄 [${typeLabel}] ร้านเคอีควิป Kequiv\n`;
-            msg += `เลขที่: ${doc.code}\n`;
+
+            let msg = `🔔 [แจ้งเตือนยอดครบกำหนดชำระ] ${company.name || 'ร้านเคอีควิป'}\n`;
+            msg += `📄 [${typeLabel}] เลขที่: ${doc.code}\n`;
             msg += `ลูกค้า: ${doc.customer_name || 'ลูกค้าผู้มีอุปการคุณ'}\n`;
             msg += `ยอดเงิน: ฿${app.formatCurrency(doc.grand_total)} บาท\n`;
+            if (bank) {
+                msg += `ธนาคาร: ${bank.bank} (${bank.account_no})\n`;
+            }
             msg += `\n👉 เปิดดูเอกสารฉบับเต็ม & โหลด PDF:\n${shareUrl}\n\nขอบพระคุณครับ 🙏`;
 
             // Auto copy to clipboard

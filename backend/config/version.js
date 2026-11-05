@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.8',
+    version: '2.9.9',
     releaseDate: '2026-11-05',
-    codename: 'Public Share Link Security Hardening & Anti-Scraping Protection',
+    codename: 'Fix Document Module Variable Collision & Enforce Top-of-Page Scroll Position',
     changelog: [
+        {
+            version: '2.9.9',
+            date: '2026-11-05',
+            title: 'Fix Document Module Variable Collision & Enforce Top-of-Page Scroll Position',
+            features: [
+                'แก้ไขข้อผิดพลาดใน documents.js ที่ทำให้เมนู "2. รายการเอกสารทั้งหมด" และ "3. ออกเอกสารใหม่" แสดงผลเป็นหน้าว่างเปล่า (Fix Duplicate Identifier Collision)',
+                'ป้องกันหน้าเว็บเลื่อนลงล่างสุดอัตโนมัติขณะเปิดหน้าเว็บ (Enforce Top-of-Page Scroll Position): ปิด Browser Auto-scroll Restoration ด้วย history.scrollRestoration = manual',
+                'เพิ่ม Hash Navigation ให้รองรับเมนู #audit-logs เชื่อมต่อตรงได้อย่างราบรื่น'
+            ]
+        },
         {
             version: '2.9.8',
             date: '2026-11-05',

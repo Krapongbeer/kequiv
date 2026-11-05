@@ -23,6 +23,12 @@ const app = {
     async init() {
         console.log('Kequiv Initializing...');
 
+        // Ensure page opens at the top (prevent browser auto-restoring scroll to bottom)
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo(0, 0);
+
         // Initialize Theme (Dark/Light mode)
         this.initTheme();
 
@@ -55,7 +61,7 @@ const app = {
 
         // Check hash navigation
         const hash = window.location.hash || '';
-        const backofficeTabs = ['#dashboard', '#documents', '#create-doc', '#customers', '#reservations', '#settings'];
+        const backofficeTabs = ['#dashboard', '#documents', '#create-doc', '#customers', '#reservations', '#settings', '#audit-logs'];
         if (hash === '#cms' || hash.startsWith('#cms-')) {
             if (this.state.currentUser) {
                 this.openCms(hash.replace('#cms-', '').replace('#cms', ''));
@@ -132,6 +138,7 @@ const app = {
 
         document.body.classList.add('flex', 'flex-col', 'md:flex-row');
         this.hideLoginScreen();
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         this.switchTab(targetTab || this.state.activeTab || 'dashboard');
     },
 
@@ -143,6 +150,7 @@ const app = {
         document.body.classList.remove('flex', 'flex-col', 'md:flex-row');
         this.hideLoginScreen();
         this.updateStorefrontAuthButton();
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     },
 
     updateStorefrontAuthButton() {
