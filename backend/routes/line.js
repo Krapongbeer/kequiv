@@ -5,6 +5,7 @@ const { supabase, isSupabaseConfigured } = require('../supabase');
 const { requireAuth } = require('../middleware/auth');
 const lineService = require('../services/lineService');
 const { logAudit } = require('../services/auditService');
+const { generateDocShareKey } = require('../utils/shareSecurity');
 
 // GET /api/line/status - Check LINE Bot status
 router.get('/status', (req, res) => {
@@ -61,7 +62,8 @@ router.post('/webhook', async (req, res) => {
                     const doc = db.prepare('SELECT * FROM documents WHERE code = ? AND deleted_at IS NULL').get(code);
                     if (doc) {
                         const host = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://kequiv.vercel.app';
-                        const shareUrl = `${host}/share/${doc.code}`;
+                        const shareKey = generateDocShareKey(doc.code, doc.id);
+                        const shareUrl = `${host}/share/${doc.code}?k=${shareKey}`;
                         const flexMsg = lineService.buildDocumentFlexMessage(doc, shareUrl);
                         await lineService.replyMessage(ev.replyToken, flexMsg).catch(err => console.error('LINE Reply error:', err.message));
                         continue;
@@ -99,7 +101,8 @@ router.post('/push-document', requireAuth, async (req, res) => {
         }
 
         const host = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://kequiv.vercel.app';
-        const shareUrl = `${host}/share/${doc.code}`;
+        const shareKey = generateDocShareKey(doc.code, doc.id);
+        const shareUrl = `${host}/share/${doc.code}?k=${shareKey}`;
 
         // If targetUserId is provided, push via LINE Bot
         if (targetUserId) {

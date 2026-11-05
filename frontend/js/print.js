@@ -588,7 +588,8 @@ window.printModule = {
             return;
         }
         const host = window.location.origin;
-        const shareUrl = `${host}/share/${this.currentDoc.code}`;
+        const keyParam = this.currentDoc.share_key ? `?k=${this.currentDoc.share_key}` : '';
+        const shareUrl = `${host}/share/${this.currentDoc.code}${keyParam}`;
         try {
             await navigator.clipboard.writeText(shareUrl);
             if (window.app) app.toast(`คัดลอกลิงก์บิลสำเร็จ! (${shareUrl}) 🔗`, 'success');
@@ -607,7 +608,8 @@ window.printModule = {
         const titles = { quotation: 'ใบเสนอราคา', billing: 'ใบแจ้งหนี้/วางบิล', receipt: 'ใบเสร็จรับเงิน' };
         const title = titles[doc.type] || 'เอกสารธุรกิจ';
         const host = window.location.origin;
-        const shareUrl = `${host}/share/${doc.code}`;
+        const keyParam = doc.share_key ? `?k=${doc.share_key}` : '';
+        const shareUrl = `${host}/share/${doc.code}${keyParam}`;
 
         // 1. สร้างข้อความกระชับ (ป้องกัน LINE Web Plugin เออเร่อ/หน้าขาวจาก URL ขนาดยาวเกินกำหนด)
         let compactMsg = `📄 [${title}] ร้านเคอีควิป Kequiv\n`;

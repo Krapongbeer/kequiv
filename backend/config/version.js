@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.9.14',
+    version: '2.9.15',
     releaseDate: '2026-11-05',
-    codename: 'Clean Blank Project Box when No Sub-Project is Selected',
+    codename: 'Secure Anti-Guessing Public Document Share with Secret Access Tokens',
     changelog: [
+        {
+            version: '2.9.15',
+            date: '2026-11-05',
+            title: 'Secure Anti-Guessing Public Document Share with Secret Access Tokens',
+            features: [
+                'ยกระดับความปลอดภัยลิงก์แชร์เอกสาร (Anti-Guessing & Anti-IDOR Protection): เพิ่ม Cryptographic Secret Access Token (?k=...) กำกับท้ายลิงก์แชร์ทุกฉบับ',
+                'ป้องกันบุคคลภายนอกสุ่มเดาหรือเปลี่ยนเลขที่เอกสารเพื่อแอบดูบิล/ราคาของลูกค้ารายอื่นอย่างสมบูรณ์แบบ',
+                'ระบบบล็อกการเข้าถึงโดยไม่ได้รับอนุญาต (403 Forbidden) พร้อมบันทึกลงระบบ Security Audit Log ทันที',
+                'หน้าแจ้งเตือนความปลอดภัยมาตรฐานสูง พร้อมปุ่มติดต่อร้านผ่าน LINE OA ทันทีหากไม่มีสิทธิ์เข้าถึง'
+            ]
+        },
         {
             version: '2.9.14',
             date: '2026-11-05',

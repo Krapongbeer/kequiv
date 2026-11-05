@@ -6,6 +6,7 @@ const { getNextDocumentCodeSupabase, commitDocumentCodeSupabase } = require('../
 const { thaiBahtText } = require('../utils/thaiBahtText');
 const { supabase, isSupabaseConfigured } = require('../supabase');
 const { logAudit } = require('../services/auditService');
+const { generateDocShareKey } = require('../utils/shareSecurity');
 
 // Helper to calculate totals from items
 function calculateItemsTotal(items, docDiscountTotal = 0) {
@@ -121,7 +122,8 @@ router.get('/', async (req, res) => {
                 ...d,
                 customer_name: d.customer ? d.customer.name : '-',
                 customer_phone: d.customer ? d.customer.phone : '',
-                project_name: d.project ? d.project.project_name : null
+                project_name: d.project ? d.project.project_name : null,
+                share_key: generateDocShareKey(d.code, d.id)
             }));
 
             return res.json({ success: true, data: result });
@@ -173,7 +175,10 @@ router.get('/', async (req, res) => {
         query += ' ORDER BY d.issue_date DESC, d.id DESC LIMIT ? OFFSET ?';
         params.push(parseInt(limit, 10), parseInt(offset, 10));
 
-        const docs = db.prepare(query).all(...params);
+        const docs = db.prepare(query).all(...params).map(d => ({
+            ...d,
+            share_key: generateDocShareKey(d.code, d.id)
+        }));
         res.json({ success: true, data: docs });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
@@ -235,6 +240,7 @@ router.get('/:id', async (req, res) => {
             };
 
             flattened.grand_total_thai = thaiBahtText(flattened.grand_total);
+            flattened.share_key = generateDocShareKey(flattened.code, flattened.id);
 
             // Attach company info
             const { data: comp } = await supabase.from('company_profile').select('*').eq('id', 1).single();
@@ -281,6 +287,7 @@ router.get('/:id', async (req, res) => {
         `).all(doc.id);
 
         doc.grand_total_thai = thaiBahtText(doc.grand_total);
+        doc.share_key = generateDocShareKey(doc.code, doc.id);
 
         const company = db.prepare('SELECT * FROM company_profile WHERE id = 1').get();
         if (company && company.bank_info) {

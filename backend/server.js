@@ -15,6 +15,10 @@ const { requireAuth, requireAdmin } = require('./middleware/auth');
 const { ensureDefaultUsers } = require('./services/userService');
 const { autoBufferMiddleware, ensureDailyBuffer } = require('./services/autoBuffer');
 const { pingSupabase, startKeepAliveSchedule, getStatus: getKeepAliveStatus } = require('./services/supabaseKeepAlive');
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('./routes/auth');
+const { verifyDocShareKey, generateDocShareKey } = require('./utils/shareSecurity');
+const { logAudit } = require('./services/auditService');
 
 // Middlewares & Security Headers
 app.disable('x-powered-by');
@@ -115,14 +119,31 @@ app.get('/api/documents/public/:code', shareLimiter, async (req, res) => {
     try {
         const { code } = req.params;
         const cleanCode = (code || '').trim().toUpperCase();
+        const { k, key } = req.query;
+        const providedKey = (k || key || '').trim();
 
         // Security Validation: Strict code format (prevents injection & probing)
         if (!/^[A-Z]{2,4}\d{4,8}-[0-9A-Z]{2,6}$/.test(cleanCode) && !/^[A-Z0-9-]{4,20}$/.test(cleanCode)) {
             return res.status(400).json({ success: false, error: 'รูปแบบรหัสเอกสารไม่ถูกต้อง' });
         }
 
+        // Check if requester is logged in as admin (can preview without secret key)
+        let isAdmin = false;
+        const authHeader = req.headers['authorization'];
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            try {
+                const token = authHeader.substring(7);
+                const decoded = jwt.verify(token, JWT_SECRET);
+                if (decoded && decoded.username) {
+                    isAdmin = true;
+                }
+            } catch (_) {}
+        }
+
+        let doc = null;
+
         if (isSupabaseConfigured && supabase) {
-            const { data: doc, error } = await supabase
+            const { data, error } = await supabase
                 .from('documents')
                 .select(`
                     *,
@@ -134,7 +155,7 @@ app.get('/api/documents/public/:code', shareLimiter, async (req, res) => {
                 .is('deleted_at', null)
                 .single();
 
-            if (!error && doc) {
+            if (!error && data) {
                 const { data: company } = await supabase.from('company_profile').select('*').eq('id', 1).single();
                 let bank_accounts = [];
                 if (company && company.bank_info) {
@@ -142,59 +163,84 @@ app.get('/api/documents/public/:code', shareLimiter, async (req, res) => {
                         bank_accounts = typeof company.bank_info === 'string' ? JSON.parse(company.bank_info) : company.bank_info;
                     } catch (_) {}
                 }
-                return res.json({
-                    success: true,
-                    data: {
-                        ...doc,
-                        customer_name: doc.customer?.name || '-',
-                        customer_tax_id: doc.customer?.tax_id || '',
-                        customer_address: doc.customer?.address || '',
-                        customer_phone: doc.customer?.phone || '',
-                        customer_email: doc.customer?.email || '',
-                        project_name: doc.project?.project_name || null,
-                        project_site_address: doc.project?.site_address || null,
-                        project_contact_person: doc.project?.contact_person || null,
-                        company: {
-                            ...(company || {}),
-                            bank_accounts
-                        }
+                doc = {
+                    ...data,
+                    customer_name: data.customer?.name || '-',
+                    customer_tax_id: data.customer?.tax_id || '',
+                    customer_address: data.customer?.address || '',
+                    customer_phone: data.customer?.phone || '',
+                    customer_email: data.customer?.email || '',
+                    project_name: data.project?.project_name || null,
+                    project_site_address: data.project?.site_address || null,
+                    project_contact_person: data.project?.contact_person || null,
+                    company: {
+                        ...(company || {}),
+                        bank_accounts
                     }
-                });
+                };
             }
         }
 
-        // SQLite Fallback
-        const doc = db.prepare(`
-            SELECT d.*, 
-                   c.name as customer_name, c.tax_id as customer_tax_id, c.address as customer_address, 
-                   c.phone as customer_phone, c.email as customer_email,
-                   p.project_name, p.site_address as project_site_address, p.contact_person as project_contact_person
-            FROM documents d
-            LEFT JOIN customers c ON c.id = d.customer_id
-            LEFT JOIN customer_projects p ON p.id = d.project_id
-            WHERE d.code = ? AND d.deleted_at IS NULL
-        `).get(cleanCode);
+        if (!doc) {
+            // SQLite Fallback
+            const localDoc = db.prepare(`
+                SELECT d.*, 
+                       c.name as customer_name, c.tax_id as customer_tax_id, c.address as customer_address, 
+                       c.phone as customer_phone, c.email as customer_email,
+                       p.project_name, p.site_address as project_site_address, p.contact_person as project_contact_person
+                FROM documents d
+                LEFT JOIN customers c ON c.id = d.customer_id
+                LEFT JOIN customer_projects p ON p.id = d.project_id
+                WHERE d.code = ? AND d.deleted_at IS NULL
+            `).get(cleanCode);
+
+            if (localDoc) {
+                localDoc.items = db.prepare(`
+                    SELECT * FROM document_items 
+                    WHERE document_id = ? 
+                    ORDER BY sort_order ASC, id ASC
+                `).all(localDoc.id);
+
+                const company = db.prepare('SELECT * FROM company_profile WHERE id = 1').get();
+                let bank_accounts = [];
+                if (company && company.bank_info) {
+                    try {
+                        bank_accounts = JSON.parse(company.bank_info);
+                    } catch (_) {}
+                }
+                localDoc.company = { ...(company || {}), bank_accounts };
+                doc = localDoc;
+            }
+        }
 
         if (!doc) {
             return res.status(404).json({ success: false, error: 'ไม่พบเอกสารนี้ในระบบ' });
         }
 
-        doc.items = db.prepare(`
-            SELECT * FROM document_items 
-            WHERE document_id = ? 
-            ORDER BY sort_order ASC, id ASC
-        `).all(doc.id);
+        // Security Check: Verify Access Key
+        const isKeyValid = verifyDocShareKey(doc.code, doc.id, providedKey);
 
-        const company = db.prepare('SELECT * FROM company_profile WHERE id = 1').get();
-        let bank_accounts = [];
-        if (company && company.bank_info) {
-            try {
-                bank_accounts = JSON.parse(company.bank_info);
-            } catch (_) {}
+        if (!isAdmin && !isKeyValid) {
+            const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '-';
+            logAudit(req, 'PUBLIC_SHARE_ACCESS_BLOCKED', {
+                targetType: 'document',
+                targetId: doc.id,
+                details: `บล็อกการเข้าถึงบิล ${doc.code} โดยไม่ได้รับอนุญาต (IP: ${clientIp}, Key: ${providedKey ? 'ไม่ถูกต้อง' : 'ไม่ได้ระบุ'})`
+            }).catch(() => {});
+
+            return res.status(403).json({
+                success: false,
+                error: 'ไม่สามารถเปิดเอกสารได้: ลิงก์ไม่ถูกต้อง หรือไม่มีสิทธิ์เข้าถึง (ต้องใช้ลิงก์ฉบับเต็มที่ได้รับจากทางร้าน)'
+            });
         }
-        doc.company = { ...(company || {}), bank_accounts };
 
-        res.json({ success: true, data: doc });
+        // Attach share_key to response
+        doc.share_key = generateDocShareKey(doc.code, doc.id);
+
+        res.json({
+            success: true,
+            data: doc
+        });
     } catch (err) {
         res.status(500).json({ success: false, error: 'เกิดข้อผิดพลาดในการโหลดเอกสาร' });
     }

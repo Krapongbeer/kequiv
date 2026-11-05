@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&family=Sarabun:wght@400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <link rel="stylesheet" href="/css/style.css?v=2.9.3">
+    <link rel="stylesheet" href="/css/style.css?v=2.9.15">
 
     <style>
         @media print {
@@ -71,7 +71,7 @@
     </footer>
 
     <!-- App Scripts -->
-    <script src="/js/print.js?v=2.9.3"></script>
+    <script src="/js/print.js?v=2.9.15"></script>
     <script>
         window.app = {
             formatCurrency: (n) => Number(n || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
@@ -90,6 +90,31 @@
 
         let loadedDoc = null;
 
+        function renderErrorState(title, message) {
+            document.getElementById('print-sheet').innerHTML = `
+                <div class="p-8 sm:p-14 text-center max-w-lg mx-auto">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-3xl shadow-xs">
+                        🔒
+                    </div>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900 font-typewriter">${title}</h2>
+                    <p class="text-xs sm:text-sm text-slate-600 mt-2 font-mono leading-relaxed">${message}</p>
+                    <div class="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-200 text-left text-xs text-slate-600">
+                        <p class="font-bold text-slate-800 mb-1">🛡️ นโยบายความปลอดภัยของร้าน Kequiv:</p>
+                        <p>เพื่อปกป้องข้อมูลส่วนบุคคลและยอดเงินของลูกค้า เอกสารทุกฉบับจะเปิดได้เฉพาะผ่านลิงก์เฉพาะ (Secret Link) ที่ได้รับจากทางร้านเท่านั้น ไม่สามารถสุ่มเดาเลขเอกสารได้</p>
+                    </div>
+                    <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+                        <a href="https://line.me/R/ti/p/@vcv6921d" target="_blank" class="btn-line text-xs py-2 px-4 shadow-sm inline-flex items-center gap-1.5 font-bold">
+                            <span>💬</span> ติดต่อทางร้านผ่าน LINE OA
+                        </a>
+                        <a href="/" class="btn-ocean text-xs py-2 px-4 shadow-sm inline-flex items-center gap-1.5">
+                            <span>🏠</span> ไปยังหน้าแรก
+                        </a>
+                    </div>
+                </div>
+            `;
+            document.getElementById('doc-title-meta').textContent = 'การเข้าถึงถูกจำกัดสิทธิ์';
+        }
+
         async function loadPublicDocument() {
             const urlParams = new URLSearchParams(window.location.search);
             const pathSegments = window.location.pathname.split('/').filter(Boolean);
@@ -98,16 +123,24 @@
                 ? codeFromPath 
                 : (urlParams.get('code') || '');
 
+            const key = (urlParams.get('k') || urlParams.get('key') || '').trim();
+
             if (!code) {
-                document.getElementById('print-sheet').innerHTML = '<div class="p-8 text-center text-rose-600 font-mono">ไม่พบรหัสเอกสาร</div>';
+                renderErrorState('ไม่พบรหัสเอกสาร', 'กรุณาตรวจสอบลิงก์ที่ได้รับจากทางร้านอีกครั้ง');
                 return;
             }
 
             try {
-                const res = await fetch(`/api/documents/public/${encodeURIComponent(code)}`);
+                const authToken = localStorage.getItem('kequiv_token') || '';
+                const headers = {};
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+                const query = key ? `?k=${encodeURIComponent(key)}` : '';
+                const res = await fetch(`/api/documents/public/${encodeURIComponent(code)}${query}`, { headers });
                 const json = await res.json();
                 if (!json.success || !json.data) {
-                    throw new Error(json.error || 'ไม่พบเอกสาร');
+                    throw new Error(json.error || 'ไม่พบเอกสาร หรือไม่มีสิทธิ์เข้าถึง');
                 }
 
                 loadedDoc = json.data;
@@ -116,13 +149,7 @@
                 document.getElementById('doc-title-meta').textContent = `เอกสารเลขที่ ${loadedDoc.code} (${app.formatDateThai(loadedDoc.issue_date)})`;
                 window.printModule.renderSheet(loadedDoc);
             } catch (err) {
-                document.getElementById('print-sheet').innerHTML = `
-                    <div class="p-12 text-center text-rose-700 font-mono">
-                        <div class="text-3xl mb-2">📄</div>
-                        <p class="font-bold text-base">ไม่สามารถเปิดเอกสารได้</p>
-                        <p class="text-xs text-slate-500 mt-1">${err.message}</p>
-                    </div>
-                `;
+                renderErrorState('ไม่สามารถเปิดเอกสารได้', err.message);
             }
         }
 

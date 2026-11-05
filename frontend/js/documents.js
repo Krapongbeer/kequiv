@@ -279,7 +279,8 @@ window.documentsModule = {
             const titles = { quotation: 'ใบเสนอราคา', billing: 'ใบแจ้งหนี้/วางบิล', receipt: 'ใบเสร็จรับเงิน' };
             const typeLabel = titles[doc.type] || 'เอกสารธุรกิจ';
             const host = window.location.origin;
-            const shareUrl = `${host}/share/${doc.code}`;
+            const keyParam = doc.share_key ? `?k=${doc.share_key}` : '';
+            const shareUrl = `${host}/share/${doc.code}${keyParam}`;
 
             let msg = `🔔 [แจ้งเตือนยอดครบกำหนดชำระ] ${company.name || 'ร้านเคอีควิป'}\n`;
             msg += `📄 [${typeLabel}] เลขที่: ${doc.code}\n`;
