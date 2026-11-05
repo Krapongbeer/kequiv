@@ -91,11 +91,15 @@
         let loadedDoc = null;
 
         async function loadPublicDocument() {
-            const parts = window.location.pathname.split('/');
-            const code = parts[parts.length - 1] || new URLSearchParams(window.location.search).get('code');
+            const urlParams = new URLSearchParams(window.location.search);
+            const pathSegments = window.location.pathname.split('/').filter(Boolean);
+            const codeFromPath = pathSegments.length > 0 ? pathSegments[pathSegments.length - 1] : null;
+            const code = (codeFromPath && codeFromPath !== 'share.html' && codeFromPath !== 'share') 
+                ? codeFromPath 
+                : (urlParams.get('code') || '');
 
             if (!code) {
-                document.getElementById('print-sheet').innerHTML = '<div class="p-8 text-center text-rose-600">ไม่พบรหัสเอกสาร</div>';
+                document.getElementById('print-sheet').innerHTML = '<div class="p-8 text-center text-rose-600 font-mono">ไม่พบรหัสเอกสาร</div>';
                 return;
             }
 
@@ -107,6 +111,7 @@
                 }
 
                 loadedDoc = json.data;
+                window.printModule.currentDoc = loadedDoc;
                 document.title = `${loadedDoc.type === 'quotation' ? 'ใบเสนอราคา' : 'เอกสาร'} ${loadedDoc.code} - ร้านเคอีควิป`;
                 document.getElementById('doc-title-meta').textContent = `เอกสารเลขที่ ${loadedDoc.code} (${app.formatDateThai(loadedDoc.issue_date)})`;
                 window.printModule.renderSheet(loadedDoc);

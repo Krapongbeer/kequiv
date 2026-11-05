@@ -6,6 +6,10 @@
       "destination": "/api/index.js"
     },
     {
+      "source": "/share/(.*)",
+      "destination": "/frontend/share.html"
+    },
+    {
       "source": "/uploads/(.*)",
       "destination": "/uploads/$1"
     },
