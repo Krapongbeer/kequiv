@@ -305,19 +305,40 @@ window.customersModule = {
 
         container.innerHTML = `
             <div class="space-y-2 font-mono">
-                ${projects.map(p => `
+                ${projects.map(p => {
+                    let taxId = p.tax_id || '';
+                    let email = p.email || '';
+                    let phone = p.phone || '';
+                    let cleanNote = p.note || '';
+                    if (!taxId && cleanNote.includes('[TAX:')) {
+                        const m = cleanNote.match(/\[TAX:(.*?)\]/);
+                        if (m) taxId = m[1];
+                    }
+                    if (!email && cleanNote.includes('[EMAIL:')) {
+                        const m = cleanNote.match(/\[EMAIL:(.*?)\]/);
+                        if (m) email = m[1];
+                    }
+                    if (!phone && cleanNote.includes('[PHONE:')) {
+                        const m = cleanNote.match(/\[PHONE:(.*?)\]/);
+                        if (m) phone = m[1];
+                    }
+                    cleanNote = cleanNote.replace(/\[TAX:.*?\]/g, '').replace(/\[EMAIL:.*?\]/g, '').replace(/\[PHONE:.*?\]/g, '').trim();
+
+                    return `
                     <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-start justify-between gap-3 text-xs">
                         <div class="flex-1">
-                            <div class="font-bold text-slate-900">📌 ${p.project_name}</div>
-                            ${p.site_address ? `<div class="text-slate-600 mt-0.5">📍 หน้างาน: ${p.site_address}</div>` : ''}
-                            ${p.contact_person ? `<div class="text-slate-600 mt-0.5">👤 ผู้ติดต่อ: ${p.contact_person}</div>` : ''}
-                            ${p.note ? `<div class="text-slate-400 italic mt-0.5">📝 ${p.note}</div>` : ''}
+                            <div class="font-bold text-slate-900 text-sm">${p.project_name}</div>
+                            ${taxId ? `<div class="text-sky-800 font-bold mt-0.5">Tax: ${taxId}</div>` : ''}
+                            ${p.site_address ? `<div class="text-slate-600 mt-0.5">📍 ที่อยู่/หน้างาน: ${p.site_address}</div>` : ''}
+                            ${(p.contact_person || phone) ? `<div class="text-slate-600 mt-0.5">👤 ผู้ติดต่อ: ${p.contact_person || phone}</div>` : ''}
+                            ${email ? `<div class="text-slate-600 mt-0.5">✉️ อีเมล: ${email}</div>` : ''}
+                            ${cleanNote ? `<div class="text-slate-400 italic mt-0.5">📝 หมายเหตุ: ${cleanNote}</div>` : ''}
                         </div>
                         <button type="button" onclick="window.customersModule.deleteProject(${p.id}, ${JSON.stringify(p.project_name || '').replace(/"/g, '&quot;')})" class="btn-paper text-[11px] py-1 px-2.5 text-rose-700 border-rose-300 hover:bg-rose-50 shadow-xs">
                             ลบ
                         </button>
                     </div>
-                `).join('')}
+                `}).join('')}
             </div>
         `;
     },
@@ -338,19 +359,27 @@ window.customersModule = {
     async saveProject() {
         if (!this.selectedCustomerId) return;
         const name = document.getElementById('proj-name')?.value?.trim();
+        const taxId = document.getElementById('proj-tax-id')?.value?.trim();
+        const phone = document.getElementById('proj-phone')?.value?.trim();
+        const email = document.getElementById('proj-email')?.value?.trim();
         const contact = document.getElementById('proj-contact')?.value?.trim();
         const site = document.getElementById('proj-site')?.value?.trim();
+        const note = document.getElementById('proj-note')?.value?.trim();
 
         if (!name) {
-            app.toast('กรุณาระบุชื่อโครงการ', 'warning');
+            app.toast('กรุณาระบุชื่อโครงการ / บริษัท / นิติบุคคล', 'warning');
             return;
         }
 
         try {
             await api.addProject(this.selectedCustomerId, {
                 project_name: name,
-                contact_person: contact,
-                site_address: site
+                tax_id: taxId || '',
+                phone: phone || '',
+                email: email || '',
+                contact_person: contact || '',
+                site_address: site || '',
+                note: note || ''
             });
             app.toast('บันทึกโครงการสำเร็จ', 'success');
             document.getElementById('form-add-project')?.reset();

@@ -5,6 +5,29 @@ const { supabase, isSupabaseConfigured } = require('../supabase');
 const { logAudit } = require('../services/auditService');
 
 // Helper to safely insert into Supabase with automatic sequence recovery on duplicate key (23505)
+function extractProjectMeta(p) {
+    if (!p) return p;
+    let tax_id = '';
+    let email = '';
+    let phone = '';
+    let cleanNote = p.note || '';
+
+    const taxMatch = cleanNote.match(/\[TAX:(.*?)\]/);
+    if (taxMatch) { tax_id = taxMatch[1]; cleanNote = cleanNote.replace(taxMatch[0], '').trim(); }
+
+    const emailMatch = cleanNote.match(/\[EMAIL:(.*?)\]/);
+    if (emailMatch) { email = emailMatch[1]; cleanNote = cleanNote.replace(emailMatch[0], '').trim(); }
+
+    const phoneMatch = cleanNote.match(/\[PHONE:(.*?)\]/);
+    if (phoneMatch) { phone = phoneMatch[1]; cleanNote = cleanNote.replace(phoneMatch[0], '').trim(); }
+
+    p.tax_id = tax_id;
+    p.email = email;
+    p.phone = phone;
+    p.clean_note = cleanNote;
+    return p;
+}
+
 async function insertWithSequenceRetry(client, table, payload, maxRetries = 5) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         const { data, error } = await client.from(table).insert(payload).select().single();
@@ -405,23 +428,34 @@ router.delete('/:id', async (req, res) => {
 router.post('/:id/projects', async (req, res) => {
     try {
         const customerId = req.params.id;
-        const { project_name, site_address, contact_person, note } = req.body;
+        const { project_name, site_address, contact_person, note, tax_id, phone, email } = req.body;
 
         if (!project_name || !project_name.trim()) {
             return res.status(400).json({ success: false, error: 'กรุณาระบุชื่อโครงการ / หัวบิล' });
         }
+
+        let finalContact = (contact_person || '').trim();
+        if (phone && !finalContact.includes(phone)) {
+            finalContact = finalContact ? `${finalContact} (${phone.trim()})` : phone.trim();
+        }
+
+        const tags = [];
+        if (tax_id && tax_id.trim()) tags.push(`[TAX:${tax_id.trim()}]`);
+        if (email && email.trim()) tags.push(`[EMAIL:${email.trim()}]`);
+        if (phone && phone.trim()) tags.push(`[PHONE:${phone.trim()}]`);
+        const finalNote = tags.length > 0 ? `${tags.join('')} ${(note || '').trim()}`.trim() : (note || '').trim();
 
         if (isSupabaseConfigured && supabase) {
             const { data, error } = await insertWithSequenceRetry(supabase, 'customer_projects', {
                 customer_id: customerId,
                 project_name: project_name.trim(),
                 site_address: site_address || '',
-                contact_person: contact_person || '',
-                note: note || ''
+                contact_person: finalContact,
+                note: finalNote
             });
 
             if (error) throw new Error(error.message);
-            return res.json({ success: true, data });
+            return res.json({ success: true, data: extractProjectMeta(data) });
         }
 
         // SQLite Fallback
@@ -429,9 +463,9 @@ router.post('/:id/projects', async (req, res) => {
             INSERT INTO customer_projects (customer_id, project_name, site_address, contact_person, note)
             VALUES (?, ?, ?, ?, ?)
         `);
-        const result = stmt.run(customerId, project_name.trim(), site_address || '', contact_person || '', note || '');
+        const result = stmt.run(customerId, project_name.trim(), site_address || '', finalContact, finalNote);
         const project = db.prepare('SELECT * FROM customer_projects WHERE id = ?').get(result.lastInsertRowid);
-        res.json({ success: true, data: project });
+        res.json({ success: true, data: extractProjectMeta(project) });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }

@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.29',
+    version: '2.9.30',
     releaseDate: '2026-11-07',
-    codename: 'Multi-Channel Payment Methods & Bill Form Project Restructure',
+    codename: 'Customer Person Name & Project Billing Metadata Integration',
     changelog: [
+        {
+            version: '2.9.30',
+            date: '2026-11-07',
+            title: 'Customer Person Name & Project Billing Metadata Integration',
+            features: [
+                'ปรับรูปแบบการเพิ่มลูกค้า: เน้นใส่ชื่อคน/ผู้ติดต่อ เพื่อง่ายในการค้นหาและเลือกออกบิล',
+                'เพิ่มข้อมูลออกบิลเต็มรูปแบบในโครงการ: รองรับการระบุ ชื่อโครงการ/บริษัท, เลขผู้เสียภาษี, เบอร์โทรศัพท์, อีเมล, ที่อยู่หน้างาน และหมายเหตุครบถ้วนในระดับโครงการ',
+                'ปรับปรุงหัวบิลพิมพ์ตามสั่ง: นำคำว่า "ข้อมูลโครงการ" และรูปหมุด 📌 ออกตามความต้องการ โดยแสดงชื่อโครงการ/หัวบิลและเลขผู้เสียภาษีเป็นหัวเรื่องหลักโดยตรงอย่างเรียบหรู กะทัดรัด ลงตัวพอดีหน้าเดียว'
+            ]
+        },
         {
             version: '2.9.29',
             date: '2026-11-07',

@@ -253,7 +253,7 @@ router.get('/:id', async (req, res) => {
                 .select(`
                     *,
                     customer:customers(name, tax_id, address, phone, email),
-                    project:customer_projects(project_name, site_address, contact_person),
+                    project:customer_projects(project_name, site_address, contact_person, note),
                     items:document_items(*)
                 `)
                 .eq('id', id)
@@ -281,6 +281,18 @@ router.get('/:id', async (req, res) => {
                 }
             }
 
+            let pTaxId = '';
+            let pEmail = '';
+            let pPhone = '';
+            if (doc.project && doc.project.note) {
+                const tm = doc.project.note.match(/\[TAX:(.*?)\]/);
+                if (tm) pTaxId = tm[1];
+                const em = doc.project.note.match(/\[EMAIL:(.*?)\]/);
+                if (em) pEmail = em[1];
+                const pm = doc.project.note.match(/\[PHONE:(.*?)\]/);
+                if (pm) pPhone = pm[1];
+            }
+
             const flattened = {
                 ...doc,
                 customer_name: doc.customer ? doc.customer.name : '-',
@@ -291,6 +303,9 @@ router.get('/:id', async (req, res) => {
                 project_name: doc.project ? doc.project.project_name : null,
                 project_site_address: doc.project ? doc.project.site_address : '',
                 project_contact_person: doc.project ? doc.project.contact_person : '',
+                project_tax_id: pTaxId,
+                project_email: pEmail,
+                project_phone: pPhone,
                 reference_code,
                 reference_type,
                 items: (doc.items || []).sort((a, b) => a.sort_order - b.sort_order)
@@ -325,6 +340,7 @@ router.get('/:id', async (req, res) => {
                    p.project_name,
                    p.site_address as project_site_address,
                    p.contact_person as project_contact_person,
+                   p.note as project_note,
                    ref.code as reference_code,
                    ref.type as reference_type
             FROM documents d
@@ -337,6 +353,21 @@ router.get('/:id', async (req, res) => {
         if (!doc) {
             return res.status(404).json({ success: false, error: 'ไม่พบเอกสาร' });
         }
+
+        let pTaxId = '';
+        let pEmail = '';
+        let pPhone = '';
+        if (doc.project_note) {
+            const tm = doc.project_note.match(/\[TAX:(.*?)\]/);
+            if (tm) pTaxId = tm[1];
+            const em = doc.project_note.match(/\[EMAIL:(.*?)\]/);
+            if (em) pEmail = em[1];
+            const pm = doc.project_note.match(/\[PHONE:(.*?)\]/);
+            if (pm) pPhone = pm[1];
+        }
+        doc.project_tax_id = pTaxId;
+        doc.project_email = pEmail;
+        doc.project_phone = pPhone;
 
         doc.items = db.prepare(`
             SELECT * FROM document_items 
