@@ -219,7 +219,7 @@ window.documentsModule = {
                                                     ✏️ แก้ไข
                                                 </button>
                                             ` : ''}
-                                            <button onclick="window.documentsModule.openConvertModal(${d.id}, '${d.type}', '${d.code}')" class="btn-paper text-xs py-1 px-2" title="แปลงเป็นเอกสารขั้นถัดไป">
+                                            <button onclick="window.documentsModule.openConvertModal(${d.id}, '${d.type}', '${d.code}', '${d.issue_date || ''}')" class="btn-paper text-xs py-1 px-2" title="แปลงเป็นเอกสารขั้นถัดไป">
                                                 🔄 แปลง
                                             </button>
                                             ${d.type === 'billing' && d.status !== 'paid' ? `
@@ -1657,10 +1657,26 @@ window.documentsModule = {
     },
 
     // Actions
-    openConvertModal(id, currentType, code) {
-        app.state.pendingConvertDoc = { id, currentType, code };
+    async openConvertModal(id, currentType, code, issueDate) {
+        if (!issueDate) {
+            const doc = (app.state.documents || []).find(d => Number(d.id) === Number(id));
+            issueDate = doc ? doc.issue_date : new Date().toISOString().slice(0, 10);
+        }
+
+        app.state.pendingConvertDoc = { id, currentType, code, issue_date: issueDate };
+
         const label = document.getElementById('modal-convert-source');
         if (label) label.textContent = `${app.getDocTypeBadge(currentType)} เลขที่ ${code}`;
+
+        const dateLabel = document.getElementById('modal-convert-source-date');
+        if (dateLabel) {
+            dateLabel.textContent = `${app.formatDateThai(issueDate)} (${issueDate})`;
+        }
+
+        const dateInput = document.getElementById('convert-issue-date');
+        if (dateInput) {
+            dateInput.value = issueDate;
+        }
 
         const selectTarget = document.getElementById('convert-target-type');
         if (selectTarget) {
@@ -1680,22 +1696,176 @@ window.documentsModule = {
                 `;
             }
         }
+
         app.openModal('modal-convert');
+        await this.onConvertTargetOrDateChanged();
+    },
+
+    toggleConvertCodeMode(mode) {
+        const resContainer = document.getElementById('convert-reserved-container');
+        const autoContainer = document.getElementById('convert-auto-container');
+        if (mode === 'reserved') {
+            if (resContainer) resContainer.classList.remove('hidden');
+            if (autoContainer) autoContainer.classList.add('hidden');
+        } else {
+            if (resContainer) resContainer.classList.add('hidden');
+            if (autoContainer) autoContainer.classList.remove('hidden');
+        }
+    },
+
+    async onConvertTargetOrDateChanged() {
+        const targetTypeSelect = document.getElementById('convert-target-type');
+        const issueDateInput = document.getElementById('convert-issue-date');
+        const dueDateContainer = document.getElementById('convert-due-date-container');
+        const dueDateInput = document.getElementById('convert-due-date');
+        const reservedSelect = document.getElementById('convert-reserved-select');
+        const reservedHint = document.getElementById('convert-reserved-hint');
+        const badgeEl = document.getElementById('convert-code-badge');
+        const autoPreviewEl = document.getElementById('convert-auto-preview');
+        const modeReservedRadio = document.getElementById('convert-mode-reserved');
+        const modeAutoRadio = document.getElementById('convert-mode-auto');
+
+        if (!targetTypeSelect || !issueDateInput) return;
+
+        const targetType = targetTypeSelect.value;
+        const issueDate = issueDateInput.value || new Date().toISOString().slice(0, 10);
+
+        // Show/hide due date for billing
+        if (dueDateContainer) {
+            if (targetType === 'billing') {
+                dueDateContainer.classList.remove('hidden');
+                if (dueDateInput && !dueDateInput.value) {
+                    const d = new Date(issueDate);
+                    d.setDate(d.getDate() + 30);
+                    dueDateInput.value = d.toISOString().slice(0, 10);
+                }
+            } else {
+                dueDateContainer.classList.add('hidden');
+            }
+        }
+
+        // Fetch preview for auto code
+        try {
+            const nextCodeRes = await api.getNextCode(targetType, issueDate);
+            if (autoPreviewEl && nextCodeRes.data) {
+                autoPreviewEl.value = nextCodeRes.data.code;
+            }
+        } catch (e) {
+            console.error('Failed to get next code preview:', e);
+        }
+
+        // Fetch active reservations for targetType
+        try {
+            if (badgeEl) badgeEl.textContent = 'กำลังหาเลขสำรอง...';
+            const resRes = await api.getReservations(targetType, 'reserved');
+            const reservations = (resRes && resRes.data) ? resRes.data : [];
+
+            // Match reservations:
+            // 1. Exact match on date in note (e.g. "17/7/2026" or "2026-07-17")
+            // 2. Or YearMonth in code (e.g. "202607")
+            const d = new Date(issueDate);
+            const dateStrShort = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+            const ymStr = issueDate.replace(/-/g, '').slice(0, 6);
+
+            let bestMatchIndex = -1;
+            for (let i = 0; i < reservations.length; i++) {
+                const r = reservations[i];
+                const note = r.note || '';
+                const code = r.code || '';
+                if (note.includes(dateStrShort) || note.includes(issueDate)) {
+                    bestMatchIndex = i;
+                    break;
+                }
+                if (bestMatchIndex === -1 && code.includes(ymStr)) {
+                    bestMatchIndex = i;
+                }
+            }
+
+            if (reservations.length > 0) {
+                reservedSelect.innerHTML = reservations.map((r, idx) => {
+                    const isBest = (idx === bestMatchIndex);
+                    return `
+                        <option value="${r.code}" ${isBest ? 'selected' : ''}>
+                            ${r.code} ${r.note ? `— [${r.note}]` : ''} ${isBest ? '✨ (ตรงกับวันที่ระบุ)' : ''}
+                        </option>
+                    `;
+                }).join('');
+
+                if (bestMatchIndex !== -1) {
+                    const matched = reservations[bestMatchIndex];
+                    if (badgeEl) {
+                        badgeEl.className = 'text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full font-bold';
+                        badgeEl.textContent = `✨ พบเลขที่ล็อกไว้: ${matched.code}`;
+                    }
+                    if (reservedHint) {
+                        reservedHint.innerHTML = `<span class="text-emerald-700 font-bold">✓ ตรวจพบเลข ${matched.code} ที่ล็อกไว้สำหรับวันที่ ${dateStrShort} (เลือกให้อัตโนมัติ)</span>`;
+                    }
+                    if (modeReservedRadio) {
+                        modeReservedRadio.checked = true;
+                        this.toggleConvertCodeMode('reserved');
+                    }
+                } else {
+                    if (badgeEl) {
+                        badgeEl.className = 'text-[10px] bg-purple-100 text-purple-900 border border-purple-300 px-2 py-0.5 rounded-full font-bold';
+                        badgeEl.textContent = `มีเลขในคลัง ${reservations.length} เลข`;
+                    }
+                    if (reservedHint) {
+                        reservedHint.textContent = `มีเลขสำรองในคลัง ${reservations.length} รายการ สามารถเลือกเลขที่ต้องการได้`;
+                    }
+                }
+            } else {
+                reservedSelect.innerHTML = `<option value="">-- ไม่มีเลขสำรองประเภทนี้ในคลัง --</option>`;
+                if (badgeEl) {
+                    badgeEl.className = 'text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-medium';
+                    badgeEl.textContent = 'ไม่มีเลขสำรอง (จะรันเลขอัตโนมัติ)';
+                }
+                if (reservedHint) {
+                    reservedHint.textContent = 'ไม่พบเลขสำรองในคลัง ระบบจะรันเลขอัตโนมัติตามเดือนของวันที่ออกเอกสาร';
+                }
+                if (modeAutoRadio) {
+                    modeAutoRadio.checked = true;
+                    this.toggleConvertCodeMode('auto');
+                }
+            }
+        } catch (err) {
+            console.error('Failed to load reservations for convert:', err);
+        }
     },
 
     async submitConvert() {
         if (!app.state.pendingConvertDoc) return;
         const targetType = document.getElementById('convert-target-type').value;
+        const issueDate = document.getElementById('convert-issue-date').value;
+        const dueDate = document.getElementById('convert-due-date')?.value || null;
+        const codeMode = document.querySelector('input[name="convert_code_mode"]:checked')?.value || 'reserved';
+        const reservedCode = (codeMode === 'reserved') ? document.getElementById('convert-reserved-select')?.value : null;
+
+        const submitBtn = document.getElementById('btn-submit-convert');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'กำลังแปลงเอกสาร...';
+        }
 
         try {
-            const res = await api.convertDocument(app.state.pendingConvertDoc.id, {
-                target_type: targetType
-            });
+            const payload = {
+                target_type: targetType,
+                issue_date: issueDate,
+                due_date: targetType === 'billing' ? dueDate : null,
+                reserved_code: reservedCode || null
+            };
+
+            const res = await api.convertDocument(app.state.pendingConvertDoc.id, payload);
             app.closeModal('modal-convert');
             app.toast(res.message, 'success');
+            await this.loadList();
             window.printModule.openPrint(res.data.id);
         } catch (err) {
             app.toast(err.message, 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🔄 ยืนยันการแปลงเอกสาร';
+            }
         }
     },
 

@@ -723,7 +723,7 @@ router.put('/:id', async (req, res) => {
 router.post('/:id/convert', async (req, res) => {
     try {
         const id = req.params.id;
-        const { target_type, issue_date = new Date().toISOString().slice(0, 10), due_date = null } = req.body;
+        const { target_type, issue_date, due_date = null, reserved_code } = req.body;
 
         if (!['quotation', 'billing', 'receipt'].includes(target_type)) {
             return res.status(400).json({ success: false, error: 'ประเภทเอกสารปลายทางไม่ถูกต้อง' });
@@ -741,7 +741,30 @@ router.post('/:id/convert', async (req, res) => {
                 return res.status(404).json({ success: false, error: 'ไม่พบเอกสารต้นทาง' });
             }
 
-            const newCode = await commitDocumentCodeSupabase(supabase, target_type, issue_date);
+            // CRITICAL: Default to source document's issue date if not explicitly specified
+            const finalIssueDate = issue_date || sourceDoc.issue_date || new Date().toISOString().slice(0, 10);
+            let finalCode = (reserved_code && typeof reserved_code === 'string') ? reserved_code.trim() : null;
+
+            // If no reserved_code specified, check if there is an active reservation matching this date/month
+            if (!finalCode) {
+                const d = new Date(finalIssueDate);
+                const dateFmt = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+                const ym = finalIssueDate.replace(/-/g, '').slice(0, 6);
+                const { data: matchedRes } = await supabase
+                    .from('document_reservations')
+                    .select('code')
+                    .eq('doc_type', target_type)
+                    .eq('status', 'reserved')
+                    .or(`note.ilike.%${finalIssueDate}%,note.ilike.%${dateFmt}%,code.ilike.%${ym}%`)
+                    .order('id', { ascending: true })
+                    .limit(1);
+
+                if (matchedRes && matchedRes.length > 0) {
+                    finalCode = matchedRes[0].code;
+                }
+            }
+
+            const newCode = await commitDocumentCodeSupabase(supabase, target_type, finalIssueDate, finalCode);
 
             // Build clean reference remark without redundant duplication
             const existingRemark = (sourceDoc.remark || '').trim();
@@ -759,7 +782,7 @@ router.post('/:id/convert', async (req, res) => {
                     project_id: sourceDoc.project_id,
                     project_name_custom: sourceDoc.project_name_custom,
                     reference_document_id: sourceDoc.id,
-                    issue_date,
+                    issue_date: finalIssueDate,
                     due_date: due_date || null,
                     subtotal: sourceDoc.subtotal,
                     discount_total: sourceDoc.discount_total,
@@ -767,7 +790,12 @@ router.post('/:id/convert', async (req, res) => {
                     grand_total: sourceDoc.grand_total,
                     status: 'issued',
                     remark: combinedRemark,
-                    payment_terms: sourceDoc.payment_terms || ''
+                    payment_terms: sourceDoc.payment_terms || '',
+                    is_service_bill: sourceDoc.is_service_bill || false,
+                    service_fee_percent: sourceDoc.service_fee_percent || null,
+                    service_fee_amount: sourceDoc.service_fee_amount || 0,
+                    partner_payout_amount: sourceDoc.partner_payout_amount || 0,
+                    partner_name: sourceDoc.partner_name || null
                 })
                 .select()
                 .single();
@@ -791,6 +819,18 @@ router.post('/:id/convert', async (req, res) => {
                 await supabase.from('document_items').insert(itemsToInsert);
             }
 
+            // Mark reservation as used if applicable
+            if (finalCode) {
+                await supabase
+                    .from('document_reservations')
+                    .update({
+                        status: 'used',
+                        used_at: new Date().toISOString(),
+                        used_by_doc_id: newDoc.id
+                    })
+                    .eq('code', newCode);
+            }
+
             // If billing note was converted to a receipt, mark source billing note as paid
             if (target_type === 'receipt' && sourceDoc.type === 'billing') {
                 await supabase.from('documents').update({ status: 'paid', updated_at: new Date().toISOString() }).eq('id', sourceDoc.id);
@@ -809,18 +849,38 @@ router.post('/:id/convert', async (req, res) => {
             return res.status(404).json({ success: false, error: 'ไม่พบเอกสารต้นทาง' });
         }
 
+        const finalIssueDate = issue_date || sourceDoc.issue_date || new Date().toISOString().slice(0, 10);
+        let finalCode = (reserved_code && typeof reserved_code === 'string') ? reserved_code.trim() : null;
+
+        if (!finalCode) {
+            const d = new Date(finalIssueDate);
+            const dateFmt = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+            const ym = finalIssueDate.replace(/-/g, '').slice(0, 6);
+            const matchedRes = db.prepare(`
+                SELECT code FROM document_reservations 
+                WHERE doc_type = ? AND status = 'reserved' 
+                  AND (note LIKE ? OR note LIKE ? OR code LIKE ?)
+                ORDER BY id ASC LIMIT 1
+            `).get(target_type, `%${finalIssueDate}%`, `%${dateFmt}%`, `%${ym}%`);
+
+            if (matchedRes) {
+                finalCode = matchedRes.code;
+            }
+        }
+
         const items = db.prepare('SELECT * FROM document_items WHERE document_id = ? ORDER BY sort_order ASC').all(sourceDoc.id);
 
         db.exec('BEGIN TRANSACTION');
         try {
-            const newCode = commitDocumentCode(db, target_type, issue_date);
+            const newCode = commitDocumentCode(db, target_type, finalIssueDate, finalCode);
 
             const insertDoc = db.prepare(`
                 INSERT INTO documents (
                     code, type, customer_id, project_id, project_name_custom, reference_document_id,
                     issue_date, due_date, subtotal, discount_total, vat_amount, grand_total,
-                    status, remark, payment_terms
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 'issued', ?, ?)
+                    status, remark, payment_terms,
+                    is_service_bill, service_fee_percent, service_fee_amount, partner_payout_amount, partner_name
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 'issued', ?, ?, ?, ?, ?, ?, ?)
             `);
 
             // Build clean reference remark without redundant duplication
@@ -832,10 +892,15 @@ router.post('/:id/convert', async (req, res) => {
 
             const result = insertDoc.run(
                 newCode, target_type, sourceDoc.customer_id, sourceDoc.project_id, sourceDoc.project_name_custom,
-                sourceDoc.id, issue_date, due_date || null,
+                sourceDoc.id, finalIssueDate, due_date || null,
                 sourceDoc.subtotal, sourceDoc.discount_total, sourceDoc.grand_total,
                 combinedRemarkSqlite,
-                sourceDoc.payment_terms || ''
+                sourceDoc.payment_terms || '',
+                sourceDoc.is_service_bill || 0,
+                sourceDoc.service_fee_percent || null,
+                sourceDoc.service_fee_amount || 0,
+                sourceDoc.partner_payout_amount || 0,
+                sourceDoc.partner_name || null
             );
             const newDocId = result.lastInsertRowid;
 
@@ -852,18 +917,16 @@ router.post('/:id/convert', async (req, res) => {
                 );
             }
 
+            if (finalCode) {
+                db.prepare("UPDATE document_reservations SET used_by_doc_id = ?, status = 'used', used_at = datetime('now') WHERE code = ?").run(newDocId, newCode);
+            }
+
             // If billing note was converted to a receipt, mark source billing note as paid
             if (target_type === 'receipt' && sourceDoc.type === 'billing') {
                 db.prepare("UPDATE documents SET status = 'paid', updated_at = datetime('now', 'localtime') WHERE id = ?").run(sourceDoc.id);
             }
 
             db.exec('COMMIT');
-
-            await logAudit(req, 'DOCUMENT_CREATED', {
-                targetType: 'document',
-                targetId: docId,
-                details: `สร้างเอกสาร ${finalCode} (${type}) ยอดรวม ฿${totals.grand_total}`
-            });
 
             res.json({
                 success: true,

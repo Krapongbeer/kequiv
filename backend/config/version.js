@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.21',
+    version: '2.9.22',
     releaseDate: '2026-11-07',
-    codename: 'Accurate Shop Net Income Dashboard & Unified Backdate/Future 3-Bill Reservation System',
+    codename: 'Smart Document Conversion with Date Lock & Auto-Matching Reserved Codes',
     changelog: [
+        {
+            version: '2.9.22',
+            date: '2026-11-07',
+            title: 'Smart Document Conversion with Date Lock & Auto-Matching Reserved Codes',
+            features: [
+                'ล็อกวันที่ตามเอกสารต้นทางอัตโนมัติ (Lock Date to Source Document): เมื่อกดแปลงเอกสาร (เช่น แปลง QT ไปเป็น INV หรือแปลง INV ไปเป็น RE) ระบบจะดึงวันที่ของเอกสารต้นทางมาตั้งต้นให้อัตโนมัติ ไม่ดึงวันที่ปัจจุบันมาทับบิลย้อนหลัง/ล่วงหน้าอีกต่อไป',
+                'ตรวจจับและเลือกเลขที่ล็อกสำรองไว้ให้อัตโนมัติ (Smart Reserved Code Auto-Matching): เมื่อกดแปลงเอกสาร ระบบจะค้นหาเลขสำรองในคลังที่กันไว้สำหรับวันที่ของเอกสารนั้น และเลือกเลขให้อัตโนมัติทันที (เช่น แปลง QT วันที่ 17/7/2026 ระบบจะดึง INV202607-003 และ RE202607-003 ที่ล็อกไว้มาใช้ทันที)',
+                'หน้าต่างแปลงเอกสารโฉมใหม่ (Enhanced Convert Modal): แสดงข้อมูลวันที่ต้นทาง ชัดเจน สามารถปรับวันที่ได้ และเลือกได้ว่าจะใช้เลขที่ล็อกสำรองไว้ หรือจะรันเลขอัตโนมัติตามเดือนที่ระบุ'
+            ]
+        },
         {
             version: '2.9.21',
             date: '2026-11-07',
