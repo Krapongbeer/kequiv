@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.20',
+    version: '2.9.21',
     releaseDate: '2026-11-07',
-    codename: 'Comprehensive Daily Auto-Buffer with Automatic Missed-Day Catchup & Chronological Sorting',
+    codename: 'Accurate Shop Net Income Dashboard & Unified Backdate/Future 3-Bill Reservation System',
     changelog: [
+        {
+            version: '2.9.21',
+            date: '2026-11-07',
+            title: 'Accurate Shop Net Income Dashboard & Unified Backdate/Future 3-Bill Reservation System',
+            features: [
+                'คำนวณรายได้จริงของร้านในแดชบอร์ดอย่างถูกต้อง (True Shop Revenue Calculation): ปรับยอดสรุปแดชบอร์ด "รายได้จริงเดือนนี้" ให้คำนวณจากบิลขายปกติรวมกับค่าบริการสุทธิที่ร้านได้รับจริงจากบิลที่ร้านให้บริการ (เช่น บิลปกติ 45,000 + ค่าบริการร้าน 2,600 = ฿47,600.00) ไม่นำยอดเต็มหน้าบิล (฿58,000.00) มานับเป็นรายได้ทั้งหมด พร้อมแจกแจงที่มาในบัตรสรุปอย่างชัดเจน',
+                'รวมระบบระบุวันออกเอกสาร (ย้อนหลัง / ล่วงหน้า พร้อมคำนวณ 3 บิล): สามารถเลือกวันใดก็ได้ ทั้งย้อนหลังและล่วงหน้า มีปุ่มลัดเลือกวันสะดวกรวดเร็ว (-30 วัน, -7 วัน, เมื่อวาน, วันนี้, +7 วัน, +15 วัน, +30 วัน, เดือนหน้า) พร้อมแสดงพรีวิวเลข QT, INV, RE ของวันนั้นแบบเรียลไทม์',
+                'แก้ไขปัญหากันเลขทั้ง 3 เข้าคลังสำรอง (Fix Duplicate Key Violation): ปรับระบบกันเลขทั้ง 3 ประเภทเข้าคลังสำรองเป็นแบบ Atomic Sequence Server-Side ป้องกัน Race Condition และข้อผิดพลาด duplicate key value violates unique constraint "document_reservations_pkey" อย่างสมบูรณ์'
+            ]
+        },
         {
             version: '2.9.20',
             date: '2026-11-07',

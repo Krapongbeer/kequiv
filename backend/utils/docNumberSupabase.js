@@ -186,23 +186,42 @@ async function reserveBatchNumbersSupabase(supabase, docType, count, options = {
         nextNum++;
     }
 
-    // Insert reservations with safe explicit IDs
+    // Insert reservations with safe explicit IDs and automatic collision retry
     if (rowsToInsert.length > 0) {
-        const { data: maxRow } = await supabase
-            .from('document_reservations')
-            .select('id')
-            .order('id', { ascending: false })
-            .limit(1);
-        let nextId = (maxRow?.[0]?.id || 0) + 1;
+        let inserted = false;
+        let attempts = 0;
+        let lastError = null;
 
-        rowsToInsert.forEach(row => {
-            row.id = nextId++;
-        });
+        while (!inserted && attempts < 5) {
+            attempts++;
+            const { data: maxRow } = await supabase
+                .from('document_reservations')
+                .select('id')
+                .order('id', { ascending: false })
+                .limit(1);
+            let nextId = (maxRow?.[0]?.id || 0) + 1;
 
-        const { error: insErr } = await supabase.from('document_reservations').insert(rowsToInsert);
-        if (insErr) {
-            console.error('reserveBatchNumbersSupabase insert error:', insErr);
-            throw new Error(insErr.message);
+            const candidateRows = rowsToInsert.map((row, idx) => ({
+                ...row,
+                id: nextId + idx
+            }));
+
+            const { error: insErr } = await supabase.from('document_reservations').insert(candidateRows);
+            if (!insErr) {
+                inserted = true;
+            } else if (insErr.code === '23505' || (insErr.message && insErr.message.includes('unique constraint'))) {
+                lastError = insErr;
+                // Jitter delay between 50ms and 150ms before retrying
+                await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
+            } else {
+                console.error('reserveBatchNumbersSupabase insert error:', insErr);
+                throw new Error(insErr.message);
+            }
+        }
+
+        if (!inserted) {
+            console.error('reserveBatchNumbersSupabase max retries reached:', lastError);
+            throw new Error(lastError ? lastError.message : 'ไม่สามารถบันทึกเลขสำรองได้');
         }
     }
 

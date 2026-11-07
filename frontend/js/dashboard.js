@@ -36,6 +36,9 @@ window.dashboardModule = {
 
         const {
             monthRevenue,
+            monthGrossBilled,
+            monthRegularSales,
+            monthServiceFee,
             unpaidBilling,
             overdueBilling,
             customerStats,
@@ -45,27 +48,45 @@ window.dashboardModule = {
             serviceStats
         } = data;
 
+        const hasServiceBills = serviceStats && (serviceStats.service_bills_count > 0 || (serviceStats.month_service_fee_revenue > 0));
+        const regularSalesVal = monthRegularSales !== undefined ? monthRegularSales : (monthRevenue - (serviceStats?.month_service_fee_revenue || 0));
+        const grossBilledVal = monthGrossBilled !== undefined ? monthGrossBilled : monthRevenue;
+
         container.innerHTML = `
             <!-- Top Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 font-mono">
                 <!-- Month Revenue -->
                 <div class="typewriter-card p-4 rounded-xl border-l-4 border-l-sky-500 bg-white">
                     <div class="flex items-center justify-between mb-2 pb-1 border-b border-slate-100">
-                        <span class="text-xs font-bold text-sky-900">ยอดขายเดือนนี้</span>
+                        <span class="text-xs font-bold text-sky-900">รายได้จริงเดือนนี้</span>
                         <span class="text-base text-sky-600">💰</span>
                     </div>
                     <div class="text-2xl font-bold font-typewriter text-slate-900">
                         ฿${app.formatCurrency(monthRevenue)}
                     </div>
-                    <p class="text-[11px] text-slate-500 mt-1">คำนวณจากใบเสร็จและบิลขายจริง (ไม่นับซ้ำ)</p>
-                    ${serviceStats && (serviceStats.month_service_fee_revenue > 0 || serviceStats.service_bills_count > 0) ? `
-                        <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                            <span class="text-amber-900 font-medium flex items-center gap-1">
-                                <span>🏢</span> ค่าบริการร้าน (${serviceStats.service_bills_count} บิล):
-                            </span>
-                            <span class="font-bold text-emerald-700">
-                                +฿${app.formatCurrency(serviceStats.month_service_fee_revenue)}
-                            </span>
+                    <p class="text-[11px] text-slate-500 mt-1">
+                        ${hasServiceBills ? 'เงินได้จริง (บิลขายปกติ + ค่าบริการร้าน)' : 'คำนวณจากใบเสร็จและบิลขายจริง (ไม่นับซ้ำ)'}
+                    </p>
+                    ${hasServiceBills ? `
+                        <div class="mt-2 pt-2 border-t border-slate-100 space-y-1 text-[11px]">
+                            <div class="flex items-center justify-between text-slate-600">
+                                <span>📦 บิลขายปกติ:</span>
+                                <span class="font-bold text-slate-800">฿${app.formatCurrency(regularSalesVal)}</span>
+                            </div>
+                            <div class="flex items-center justify-between text-amber-900">
+                                <span class="font-medium flex items-center gap-1">
+                                    <span>🏢</span> ค่าบริการร้าน (${serviceStats.service_bills_count} บิล):
+                                </span>
+                                <span class="font-bold text-emerald-700">
+                                    +฿${app.formatCurrency(serviceStats.month_service_fee_revenue)}
+                                </span>
+                            </div>
+                            ${grossBilledVal > monthRevenue ? `
+                                <div class="flex items-center justify-between text-slate-400 text-[10px] pt-1 border-t border-dashed border-slate-200">
+                                    <span>(ยอดหน้าบิลรวมทั้งหมด):</span>
+                                    <span>฿${app.formatCurrency(grossBilledVal)}</span>
+                                </div>
+                            ` : ''}
                         </div>
                     ` : ''}
                 </div>

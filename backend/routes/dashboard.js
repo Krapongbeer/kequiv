@@ -34,33 +34,41 @@ router.get('/', async (req, res) => {
                 return false;
             });
 
-            // Month revenue (only true sales from this month)
-            const monthRevenue = salesDocs
-                .filter(d => d.issue_date && d.issue_date >= thisMonthStart)
-                .reduce((sum, d) => sum + Number(d.grand_total || 0), 0);
-
-            // Service Bill Statistics
+            // Service Bill Statistics & Real Shop Revenue Calculation
             let totalServiceFee = 0;
             let monthServiceFee = 0;
+            let monthGrossBilled = 0;
+            let monthRegularSales = 0;
             let serviceBillsCount = 0;
             let regularBillsCount = 0;
 
             salesDocs.forEach(d => {
                 extractServiceBillInfo(d);
+                const isThisMonth = d.issue_date && d.issue_date >= thisMonthStart;
                 if (d.is_service_bill) {
                     serviceBillsCount++;
                     totalServiceFee += Number(d.service_fee_amount || 0);
-                    if (d.issue_date && d.issue_date >= thisMonthStart) {
+                    if (isThisMonth) {
+                        monthGrossBilled += Number(d.grand_total || 0);
                         monthServiceFee += Number(d.service_fee_amount || 0);
                     }
                 } else {
                     regularBillsCount++;
+                    if (isThisMonth) {
+                        monthGrossBilled += Number(d.grand_total || 0);
+                        monthRegularSales += Number(d.grand_total || 0);
+                    }
                 }
             });
+
+            // True shop income this month: regular sales + service fee earnings (e.g. 45,000 + 2,600 = 47,600)
+            const monthRevenue = monthRegularSales + monthServiceFee;
 
             const serviceStats = {
                 total_service_fee_revenue: totalServiceFee,
                 month_service_fee_revenue: monthServiceFee,
+                month_gross_billed: monthGrossBilled,
+                month_regular_sales: monthRegularSales,
                 service_bills_count: serviceBillsCount,
                 regular_bills_count: regularBillsCount
             };
@@ -150,6 +158,9 @@ router.get('/', async (req, res) => {
                 success: true,
                 data: {
                     monthRevenue,
+                    monthGrossBilled,
+                    monthRegularSales,
+                    monthServiceFee,
                     unpaidBilling,
                     overdueBilling,
                     typeCounts,
@@ -163,21 +174,6 @@ router.get('/', async (req, res) => {
         }
 
         // SQLite Fallback
-        const monthRevenue = db.prepare(`
-            SELECT COALESCE(SUM(grand_total), 0) as total
-            FROM documents
-            WHERE deleted_at IS NULL
-              AND status != 'cancelled'
-              AND issue_date >= ?
-              AND (
-                  type = 'receipt'
-                  OR (type = 'billing' AND id NOT IN (
-                      SELECT reference_document_id FROM documents 
-                      WHERE type = 'receipt' AND status != 'cancelled' AND reference_document_id IS NOT NULL
-                  ))
-              )
-        `).get(thisMonthStart).total;
-
         const unpaidBilling = db.prepare(`
             SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total
             FROM documents
@@ -255,7 +251,7 @@ router.get('/', async (req, res) => {
             ORDER BY r.code ASC LIMIT 10
         `).all();
 
-        // Service Bill Statistics (SQLite)
+        // Service Bill Statistics & Real Shop Revenue (SQLite)
         const allSqliteDocs = db.prepare(`
             SELECT id, type, status, issue_date, grand_total, remark
             FROM documents
@@ -271,25 +267,37 @@ router.get('/', async (req, res) => {
 
         let totalServiceFee = 0;
         let monthServiceFee = 0;
+        let monthGrossBilled = 0;
+        let monthRegularSales = 0;
         let serviceBillsCount = 0;
         let regularBillsCount = 0;
 
         allSqliteDocs.forEach(d => {
             extractServiceBillInfo(d);
+            const isThisMonth = d.issue_date && d.issue_date >= thisMonthStart;
             if (d.is_service_bill) {
                 serviceBillsCount++;
                 totalServiceFee += Number(d.service_fee_amount || 0);
-                if (d.issue_date && d.issue_date >= thisMonthStart) {
+                if (isThisMonth) {
+                    monthGrossBilled += Number(d.grand_total || 0);
                     monthServiceFee += Number(d.service_fee_amount || 0);
                 }
             } else {
                 regularBillsCount++;
+                if (isThisMonth) {
+                    monthGrossBilled += Number(d.grand_total || 0);
+                    monthRegularSales += Number(d.grand_total || 0);
+                }
             }
         });
+
+        const monthRevenue = monthRegularSales + monthServiceFee;
 
         const serviceStats = {
             total_service_fee_revenue: totalServiceFee,
             month_service_fee_revenue: monthServiceFee,
+            month_gross_billed: monthGrossBilled,
+            month_regular_sales: monthRegularSales,
             service_bills_count: serviceBillsCount,
             regular_bills_count: regularBillsCount
         };
@@ -298,6 +306,9 @@ router.get('/', async (req, res) => {
             success: true,
             data: {
                 monthRevenue,
+                monthGrossBilled,
+                monthRegularSales,
+                monthServiceFee,
                 unpaidBilling,
                 overdueBilling,
                 typeCounts,

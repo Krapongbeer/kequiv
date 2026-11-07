@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const { reserveBatchNumbers } = require('../utils/docNumber');
+const { reserveBatchNumbers, getYearMonth } = require('../utils/docNumber');
 const { reserveBatchNumbersSupabase } = require('../utils/docNumberSupabase');
 const { supabase, isSupabaseConfigured } = require('../supabase');
 const { ensureDailyBuffer } = require('../services/autoBuffer');
@@ -138,6 +138,54 @@ router.post('/batch', async (req, res) => {
             success: true,
             message: `กันเลขที่ ${doc_type} สำเร็จจำนวน ${codes.length} เลข`,
             codes
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// POST reserve all 3 document types (QT, INV, RE) for a specific date in one request
+router.post('/batch-all', async (req, res) => {
+    try {
+        const { date_str, note = '', count = 1 } = req.body;
+        const types = ['quotation', 'billing', 'receipt'];
+        const results = {};
+
+        if (isSupabaseConfigured && supabase) {
+            const { data: comp } = await supabase.from('company_profile').select('year_format').eq('id', 1).single();
+            const yearMonth = date_str ? getYearMonth(date_str, comp ? comp.year_format : 'CE') : null;
+
+            for (const docType of types) {
+                const codes = await reserveBatchNumbersSupabase(supabase, docType, count, {
+                    note,
+                    yearMonth
+                });
+                results[docType] = codes;
+            }
+
+            return res.json({
+                success: true,
+                message: 'กันเลขทั้ง 3 ประเภท (QT, INV, RE) เข้าคลังสำรองเรียบร้อยแล้ว',
+                data: results
+            });
+        }
+
+        // SQLite Fallback
+        const comp = db.prepare('SELECT year_format FROM company_profile WHERE id = 1').get();
+        const yearMonth = date_str ? getYearMonth(date_str, comp ? comp.year_format : 'CE') : null;
+
+        for (const docType of types) {
+            const codes = reserveBatchNumbers(db, docType, count, {
+                note,
+                yearMonth
+            });
+            results[docType] = codes;
+        }
+
+        res.json({
+            success: true,
+            message: 'กันเลขทั้ง 3 ประเภท (QT, INV, RE) เข้าคลังสำรองเรียบร้อยแล้ว',
+            data: results
         });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });

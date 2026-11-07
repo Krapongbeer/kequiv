@@ -557,7 +557,7 @@ window.documentsModule = {
                                         </label>
                                         <label class="inline-flex items-center gap-1.5 cursor-pointer">
                                             <input type="radio" name="code_mode" value="future" onchange="window.documentsModule.toggleCodeMode('future')" class="text-emerald-600">
-                                            <span class="font-semibold text-emerald-700">✨ ออกเอกสารล่วงหน้า (เลขอนาคต)</span>
+                                            <span class="font-semibold text-emerald-700">📅 ระบุวันออกเอกสาร (ย้อนหลัง / ล่วงหน้า พร้อมคำนวณ 3 บิล)</span>
                                         </label>
                                     </div>
 
@@ -582,26 +582,32 @@ window.documentsModule = {
                                         </select>
                                     </div>
 
-                                    <!-- Container for Future Code Generation -->
+                                    <!-- Container for Date-Specific Code Generation (Backdating & Future) -->
                                     <div id="code-future-container" class="hidden space-y-2.5 p-3.5 bg-emerald-50/80 border border-emerald-300 rounded-xl">
                                         <div class="flex flex-wrap items-center justify-between gap-2">
                                             <label class="text-xs font-bold text-emerald-950 flex items-center gap-1">
-                                                <span>📅 เลือกวัน/เดือน/ปี ที่ต้องการออกเอกสารล่วงหน้า:</span>
+                                                <span>📅 เลือกวัน/เดือน/ปี ที่ต้องการออกเอกสาร (ย้อนหลัง หรือ ล่วงหน้า):</span>
                                             </label>
                                             <div class="flex items-center gap-1 flex-wrap">
-                                                <button type="button" onclick="window.documentsModule.setFutureOffset(7)" class="text-[10px] px-2 py-0.5 bg-white border border-emerald-300 rounded text-emerald-800 hover:bg-emerald-100 font-medium">+7 วัน</button>
-                                                <button type="button" onclick="window.documentsModule.setFutureOffset(15)" class="text-[10px] px-2 py-0.5 bg-white border border-emerald-300 rounded text-emerald-800 hover:bg-emerald-100 font-medium">+15 วัน</button>
-                                                <button type="button" onclick="window.documentsModule.setFutureOffset(30)" class="text-[10px] px-2 py-0.5 bg-white border border-emerald-300 rounded text-emerald-800 hover:bg-emerald-100 font-medium">+30 วัน</button>
-                                                <button type="button" onclick="window.documentsModule.setFutureNextMonth()" class="text-[10px] px-2 py-0.5 bg-white border border-emerald-300 rounded text-emerald-800 hover:bg-emerald-100 font-bold">เดือนหน้า</button>
+                                                <span class="text-[10px] text-purple-800 font-bold mr-0.5">ย้อนหลัง:</span>
+                                                <button type="button" onclick="window.documentsModule.setFutureOffset(-30)" class="text-[10px] px-1.5 py-0.5 bg-white border border-purple-300 rounded text-purple-800 hover:bg-purple-100 font-medium">-30 วัน</button>
+                                                <button type="button" onclick="window.documentsModule.setFutureOffset(-7)" class="text-[10px] px-1.5 py-0.5 bg-white border border-purple-300 rounded text-purple-800 hover:bg-purple-100 font-medium">-7 วัน</button>
+                                                <button type="button" onclick="window.documentsModule.setFutureOffset(-1)" class="text-[10px] px-1.5 py-0.5 bg-white border border-purple-300 rounded text-purple-800 hover:bg-purple-100 font-medium">เมื่อวาน</button>
+                                                <button type="button" onclick="window.documentsModule.setFutureOffset(0)" class="text-[10px] px-1.5 py-0.5 bg-white border border-sky-300 rounded text-sky-800 hover:bg-sky-100 font-bold">วันนี้</button>
+                                                <span class="text-[10px] text-emerald-800 font-bold mx-0.5">ล่วงหน้า:</span>
+                                                <button type="button" onclick="window.documentsModule.setFutureOffset(7)" class="text-[10px] px-1.5 py-0.5 bg-white border border-emerald-300 rounded text-emerald-800 hover:bg-emerald-100 font-medium">+7 วัน</button>
+                                                <button type="button" onclick="window.documentsModule.setFutureOffset(15)" class="text-[10px] px-1.5 py-0.5 bg-white border border-emerald-300 rounded text-emerald-800 hover:bg-emerald-100 font-medium">+15 วัน</button>
+                                                <button type="button" onclick="window.documentsModule.setFutureOffset(30)" class="text-[10px] px-1.5 py-0.5 bg-white border border-emerald-300 rounded text-emerald-800 hover:bg-emerald-100 font-medium">+30 วัน</button>
+                                                <button type="button" onclick="window.documentsModule.setFutureNextMonth()" class="text-[10px] px-1.5 py-0.5 bg-white border border-emerald-300 rounded text-emerald-800 hover:bg-emerald-100 font-bold">เดือนหน้า</button>
                                             </div>
                                         </div>
 
                                         <input type="date" id="future-date-picker" class="w-full px-3 py-1.5 text-xs bg-white border border-emerald-300 rounded-lg text-emerald-950 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20" onchange="window.documentsModule.onFutureDatePicked(this.value)">
 
-                                        <!-- Live Calculated Future Codes for ALL 3 types (QT, INV, RE) -->
+                                        <!-- Live Calculated Codes for ALL 3 types (QT, INV, RE) for the chosen date -->
                                         <div>
                                             <div class="flex items-center justify-between text-[11px] text-emerald-900 font-bold mb-1.5">
-                                                <span>⚡ เลขที่ระบบสร้างขึ้นล่วงหน้าทั้ง 3 ประเภท:</span>
+                                                <span>⚡ เลขที่ระบบคำนวณให้ทั้ง 3 ประเภท (สำหรับวันที่ระบุ):</span>
                                                 <span class="text-[10px] text-emerald-700 font-normal">(คลิกการ์ดเพื่อสลับประเภทเอกสาร)</span>
                                             </div>
                                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -640,7 +646,7 @@ window.documentsModule = {
                                                 <b id="future-selected-display" class="font-bold underline text-emerald-950">-</b>
                                             </span>
                                             <button type="button" onclick="window.documentsModule.reserveAllFutureCodes()" class="text-[11px] font-bold text-emerald-900 hover:underline bg-white px-2 py-0.5 rounded border border-emerald-300 shadow-xs inline-flex items-center gap-1">
-                                                <span>📥 กันเลขทั้ง 3 นี้เข้าคลังสำรอง</span>
+                                                <span>📥 กันเลขทั้ง 3 นี้เข้าคลังสำรอง (สำหรับวันที่ระบุ)</span>
                                             </button>
                                         </div>
                                     </div>
@@ -1359,22 +1365,27 @@ window.documentsModule = {
         const dateStr = (picker && picker.value) ? picker.value : new Date().toISOString().slice(0, 10);
         
         try {
-            if (window.app) app.toast('กำลังกันเลขออนาคตทั้ง 3 ประเภท...', 'info');
+            if (window.app) app.toast('กำลังกันเลขทั้ง 3 ประเภทเข้าคลังสำรอง...', 'info');
             
             const d = new Date(dateStr);
             const dateLabel = isNaN(d.getTime()) ? dateStr : `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
-            const noteText = `กันเลขออนาคตสำหรับวันที่ ${dateLabel}`;
+            const noteText = `กันเลขสำหรับวันที่ ${dateLabel}`;
 
-            await Promise.all([
-                api.reserveBatch({ doc_type: 'quotation', count: 1, note: noteText, year_month: this.futureCodesCache?.quotation?.yearMonth }),
-                api.reserveBatch({ doc_type: 'billing', count: 1, note: noteText, year_month: this.futureCodesCache?.billing?.yearMonth }),
-                api.reserveBatch({ doc_type: 'receipt', count: 1, note: noteText, year_month: this.futureCodesCache?.receipt?.yearMonth })
-            ]);
+            await api.reserveBatchAll({
+                date_str: dateStr,
+                note: noteText,
+                count: 1
+            });
 
-            if (window.app) app.toast('กันเลขออนาคตทั้ง 3 ประเภท (QT, INV, RE) เข้าคลังเลขสำรองเรียบร้อยแล้ว! 📥⚡', 'success');
+            if (window.app) app.toast(`กันเลขทั้ง 3 ประเภท (QT, INV, RE) สำหรับวันที่ ${dateLabel} เข้าคลังเลขสำรองเรียบร้อยแล้ว! 📥⚡`, 'success');
 
-            // Refresh the future codes display
+            // Refresh the live codes display for this date
             await this.onFutureDatePicked(dateStr);
+
+            // Also reload reservations cache if reservations module is loaded
+            if (window.reservationsModule && typeof window.reservationsModule.load === 'function') {
+                window.reservationsModule.load();
+            }
         } catch (e) {
             if (window.app) app.toast('เกิดข้อผิดพลาด: ' + e.message, 'error');
         }
