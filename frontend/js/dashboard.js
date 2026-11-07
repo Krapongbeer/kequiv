@@ -41,7 +41,8 @@ window.dashboardModule = {
             customerStats,
             recentDocs,
             topCustomers,
-            availableReservations
+            availableReservations,
+            serviceStats
         } = data;
 
         container.innerHTML = `
@@ -57,6 +58,16 @@ window.dashboardModule = {
                         ฿${app.formatCurrency(monthRevenue)}
                     </div>
                     <p class="text-[11px] text-slate-500 mt-1">คำนวณจากใบเสร็จและบิลขายจริง (ไม่นับซ้ำ)</p>
+                    ${serviceStats && (serviceStats.month_service_fee_revenue > 0 || serviceStats.service_bills_count > 0) ? `
+                        <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                            <span class="text-amber-900 font-medium flex items-center gap-1">
+                                <span>🏢</span> ค่าบริการร้าน (${serviceStats.service_bills_count} บิล):
+                            </span>
+                            <span class="font-bold text-emerald-700">
+                                +฿${app.formatCurrency(serviceStats.month_service_fee_revenue)}
+                            </span>
+                        </div>
+                    ` : ''}
                 </div>
 
                 <!-- Unpaid Invoices -->

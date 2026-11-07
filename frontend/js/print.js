@@ -41,7 +41,10 @@ window.printModule = {
         const bankAccounts = company.bank_accounts || [];
 
         const isUndated = doc.is_undated || (doc.remark && doc.remark.includes('[ไม่ลงวันที่]')) || !doc.issue_date;
-        const cleanRemark = (doc.remark || '').replace(/\[ไม่ลงวันที่\]/g, '').trim();
+        const cleanRemark = (doc.remark || '')
+            .replace(/\[ไม่ลงวันที่\]/g, '')
+            .replace(/\[บิลที่ร้านให้บริการ:.*?\]/g, '')
+            .trim();
 
         // Titles map (strictly NO "ใบกำกับภาษี")
         const titles = {
@@ -77,7 +80,9 @@ window.printModule = {
         // Helper: Format remarks preserving lines, separating stacked references, and preventing code hyphens from breaking
         const formatRemarks = (remark) => {
             if (!remark) return '';
-            const safe = escapeHtml(remark);
+            const safe = escapeHtml(remark)
+                .replace(/\[ไม่ลงวันที่\]/g, '')
+                .replace(/\[บิลที่ร้านให้บริการ:.*?\]/g, '');
             let text = safe.replace(/(?<!^)(อ้างอิงจากเอกสาร\s+)/g, '\n$1');
             text = text.replace(/(?<!^)(ขอบพระคุณ)/g, '\n$1').trim();
             const lines = text.split('\n').map(l => l.trim()).filter(Boolean);

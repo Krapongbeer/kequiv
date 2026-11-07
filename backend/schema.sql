@@ -86,6 +86,11 @@ CREATE TABLE IF NOT EXISTS documents (
     status TEXT NOT NULL DEFAULT 'issued', -- 'draft', 'issued', 'paid', 'cancelled'
     remark TEXT DEFAULT '',
     payment_terms TEXT DEFAULT '',
+    is_service_bill INTEGER DEFAULT 0, -- 1 = บิลที่ร้านให้บริการ, 0 = บิลขายปกติ
+    service_fee_percent REAL DEFAULT 0, -- อัตราคิดค่าบริการ %
+    service_fee_amount REAL DEFAULT 0, -- รายได้ค่าบริการของร้าน
+    partner_payout_amount REAL DEFAULT 0, -- ยอดส่งต่อผู้ร่วมงาน / ทุน
+    partner_name TEXT DEFAULT '', -- ชื่อผู้ประสานงาน / พันธมิตร
     cancel_reason TEXT DEFAULT '',
     cancelled_at TEXT DEFAULT NULL,
     deleted_at TEXT DEFAULT NULL,

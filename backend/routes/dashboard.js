@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { supabase, isSupabaseConfigured } = require('../supabase');
+const { extractServiceBillInfo } = require('../utils/serviceBillHelper');
 
 router.get('/', async (req, res) => {
     try {
@@ -12,7 +13,7 @@ router.get('/', async (req, res) => {
             // 1. Fetch active docs
             const { data: allDocs, error: docsErr } = await supabase
                 .from('documents')
-                .select('id, code, type, status, issue_date, due_date, grand_total, customer_id, reference_document_id, project_name_custom, customer:customers(name)')
+                .select('id, code, type, status, issue_date, due_date, grand_total, remark, customer_id, reference_document_id, project_name_custom, customer:customers(name)')
                 .is('deleted_at', null)
                 .order('id', { ascending: false });
 
@@ -37,6 +38,32 @@ router.get('/', async (req, res) => {
             const monthRevenue = salesDocs
                 .filter(d => d.issue_date && d.issue_date >= thisMonthStart)
                 .reduce((sum, d) => sum + Number(d.grand_total || 0), 0);
+
+            // Service Bill Statistics
+            let totalServiceFee = 0;
+            let monthServiceFee = 0;
+            let serviceBillsCount = 0;
+            let regularBillsCount = 0;
+
+            salesDocs.forEach(d => {
+                extractServiceBillInfo(d);
+                if (d.is_service_bill) {
+                    serviceBillsCount++;
+                    totalServiceFee += Number(d.service_fee_amount || 0);
+                    if (d.issue_date && d.issue_date >= thisMonthStart) {
+                        monthServiceFee += Number(d.service_fee_amount || 0);
+                    }
+                } else {
+                    regularBillsCount++;
+                }
+            });
+
+            const serviceStats = {
+                total_service_fee_revenue: totalServiceFee,
+                month_service_fee_revenue: monthServiceFee,
+                service_bills_count: serviceBillsCount,
+                regular_bills_count: regularBillsCount
+            };
 
             // Unpaid billing (only open billing notes that have NOT been paid or converted to a receipt)
             const unpaidBillingDocs = docs.filter(d => 
@@ -129,7 +156,8 @@ router.get('/', async (req, res) => {
                     customerStats,
                     recentDocs,
                     topCustomers,
-                    availableReservations
+                    availableReservations,
+                    serviceStats
                 }
             });
         }
@@ -227,6 +255,45 @@ router.get('/', async (req, res) => {
             ORDER BY r.code ASC LIMIT 10
         `).all();
 
+        // Service Bill Statistics (SQLite)
+        const allSqliteDocs = db.prepare(`
+            SELECT id, type, status, issue_date, grand_total, remark
+            FROM documents
+            WHERE deleted_at IS NULL AND status != 'cancelled'
+              AND (
+                  type = 'receipt'
+                  OR (type = 'billing' AND id NOT IN (
+                      SELECT reference_document_id FROM documents 
+                      WHERE type = 'receipt' AND status != 'cancelled' AND reference_document_id IS NOT NULL
+                  ))
+              )
+        `).all();
+
+        let totalServiceFee = 0;
+        let monthServiceFee = 0;
+        let serviceBillsCount = 0;
+        let regularBillsCount = 0;
+
+        allSqliteDocs.forEach(d => {
+            extractServiceBillInfo(d);
+            if (d.is_service_bill) {
+                serviceBillsCount++;
+                totalServiceFee += Number(d.service_fee_amount || 0);
+                if (d.issue_date && d.issue_date >= thisMonthStart) {
+                    monthServiceFee += Number(d.service_fee_amount || 0);
+                }
+            } else {
+                regularBillsCount++;
+            }
+        });
+
+        const serviceStats = {
+            total_service_fee_revenue: totalServiceFee,
+            month_service_fee_revenue: monthServiceFee,
+            service_bills_count: serviceBillsCount,
+            regular_bills_count: regularBillsCount
+        };
+
         res.json({
             success: true,
             data: {
@@ -237,7 +304,8 @@ router.get('/', async (req, res) => {
                 customerStats,
                 recentDocs,
                 topCustomers,
-                availableReservations
+                availableReservations,
+                serviceStats
             }
         });
     } catch (err) {

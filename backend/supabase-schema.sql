@@ -91,6 +91,11 @@ CREATE TABLE IF NOT EXISTS public.documents (
     status TEXT NOT NULL DEFAULT 'issued', -- 'draft', 'issued', 'paid', 'cancelled'
     remark TEXT DEFAULT '',
     payment_terms TEXT DEFAULT '',
+    is_service_bill BOOLEAN DEFAULT FALSE, -- TRUE = บิลที่ร้านให้บริการ
+    service_fee_percent NUMERIC(5, 2) DEFAULT 0, -- อัตราคิดค่าบริการ %
+    service_fee_amount NUMERIC(12, 2) DEFAULT 0, -- รายได้ค่าบริการของร้าน
+    partner_payout_amount NUMERIC(12, 2) DEFAULT 0, -- ยอดส่งต่อผู้ร่วมงาน / ทุน
+    partner_name TEXT DEFAULT '', -- ชื่อผู้ประสานงาน / พันธมิตร
     cancel_reason TEXT DEFAULT '',
     cancelled_at TIMESTAMPTZ DEFAULT NULL,
     deleted_at TIMESTAMPTZ DEFAULT NULL,

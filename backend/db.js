@@ -82,6 +82,13 @@ function initSchema() {
             stmtPortfolio.run(...item);
         }
     }
+
+    // Safety Migrations for Service Bill Columns (SQLite)
+    try { db.exec('ALTER TABLE documents ADD COLUMN is_service_bill INTEGER DEFAULT 0;'); } catch (e) {}
+    try { db.exec('ALTER TABLE documents ADD COLUMN service_fee_percent REAL DEFAULT 0;'); } catch (e) {}
+    try { db.exec('ALTER TABLE documents ADD COLUMN service_fee_amount REAL DEFAULT 0;'); } catch (e) {}
+    try { db.exec('ALTER TABLE documents ADD COLUMN partner_payout_amount REAL DEFAULT 0;'); } catch (e) {}
+    try { db.exec('ALTER TABLE documents ADD COLUMN partner_name TEXT DEFAULT "";'); } catch (e) {}
 }
 
 initSchema();

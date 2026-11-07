@@ -6,6 +6,7 @@ window.documentsModule = {
     filters: {
         type: 'all',
         status: 'all',
+        service_bill: 'all',
         customer_id: '',
         search: '',
         start_date: '',
@@ -88,8 +89,12 @@ window.documentsModule = {
                     <button onclick="window.documentsModule.setFilter('type', 'billing', 'status', 'issued')" class="px-3 py-1.5 rounded-lg transition ${this.filters.type === 'billing' && this.filters.status === 'issued' ? 'bg-amber-700 text-white font-bold shadow-xs' : 'text-amber-800 hover:bg-amber-100'}">
                         ⏳ รอชำระเงิน
                     </button>
-                    <button onclick="window.documentsModule.setFilter('type', 'all', 'status', 'cancelled')" class="px-3 py-1.5 rounded-lg transition ${this.filters.status === 'cancelled' ? 'bg-rose-700 text-white font-bold shadow-xs' : 'text-rose-800 hover:bg-rose-100'}">
+                    <button onclick="window.documentsModule.setFilter('type', 'all', 'status', 'cancelled', 'service_bill', 'all')" class="px-3 py-1.5 rounded-lg transition ${this.filters.status === 'cancelled' ? 'bg-rose-700 text-white font-bold shadow-xs' : 'text-rose-800 hover:bg-rose-100'}">
                         🚫 ยกเลิกแล้ว
+                    </button>
+                    <div class="h-4 w-px bg-slate-300 mx-1 hidden sm:block"></div>
+                    <button onclick="window.documentsModule.setFilter('service_bill', window.documentsModule.filters.service_bill === 'service' ? 'all' : 'service')" class="px-3 py-1.5 rounded-lg transition ${this.filters.service_bill === 'service' ? 'bg-amber-600 text-white font-bold shadow-xs' : 'text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-300/60'}">
+                        🏢 บิลที่ร้านให้บริการ
                     </button>
                 </div>
 
@@ -161,7 +166,14 @@ window.documentsModule = {
                                 <tr class="hover:bg-slate-50 transition">
                                     <td class="px-3.5 py-3 whitespace-nowrap">
                                         <div class="font-bold text-slate-900 font-typewriter text-sm">${d.code}</div>
-                                        <div class="mt-1">${app.getDocTypeBadge(d.type)}</div>
+                                        <div class="mt-1 flex items-center gap-1 flex-wrap">
+                                            ${app.getDocTypeBadge(d.type)}
+                                            ${d.is_service_bill ? `
+                                                <span class="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300" title="บิลที่ร้านให้บริการ (คิดค่าบริการ ${d.service_fee_percent}%)">
+                                                    🏢 บริการ (${d.service_fee_percent}%)
+                                                </span>
+                                            ` : ''}
+                                        </div>
                                     </td>
                                     <td class="px-3.5 py-3 min-w-[240px]">
                                         <div class="font-bold text-slate-900 text-xs">${app.escapeHtml ? app.escapeHtml(d.customer_name) : (d.customer_name || '-')}</div>
@@ -176,7 +188,15 @@ window.documentsModule = {
                                         ${d.due_date ? app.formatDateThai(d.due_date) : '-'}
                                     </td>
                                     <td class="px-3.5 py-3 text-right font-bold text-slate-900 whitespace-nowrap">
-                                        ฿${app.formatCurrency(d.grand_total)}
+                                        <div>฿${app.formatCurrency(d.grand_total)}</div>
+                                        ${d.is_service_bill ? `
+                                            <div class="text-[10px] font-semibold text-emerald-700 mt-0.5" title="รายได้ค่าบริการของร้าน">
+                                                +฿${app.formatCurrency(d.service_fee_amount)} (${d.service_fee_percent}%)
+                                            </div>
+                                            ${d.partner_name ? `
+                                                <div class="text-[10px] text-slate-500 font-normal">ผู้ร่วมงาน: ${app.escapeHtml ? app.escapeHtml(d.partner_name) : d.partner_name}</div>
+                                            ` : ''}
+                                        ` : ''}
                                     </td>
                                     <td class="px-3.5 py-3 text-center whitespace-nowrap">
                                         ${app.getStatusBadge(d.status)}
@@ -226,9 +246,10 @@ window.documentsModule = {
         `;
     },
 
-    setFilter(key1, val1, key2 = null, val2 = null) {
-        this.filters[key1] = val1;
-        if (key2) this.filters[key2] = val2;
+    setFilter(...args) {
+        for (let i = 0; i < args.length; i += 2) {
+            if (args[i]) this.filters[args[i]] = args[i + 1];
+        }
         this.loadList();
     },
 
@@ -331,6 +352,7 @@ window.documentsModule = {
         this.filters = {
             type: 'all',
             status: 'all',
+            service_bill: 'all',
             customer_id: '',
             search: '',
             start_date: '',
@@ -387,7 +409,8 @@ window.documentsModule = {
 
                 const rawRemark = doc.remark || '';
                 const isUndated = rawRemark.includes('[ไม่ลงวันที่]');
-                const cleanRemark = rawRemark.replace(/\[ไม่ลงวันที่\]/g, '').trim();
+                const serviceInfo = this.parseServiceBill(doc);
+                const cleanRemark = serviceInfo.clean_remark.replace(/\[ไม่ลงวันที่\]/g, '').trim();
 
                 this.renderCreateForm({
                     isEdit: true,
@@ -407,6 +430,9 @@ window.documentsModule = {
                     paymentTerms: doc.payment_terms,
                     remark: cleanRemark,
                     isUndated,
+                    isServiceBill: serviceInfo.is_service_bill,
+                    serviceFeePercent: serviceInfo.service_fee_percent,
+                    partnerName: serviceInfo.partner_name,
                     useReservedCode: null
                 });
                 return;
@@ -439,6 +465,9 @@ window.documentsModule = {
                 availableReservations,
                 selectedCustomerId: options.customer_id || null,
                 selectedProjectId: options.project_id || null,
+                isServiceBill: false,
+                serviceFeePercent: 20,
+                partnerName: '',
                 useReservedCode: options.useReservedCode || null
             });
         } catch (err) {
@@ -459,7 +488,8 @@ window.documentsModule = {
             isEdit, docId, docCode, docStatus,
             type, issue_date, due_date, customers, nextCodePreview,
             availableReservations, selectedCustomerId, selectedProjectId, projectNameCustom,
-            discountTotal, paymentTerms, remark, isUndated, useReservedCode
+            discountTotal, paymentTerms, remark, isUndated, useReservedCode,
+            isServiceBill = false, serviceFeePercent = 20, partnerName = ''
         } = ctx;
 
         container.innerHTML = `
@@ -777,6 +807,59 @@ window.documentsModule = {
                         </div>
                     </div>
 
+                    <!-- บิลที่ร้านให้บริการ (ระบบบัญชีภายใน / คิดเปอร์เซ็นต์ค่าบริการ) -->
+                    <div class="p-4 rounded-xl border ${isServiceBill ? 'border-amber-300 bg-amber-50/70 shadow-xs' : 'border-slate-200 bg-slate-50/60'} transition">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+                                <input type="checkbox" id="doc-is-service-bill" ${isServiceBill ? 'checked' : ''} class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer" onchange="window.documentsModule.toggleServiceBillFields()">
+                                <span class="text-xs font-bold text-slate-900 flex items-center gap-1.5 font-heading">
+                                    <span>🏢</span> บิลที่ร้านให้บริการ
+                                </span>
+                            </label>
+                            <span class="text-[11px] text-slate-500 font-sans">
+                                (คำนวณส่วนแบ่งค่าบริการ / สำหรับลงบัญชีภายใน ไม่แสดงบนบิลลูกค้า)
+                            </span>
+                        </div>
+
+                        <!-- Expandable options -->
+                        <div id="service-bill-fields" class="mt-3 pt-3 border-t border-amber-200/80 space-y-3 ${isServiceBill ? '' : 'hidden'}">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                        อัตราค่าบริการของร้าน (%):
+                                    </label>
+                                    <div class="flex items-center gap-1.5">
+                                        <input type="number" id="doc-service-fee-percent" value="${serviceFeePercent !== undefined && serviceFeePercent !== null ? serviceFeePercent : 20}" min="0" max="100" step="0.1" class="w-28 px-3 py-1.5 text-sm bg-white border border-amber-300 rounded-lg font-bold text-amber-900 focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 text-right" oninput="window.documentsModule.recalculateServiceFee()">
+                                        <span class="text-xs font-bold text-amber-800">%</span>
+                                        <span class="text-[11px] text-slate-500 ml-1">(ระบุเปอร์เซ็นต์ที่ร้านคิด)</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                        ชื่อผู้ประสานงาน / พันธมิตร (ถ้ามี):
+                                    </label>
+                                    <input type="text" id="doc-partner-name" value="${app.escapeHtml ? app.escapeHtml(partnerName || '') : (partnerName || '')}" placeholder="เช่น ช่างเอก, ผู้ว่าจ้างภายนอก" class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 text-slate-800">
+                                </div>
+                            </div>
+
+                            <!-- Realtime calculations -->
+                            <div class="bg-white p-3.5 rounded-xl border border-amber-200 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                                <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200">
+                                    <span class="text-slate-500 block text-[11px]">ยอดรวมสุทธิหน้าบิล:</span>
+                                    <span class="font-bold text-slate-800 text-sm mt-0.5 block" id="service-calc-grand-total">฿0.00</span>
+                                </div>
+                                <div class="p-2.5 bg-emerald-50/80 rounded-lg border border-emerald-200">
+                                    <span class="text-emerald-800 font-medium block text-[11px]">🟢 รายได้ค่าบริการของร้าน (<span id="service-calc-percent-label">${serviceFeePercent !== undefined ? serviceFeePercent : 20}</span>%):</span>
+                                    <span class="font-bold text-emerald-800 text-sm mt-0.5 block" id="service-calc-fee-amount">฿0.00</span>
+                                </div>
+                                <div class="p-2.5 bg-sky-50/80 rounded-lg border border-sky-200">
+                                    <span class="text-sky-800 font-medium block text-[11px]">🔵 ยอดส่งต่อผู้ร่วมงาน / ทุน:</span>
+                                    <span class="font-bold text-sky-800 text-sm mt-0.5 block" id="service-calc-payout-amount">฿0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Action Buttons -->
                     <div class="pt-6 border-t border-slate-200 flex flex-col md:flex-row items-center justify-end gap-3 font-mono">
                         <button type="button" onclick="app.switchTab('documents')" class="btn-paper w-full md:w-auto text-xs py-2 px-4">
@@ -1035,6 +1118,88 @@ window.documentsModule = {
 
         const thaiBahtEl = document.getElementById('calc-thai-baht');
         if (thaiBahtEl) thaiBahtEl.textContent = app.thaiBahtText(grandTotal);
+
+        this.recalculateServiceFee(grandTotal);
+    },
+
+    toggleServiceBillFields() {
+        const isChecked = document.getElementById('doc-is-service-bill')?.checked || false;
+        const container = document.getElementById('service-bill-fields');
+        if (container) {
+            if (isChecked) {
+                container.classList.remove('hidden');
+                this.recalculateServiceFee();
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+    },
+
+    recalculateServiceFee(currentGrandTotal = null) {
+        let grandTotal = currentGrandTotal;
+        if (grandTotal === null) {
+            const grandTotalEl = document.getElementById('calc-grand-total');
+            const text = grandTotalEl ? grandTotalEl.textContent.replace(/[฿,]/g, '').trim() : '0';
+            grandTotal = parseFloat(text) || 0;
+        }
+
+        const percentInput = document.getElementById('doc-service-fee-percent');
+        const percent = percentInput ? (parseFloat(percentInput.value) || 0) : 20;
+
+        const fee = Math.round((grandTotal * (percent / 100)) * 100) / 100;
+        const payout = Math.round((grandTotal - fee) * 100) / 100;
+
+        const gtEl = document.getElementById('service-calc-grand-total');
+        if (gtEl) gtEl.textContent = `฿${app.formatCurrency(grandTotal)}`;
+
+        const pLabel = document.getElementById('service-calc-percent-label');
+        if (pLabel) pLabel.textContent = percent;
+
+        const feeEl = document.getElementById('service-calc-fee-amount');
+        if (feeEl) feeEl.textContent = `฿${app.formatCurrency(fee)}`;
+
+        const payoutEl = document.getElementById('service-calc-payout-amount');
+        if (payoutEl) payoutEl.textContent = `฿${app.formatCurrency(payout)}`;
+    },
+
+    parseServiceBill(doc) {
+        if (!doc) return { is_service_bill: false, service_fee_percent: 20, service_fee_amount: 0, partner_payout_amount: 0, partner_name: '', clean_remark: '' };
+
+        if (doc.is_service_bill === true || doc.is_service_bill === 1 || doc.is_service_bill === '1') {
+            return {
+                is_service_bill: true,
+                service_fee_percent: doc.service_fee_percent !== undefined ? Number(doc.service_fee_percent) : 20,
+                service_fee_amount: Number(doc.service_fee_amount) || 0,
+                partner_payout_amount: Number(doc.partner_payout_amount) || 0,
+                partner_name: doc.partner_name || '',
+                clean_remark: (doc.clean_remark !== undefined ? doc.clean_remark : (doc.remark || '')).replace(/\[บิลที่ร้านให้บริการ:.*?\]/g, '').trim()
+            };
+        }
+
+        const rawRemark = doc.remark || '';
+        const match = rawRemark.match(/\[บิลที่ร้านให้บริการ:({.*?})\]/);
+        if (match) {
+            try {
+                const data = JSON.parse(match[1]);
+                return {
+                    is_service_bill: true,
+                    service_fee_percent: data.percent !== undefined ? Number(data.percent) : 20,
+                    service_fee_amount: Number(data.fee) || 0,
+                    partner_payout_amount: Number(data.payout) || 0,
+                    partner_name: data.partner || '',
+                    clean_remark: rawRemark.replace(match[0], '').trim()
+                };
+            } catch (e) {}
+        }
+
+        return {
+            is_service_bill: false,
+            service_fee_percent: 20,
+            service_fee_amount: 0,
+            partner_payout_amount: 0,
+            partner_name: '',
+            clean_remark: rawRemark
+        };
     },
 
     toggleUndated(checked) {
@@ -1330,10 +1495,17 @@ window.documentsModule = {
         const discount_total = parseFloat(document.getElementById('doc-discount-total').value) || 0;
         const payment_terms = document.getElementById('doc-payment-terms').value.trim();
         let remark = document.getElementById('doc-remark').value.trim();
+        // Remove any existing tags from typed input
+        remark = remark.replace(/\[ไม่ลงวันที่\]/g, '').replace(/\[บิลที่ร้านให้บริการ:.*?\]/g, '').trim();
+
         const isUndated = document.getElementById('doc-is-undated')?.checked || false;
         if (isUndated) {
             remark = remark ? `${remark}\n[ไม่ลงวันที่]` : '[ไม่ลงวันที่]';
         }
+
+        const isServiceBill = document.getElementById('doc-is-service-bill')?.checked || false;
+        const serviceFeePercent = parseFloat(document.getElementById('doc-service-fee-percent')?.value) || 0;
+        const partnerName = (document.getElementById('doc-partner-name')?.value || '').trim();
 
         const code_mode = form.code_mode.value;
         let specified_code = null;
@@ -1382,6 +1554,31 @@ window.documentsModule = {
             return;
         }
 
+        // Calculate grand total for service fee calculations
+        let subtotal = 0;
+        validItems.forEach(it => {
+            const qty = Math.max(1, Math.round(Number(it.quantity) || 1));
+            const price = parseFloat(it.unit_price) || 0;
+            const disc = parseFloat(it.discount) || 0;
+            const discType = it.discount_type || 'amount';
+            const rowDiscount = discType === 'percent' ? (qty * price * disc) / 100 : disc;
+            subtotal += Math.max(0, (qty * price) - rowDiscount);
+        });
+        const grandTotal = Math.max(0, subtotal - discount_total);
+
+        const serviceFeeAmount = isServiceBill ? Math.round((grandTotal * (serviceFeePercent / 100)) * 100) / 100 : 0;
+        const partnerPayoutAmount = isServiceBill ? Math.round((grandTotal - serviceFeeAmount) * 100) / 100 : 0;
+
+        if (isServiceBill) {
+            const servicePayload = JSON.stringify({
+                percent: serviceFeePercent,
+                fee: serviceFeeAmount,
+                payout: partnerPayoutAmount,
+                partner: partnerName
+            });
+            remark = remark ? `${remark}\n[บิลที่ร้านให้บริการ:${servicePayload}]` : `[บิลที่ร้านให้บริการ:${servicePayload}]`;
+        }
+
         const editId = document.getElementById('doc-edit-id')?.value;
 
         const payload = {
@@ -1397,7 +1594,12 @@ window.documentsModule = {
             discount_total,
             status: statusOverride || 'issued',
             remark,
-            payment_terms
+            payment_terms,
+            is_service_bill: isServiceBill,
+            service_fee_percent: serviceFeePercent,
+            service_fee_amount: serviceFeeAmount,
+            partner_payout_amount: partnerPayoutAmount,
+            partner_name: partnerName
         };
 
         try {

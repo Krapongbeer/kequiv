@@ -7,6 +7,7 @@ const { thaiBahtText } = require('../utils/thaiBahtText');
 const { supabase, isSupabaseConfigured } = require('../supabase');
 const { logAudit } = require('../services/auditService');
 const { generateDocShareKey } = require('../utils/shareSecurity');
+const { extractServiceBillInfo, serializeServiceBillRemark } = require('../utils/serviceBillHelper');
 
 // Helper to calculate totals from items
 function calculateItemsTotal(items, docDiscountTotal = 0) {
@@ -114,7 +115,7 @@ router.get('/', async (req, res) => {
     try {
         const {
             type, status, customer_id, project_id,
-            search, start_date, end_date, limit = 100, offset = 0
+            search, start_date, end_date, service_bill, limit = 100, offset = 0
         } = req.query;
 
         if (isSupabaseConfigured && supabase) {
@@ -148,6 +149,11 @@ router.get('/', async (req, res) => {
             if (end_date) {
                 query = query.lte('issue_date', end_date);
             }
+            if (service_bill === 'service') {
+                query = query.ilike('remark', '%[บิลที่ร้านให้บริการ:%');
+            } else if (service_bill === 'regular') {
+                query = query.not('remark', 'ilike', '%[บิลที่ร้านให้บริการ:%');
+            }
             if (search && search.trim()) {
                 const s = search.trim();
                 query = query.or(`code.ilike.%${s}%,project_name_custom.ilike.%${s}%`);
@@ -156,13 +162,16 @@ router.get('/', async (req, res) => {
             const { data, error } = await query;
             if (error) throw new Error(error.message);
 
-            const result = (data || []).map(d => ({
-                ...d,
-                customer_name: d.customer ? d.customer.name : '-',
-                customer_phone: d.customer ? d.customer.phone : '',
-                project_name: d.project ? d.project.project_name : null,
-                share_key: generateDocShareKey(d.code, d.id)
-            }));
+            const result = (data || []).map(d => {
+                extractServiceBillInfo(d);
+                return {
+                    ...d,
+                    customer_name: d.customer ? d.customer.name : '-',
+                    customer_phone: d.customer ? d.customer.phone : '',
+                    project_name: d.project ? d.project.project_name : null,
+                    share_key: generateDocShareKey(d.code, d.id)
+                };
+            });
 
             return res.json({ success: true, data: result });
         }
@@ -204,6 +213,13 @@ router.get('/', async (req, res) => {
             query += ' AND d.issue_date <= ?';
             params.push(end_date);
         }
+        if (service_bill === 'service') {
+            query += ' AND d.remark LIKE ?';
+            params.push('%[บิลที่ร้านให้บริการ:%');
+        } else if (service_bill === 'regular') {
+            query += ' AND (d.remark NOT LIKE ? OR d.remark IS NULL)';
+            params.push('%[บิลที่ร้านให้บริการ:%');
+        }
         if (search) {
             query += ' AND (d.code LIKE ? OR c.name LIKE ? OR d.project_name_custom LIKE ? OR p.project_name LIKE ?)';
             const s = `%${search}%`;
@@ -213,10 +229,13 @@ router.get('/', async (req, res) => {
         query += ' ORDER BY d.issue_date DESC, d.id DESC LIMIT ? OFFSET ?';
         params.push(parseInt(limit, 10), parseInt(offset, 10));
 
-        const docs = db.prepare(query).all(...params).map(d => ({
-            ...d,
-            share_key: generateDocShareKey(d.code, d.id)
-        }));
+        const docs = db.prepare(query).all(...params).map(d => {
+            extractServiceBillInfo(d);
+            return {
+                ...d,
+                share_key: generateDocShareKey(d.code, d.id)
+            };
+        });
         res.json({ success: true, data: docs });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
@@ -279,6 +298,7 @@ router.get('/:id', async (req, res) => {
 
             flattened.grand_total_thai = thaiBahtText(flattened.grand_total);
             flattened.share_key = generateDocShareKey(flattened.code, flattened.id);
+            extractServiceBillInfo(flattened);
 
             // Attach company info
             const { data: comp } = await supabase.from('company_profile').select('*').eq('id', 1).single();
@@ -326,6 +346,7 @@ router.get('/:id', async (req, res) => {
 
         doc.grand_total_thai = thaiBahtText(doc.grand_total);
         doc.share_key = generateDocShareKey(doc.code, doc.id);
+        extractServiceBillInfo(doc);
 
         const company = db.prepare('SELECT * FROM company_profile WHERE id = 1').get();
         if (company && company.bank_info) {
@@ -355,7 +376,12 @@ router.post('/', async (req, res) => {
             discount_total = 0,
             status = 'issued',
             remark = '', payment_terms = '',
-            reference_document_id = null
+            reference_document_id = null,
+            is_service_bill = false,
+            service_fee_percent = 0,
+            service_fee_amount = 0,
+            partner_payout_amount = 0,
+            partner_name = ''
         } = req.body;
 
         if (!['quotation', 'billing', 'receipt'].includes(type)) {
@@ -372,6 +398,15 @@ router.post('/', async (req, res) => {
         }
 
         const totals = calculateItemsTotal(items, discount_total);
+
+        // Internal Service Bill Calculations
+        const feeAmount = is_service_bill
+            ? (Number(service_fee_amount) || Math.round((totals.grand_total * (Number(service_fee_percent) / 100)) * 100) / 100)
+            : 0;
+        const payoutAmount = is_service_bill
+            ? (Number(partner_payout_amount) || Math.round((totals.grand_total - feeAmount) * 100) / 100)
+            : 0;
+        const finalRemark = serializeServiceBillRemark(remark, is_service_bill, service_fee_percent, feeAmount, payoutAmount, partner_name);
 
         if (isSupabaseConfigured && supabase) {
             let finalCode;
@@ -413,7 +448,7 @@ router.post('/', async (req, res) => {
                     vat_amount: 0,
                     grand_total: totals.grand_total,
                     status,
-                    remark: remark || '',
+                    remark: finalRemark,
                     payment_terms: payment_terms || ''
                 })
                 .select()
@@ -472,14 +507,16 @@ router.post('/', async (req, res) => {
                 INSERT INTO documents (
                     code, type, customer_id, project_id, project_name_custom, reference_document_id,
                     issue_date, due_date, subtotal, discount_total, vat_amount, grand_total,
-                    status, remark, payment_terms
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    status, remark, payment_terms,
+                    is_service_bill, service_fee_percent, service_fee_amount, partner_payout_amount, partner_name
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
 
             const result = insertDoc.run(
                 finalCode, type, customer_id, project_id || null, project_name_custom || '', reference_document_id || null,
                 issue_date, due_date || null, totals.subtotal, totals.discount_total, totals.vat_amount, totals.grand_total,
-                status, remark || '', payment_terms || ''
+                status, finalRemark, payment_terms || '',
+                is_service_bill ? 1 : 0, Number(service_fee_percent) || 0, feeAmount, payoutAmount, (partner_name || '').trim()
             );
             const docId = result.lastInsertRowid;
 
@@ -528,7 +565,12 @@ router.put('/:id', async (req, res) => {
             items = [],
             discount_total = 0,
             status,
-            remark = '', payment_terms = ''
+            remark = '', payment_terms = '',
+            is_service_bill = false,
+            service_fee_percent = 0,
+            service_fee_amount = 0,
+            partner_payout_amount = 0,
+            partner_name = ''
         } = req.body;
 
         if (!customer_id) {
@@ -542,6 +584,15 @@ router.put('/:id', async (req, res) => {
         }
 
         const totals = calculateItemsTotal(items, discount_total);
+
+        // Internal Service Bill Calculations
+        const feeAmount = is_service_bill
+            ? (Number(service_fee_amount) || Math.round((totals.grand_total * (Number(service_fee_percent) / 100)) * 100) / 100)
+            : 0;
+        const payoutAmount = is_service_bill
+            ? (Number(partner_payout_amount) || Math.round((totals.grand_total - feeAmount) * 100) / 100)
+            : 0;
+        const finalRemark = serializeServiceBillRemark(remark, is_service_bill, service_fee_percent, feeAmount, payoutAmount, partner_name);
 
         if (isSupabaseConfigured && supabase) {
             // Check existing
@@ -574,7 +625,7 @@ router.put('/:id', async (req, res) => {
                     discount_total: totals.discount_total,
                     grand_total: totals.grand_total,
                     status: status || existingDoc.status,
-                    remark: remark || '',
+                    remark: finalRemark,
                     payment_terms: payment_terms || '',
                     updated_at: new Date().toISOString()
                 })
@@ -626,12 +677,15 @@ router.put('/:id', async (req, res) => {
                     customer_id = ?, project_id = ?, project_name_custom = ?,
                     issue_date = ?, due_date = ?, subtotal = ?, discount_total = ?,
                     grand_total = ?, status = ?, remark = ?, payment_terms = ?,
+                    is_service_bill = ?, service_fee_percent = ?, service_fee_amount = ?,
+                    partner_payout_amount = ?, partner_name = ?,
                     updated_at = datetime('now', 'localtime')
                 WHERE id = ?
             `).run(
                 customer_id, project_id, project_name_custom,
                 issue_date, due_date, totals.subtotal, totals.discount_total,
-                totals.grand_total, status || existingDoc.status, remark, payment_terms,
+                totals.grand_total, status || existingDoc.status, finalRemark, payment_terms,
+                is_service_bill ? 1 : 0, Number(service_fee_percent) || 0, feeAmount, payoutAmount, (partner_name || '').trim(),
                 id
             );
 
