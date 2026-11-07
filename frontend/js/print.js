@@ -150,22 +150,22 @@ window.printModule = {
 
                     <div class="bg-[#faf6ee] py-1.5 px-2.5 rounded border-2 border-[#292524] text-left text-xs space-y-0.5 shadow-xs font-mono">
                         <div class="flex justify-between items-center">
-                            <span class="text-stone-500 text-[11px]">เลขที่เอกสาร:</span>
+                            <span class="text-stone-500 text-[10px]">เลขที่ / NO:</span>
                             <span class="font-bold text-[#1f1d1a] font-typewriter text-xs">${doc.code}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-stone-500 text-[11px] whitespace-nowrap">วันที่ออก:</span>
+                            <span class="text-stone-500 text-[10px] whitespace-nowrap">วันที่ / DATE:</span>
                             <span class="font-bold text-stone-800 text-xs">${isUndated ? '' : app.formatDateThai(doc.issue_date, true)}</span>
                         </div>
                         ${doc.due_date ? `
                             <div class="flex justify-between items-center">
-                                <span class="text-stone-500 text-[11px]">ครบกำหนด:</span>
+                                <span class="text-stone-500 text-[10px]">ครบกำหนด / DUE:</span>
                                 <span class="font-bold text-stone-800 text-xs">${app.formatDateThai(doc.due_date, true)}</span>
                             </div>
                         ` : ''}
                         ${doc.reference_code ? `
                             <div class="flex justify-between items-center pt-0.5 border-t border-stone-300">
-                                <span class="text-stone-500 text-[11px]">อ้างอิง:</span>
+                                <span class="text-stone-500 text-[10px]">อ้างอิง / REF:</span>
                                 <span class="font-mono text-blue-900 font-bold text-xs">${doc.reference_code}</span>
                             </div>
                         ` : ''}
@@ -173,51 +173,66 @@ window.printModule = {
                 </div>
             </div>
 
-            <!-- 2. Customer & Project Info Block (ลูกค้า / CUSTOMER + ที่อยู่ติดซ้าย) -->
+            <!-- 2. Customer & Project Info Block (ลูกค้า / CUSTOMER - สวยงาม สองภาษา) -->
             <div class="py-1.5 border-b-2 border-[#1f1d1a] font-mono avoid-page-break">
-                <div class="bg-[#faf6ee] px-3 py-2 rounded border border-stone-800 text-[11px]">
-                    <!-- Top Bar: ลูกค้า / CUSTOMER + Tax ID -->
-                    <div class="flex items-center justify-between pb-1 mb-1.5 border-b border-stone-300">
-                        <span class="text-[9.5px] font-bold uppercase tracking-wider text-stone-700 font-typewriter">
-                            ลูกค้า / CUSTOMER
+                <div class="bg-[#faf6ee] px-3.5 py-2.5 rounded border border-stone-800 text-[11px] shadow-xs">
+                    <!-- Top Bar: CUSTOMER / BILL TO + TAX ID -->
+                    <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-stone-300">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-stone-800 font-typewriter">
+                            ลูกค้า / ผู้ว่าจ้าง &bull; CUSTOMER / BILL TO
                         </span>
                         ${(doc.project_tax_id || doc.customer_tax_id) ? `
-                            <span class="text-[10px] text-stone-800 font-mono font-bold">
-                                Tax: ${escapeHtml(doc.project_tax_id || doc.customer_tax_id)}
-                            </span>
+                            <div class="text-[10.5px] text-stone-900 font-mono font-bold tracking-wide">
+                                <span class="text-stone-500 font-normal">เลขประจำตัวผู้เสียภาษี / TAX ID:</span>
+                                <span class="ml-1 px-1.5 py-0.5 bg-white border border-stone-300 rounded font-semibold">${escapeHtml(doc.project_tax_id || doc.customer_tax_id)}</span>
+                            </div>
                         ` : ''}
                     </div>
 
-                    <!-- Project / Company Title -->
-                    <div class="font-bold text-stone-950 text-[12px] leading-snug">
-                        ${escapeHtml(doc.project_name_custom || doc.project_name || doc.customer_name || '-')}
+                    <!-- Structured Info Rows -->
+                    <div class="space-y-1.5">
+                        <!-- Row 1: Project / Company Title -->
+                        <div class="flex items-start gap-2">
+                            <span class="text-[10px] font-bold text-stone-500 uppercase tracking-wider shrink-0 w-28 pt-0.5">ชื่อ / NAME:</span>
+                            <span class="font-bold text-stone-950 text-[12.5px] leading-snug flex-1">
+                                ${escapeHtml(doc.project_name_custom || doc.project_name || doc.customer_name || '-')}
+                            </span>
+                        </div>
+
+                        <!-- Row 2: Customer / Attention (if distinct from project title) -->
+                        ${((doc.project_name_custom || doc.project_name) && doc.customer_name && doc.customer_name !== (doc.project_name_custom || doc.project_name)) ? `
+                            <div class="flex items-start gap-2 text-[10.5px]">
+                                <span class="text-[10px] font-bold text-stone-500 uppercase tracking-wider shrink-0 w-28">ผู้ติดต่อ / ATTN:</span>
+                                <span class="font-medium text-stone-800 flex-1">${escapeHtml(doc.customer_name)}</span>
+                            </div>
+                        ` : ''}
+
+                        <!-- Row 3: Address -->
+                        ${(doc.project_site_address || doc.customer_address) ? `
+                            <div class="flex items-start gap-2 text-[10.5px]">
+                                <span class="text-[10px] font-bold text-stone-500 uppercase tracking-wider shrink-0 w-28">ที่อยู่ / ADDRESS:</span>
+                                <span class="text-stone-700 leading-tight flex-1 text-left">${escapeHtml(doc.project_site_address || doc.customer_address)}</span>
+                            </div>
+                        ` : ''}
+
+                        <!-- Row 4: Contact & Phone & Email -->
+                        ${(doc.project_contact_person || doc.customer_phone || doc.project_email || doc.customer_email) ? `
+                            <div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-[10px] pt-1.5 mt-1 border-t border-stone-200/80">
+                                ${(doc.project_contact_person || doc.customer_phone) ? `
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="font-bold text-stone-500 uppercase">ผู้ประสานงาน / CONTACT:</span>
+                                        <span class="font-bold text-stone-900">${escapeHtml(doc.project_contact_person || doc.customer_phone)}</span>
+                                    </div>
+                                ` : ''}
+                                ${(doc.project_email || doc.customer_email) ? `
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="font-bold text-stone-500 uppercase">อีเมล / EMAIL:</span>
+                                        <span class="font-bold text-stone-900 font-mono">${escapeHtml(doc.project_email || doc.customer_email)}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        ` : ''}
                     </div>
-
-                    <!-- Customer / Contact Person (if distinct from project title) -->
-                    ${((doc.project_name_custom || doc.project_name) && doc.customer_name && doc.customer_name !== (doc.project_name_custom || doc.project_name)) ? `
-                        <div class="text-[10.5px] text-stone-700 mt-0.5">
-                            <span class="font-semibold text-stone-800">ชื่อลูกค้า / ผู้ติดต่อ:</span> ${escapeHtml(doc.customer_name)}
-                        </div>
-                    ` : ''}
-
-                    <!-- Address (ติดซ้ายมือ 100%) -->
-                    ${(doc.project_site_address || doc.customer_address) ? `
-                        <div class="text-[10.5px] text-stone-700 mt-1 leading-tight text-left">
-                            <span class="font-bold text-stone-800">ที่อยู่ / สถานที่:</span> ${escapeHtml(doc.project_site_address || doc.customer_address)}
-                        </div>
-                    ` : ''}
-
-                    <!-- Contact details row (ติดซ้ายมือ) -->
-                    ${(doc.project_contact_person || doc.customer_phone || doc.project_email || doc.customer_email) ? `
-                        <div class="flex flex-wrap items-center gap-x-4 gap-y-0.5 text-[10px] text-stone-600 mt-1 text-left">
-                            ${(doc.project_contact_person || doc.customer_phone) ? `
-                                <div><span class="font-semibold text-stone-700">ผู้ประสานงาน / โทร:</span> <b>${escapeHtml(doc.project_contact_person || doc.customer_phone)}</b></div>
-                            ` : ''}
-                            ${(doc.project_email || doc.customer_email) ? `
-                                <div><span class="font-semibold text-stone-700">อีเมล:</span> <b>${escapeHtml(doc.project_email || doc.customer_email)}</b></div>
-                            ` : ''}
-                        </div>
-                    ` : ''}
                 </div>
             </div>
 
@@ -225,14 +240,35 @@ window.printModule = {
             <div class="mt-2">
                 <table class="w-full text-[11px] text-left border-collapse border-2 border-[#1f1d1a]">
                     <thead>
-                        <tr class="bg-[#ede4d3] text-stone-900 font-bold border-b-2 border-[#1f1d1a] font-typewriter">
-                            <th class="border border-stone-800 px-1.5 py-1 text-center whitespace-nowrap w-10">ลำดับ</th>
-                            <th class="border border-stone-800 px-2 py-1">รายการสินค้า / รายละเอียดงาน</th>
-                            <th class="border border-stone-800 px-2 py-1 text-right whitespace-nowrap w-14">จำนวน</th>
-                            <th class="border border-stone-800 px-2 py-1 text-center whitespace-nowrap w-14">หน่วย</th>
-                            <th class="border border-stone-800 px-2 py-1 text-right whitespace-nowrap w-24">ราคา/หน่วย</th>
-                            <th class="border border-stone-800 px-2 py-1 text-right whitespace-nowrap w-16">ส่วนลด</th>
-                            <th class="border border-stone-800 px-2.5 py-1 text-right whitespace-nowrap w-24">จำนวนเงิน</th>
+                        <tr class="bg-[#ede4d3] text-stone-900 font-bold border-b-2 border-[#1f1d1a] font-typewriter text-[10px]">
+                            <th class="border border-stone-800 px-1 py-1 text-center whitespace-nowrap w-10">
+                                <div>ลำดับ</div>
+                                <div class="text-[8.5px] font-normal text-stone-600">NO.</div>
+                            </th>
+                            <th class="border border-stone-800 px-2 py-1">
+                                <div>รายการสินค้า / รายละเอียดงาน</div>
+                                <div class="text-[8.5px] font-normal text-stone-600">DESCRIPTION</div>
+                            </th>
+                            <th class="border border-stone-800 px-1.5 py-1 text-right whitespace-nowrap w-14">
+                                <div>จำนวน</div>
+                                <div class="text-[8.5px] font-normal text-stone-600">QTY</div>
+                            </th>
+                            <th class="border border-stone-800 px-1.5 py-1 text-center whitespace-nowrap w-14">
+                                <div>หน่วย</div>
+                                <div class="text-[8.5px] font-normal text-stone-600">UNIT</div>
+                            </th>
+                            <th class="border border-stone-800 px-2 py-1 text-right whitespace-nowrap w-24">
+                                <div>ราคา/หน่วย</div>
+                                <div class="text-[8.5px] font-normal text-stone-600">UNIT PRICE</div>
+                            </th>
+                            <th class="border border-stone-800 px-1.5 py-1 text-right whitespace-nowrap w-16">
+                                <div>ส่วนลด</div>
+                                <div class="text-[8.5px] font-normal text-stone-600">DISC</div>
+                            </th>
+                            <th class="border border-stone-800 px-2.5 py-1 text-right whitespace-nowrap w-24">
+                                <div>จำนวนเงิน</div>
+                                <div class="text-[8.5px] font-normal text-stone-600">AMOUNT</div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -360,15 +396,15 @@ window.printModule = {
                 <div class="col-span-7 space-y-1.5">
                     <!-- Thai Baht Text Box -->
                     <div class="py-1.5 px-2 bg-[#faf6ee] rounded border border-stone-800 flex items-center gap-1.5 text-xs">
-                        <span class="font-bold text-stone-700 shrink-0 font-typewriter">ตัวอักษร:</span>
+                        <span class="font-bold text-stone-700 shrink-0 font-typewriter text-[10.5px]">ตัวอักษร / BAHT TEXT:</span>
                         <span class="font-bold text-stone-900 leading-tight">( ${doc.grand_total_thai || 'ศูนย์บาทถ้วน'} )</span>
                     </div>
 
                     <!-- Bank Payment Accounts -->
                     ${bankAccounts.length > 0 ? `
                         <div class="py-1.5 px-2 bg-[#faf6ee] rounded border border-stone-400 text-[11px] space-y-1">
-                            <div class="font-bold text-stone-800 flex items-center gap-1 font-typewriter">
-                                <span>💳</span> ช่องทางการชำระเงิน:
+                            <div class="font-bold text-stone-800 flex items-center gap-1 font-typewriter text-[10.5px]">
+                                <span>💳</span> ช่องทางการชำระเงิน / PAYMENT METHODS:
                             </div>
                             <div class="grid grid-cols-1 gap-0.5">
                                 ${bankAccounts.map(b => `
@@ -389,7 +425,7 @@ window.printModule = {
                     <div class="text-[10px] text-stone-700 space-y-1.5 mt-1 font-mono">
                         ${doc.payment_terms ? `
                             <div>
-                                <span class="font-bold text-stone-900 block mb-0.5">เงื่อนไขชำระเงิน:</span>
+                                <span class="font-bold text-stone-900 block mb-0.5">เงื่อนไขชำระเงิน / PAYMENT TERMS:</span>
                                 <div class="pl-2 border-l-2 border-stone-300 text-stone-600 space-y-0.5">
                                     ${formatPaymentTerms(doc.payment_terms)}
                                 </div>
@@ -397,7 +433,7 @@ window.printModule = {
                         ` : ''}
                         ${cleanRemark ? `
                             <div>
-                                <span class="font-bold text-stone-900 block mb-0.5">หมายเหตุ:</span>
+                                <span class="font-bold text-stone-900 block mb-0.5">หมายเหตุ / REMARKS:</span>
                                 <div class="pl-2 border-l-2 border-stone-300 text-stone-600 space-y-0.5">
                                     ${formatRemarks(cleanRemark)}
                                 </div>
@@ -410,17 +446,26 @@ window.printModule = {
                 <div class="col-span-5 border-2 border-stone-800 rounded overflow-hidden bg-white text-xs">
                     <table class="w-full">
                         <tr class="border-b border-stone-200">
-                            <td class="px-2.5 py-1 text-stone-600">รวมเป็นเงิน:</td>
+                            <td class="px-2.5 py-1 text-stone-600">
+                                <div>รวมเป็นเงิน</div>
+                                <div class="text-[8.5px] text-stone-400 uppercase">SUBTOTAL</div>
+                            </td>
                             <td class="px-2.5 py-1 text-right font-mono font-medium">${app.formatCurrency(doc.subtotal)}</td>
                         </tr>
                         ${doc.discount_total > 0 ? `
                             <tr class="border-b border-stone-200 text-red-700">
-                                <td class="px-2.5 py-1">ส่วนลด:</td>
+                                <td class="px-2.5 py-1">
+                                    <div>ส่วนลด</div>
+                                    <div class="text-[8.5px] text-red-500 uppercase">DISCOUNT</div>
+                                </td>
                                 <td class="px-2.5 py-1 text-right font-mono font-medium">-฿${app.formatCurrency(doc.discount_total)}</td>
                             </tr>
                         ` : ''}
                         <tr class="bg-[#ede4d3] font-bold text-stone-900 border-t-2 border-stone-800">
-                            <td class="px-2.5 py-2 text-xs font-typewriter">ยอดรวมสุทธิ:</td>
+                            <td class="px-2.5 py-2 font-typewriter">
+                                <div class="text-xs">ยอดรวมสุทธิ</div>
+                                <div class="text-[8.5px] text-stone-600 font-normal uppercase">GRAND TOTAL</div>
+                            </td>
                             <td class="px-2.5 py-2 text-right font-bold text-base text-[#1f1d1a] font-typewriter">
                                 ฿${app.formatCurrency(doc.grand_total)}
                             </td>
@@ -437,7 +482,8 @@ window.printModule = {
                         <div class="w-44 border-b-2 border-stone-700"></div>
                     </div>
                     <div class="mt-1 font-bold text-stone-800 text-[11px] font-typewriter">ผู้สั่งซื้อ / ผู้รับบริการ</div>
-                    <div class="text-[10px] text-stone-500 mt-0.5">วันที่ ..... / ..... / ..........</div>
+                    <div class="text-[9px] text-stone-500 uppercase font-sans">CUSTOMER / RECEIVED BY</div>
+                    <div class="text-[9.5px] text-stone-500 mt-0.5">วันที่ / DATE ..... / ..... / ..........</div>
                 </div>
 
                 <!-- Authorized Signature -->
@@ -446,7 +492,8 @@ window.printModule = {
                         <div class="w-44 border-b-2 border-stone-700"></div>
                     </div>
                     <div class="mt-1 font-bold text-stone-800 text-[11px] font-typewriter">ผู้มีอำนาจลงนาม / ผู้รับเงิน</div>
-                    <div class="text-[10px] text-stone-500 mt-0.5">วันที่ ..... / ..... / ..........</div>
+                    <div class="text-[9px] text-stone-500 uppercase font-sans">AUTHORIZED SIGNATURE</div>
+                    <div class="text-[9.5px] text-stone-500 mt-0.5">วันที่ / DATE ..... / ..... / ..........</div>
                 </div>
             </div>
         `;

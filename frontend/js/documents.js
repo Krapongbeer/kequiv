@@ -661,8 +661,27 @@ window.documentsModule = {
                         </div>
                     </div>
 
-                    <!-- Section 2: Project, Customer & Dates -->
+                    <!-- Section 2: Customer, Project & Dates (สลับชื่อลูกค้า/ผู้ติดต่อไว้ซ้าย โครงการไว้ขวา) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Customer Dropdown (ชื่อลูกค้า / ผู้ติดต่อ) -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
+                                <span>ชื่อลูกค้า / ผู้ติดต่อ <span class="text-rose-500">*</span></span>
+                                <button type="button" onclick="window.customersModule.openCustomerModal()" class="text-[11px] text-sky-700 font-bold hover:underline">
+                                    + เพิ่มลูกค้าใหม่
+                                </button>
+                            </label>
+                            <select id="doc-customer-select" name="customer_id" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none" onchange="window.documentsModule.onCustomerSelected(this.value)">
+                                <option value="">-- เลือกลูกค้า (ชื่อคนค้นหาง่าย) --</option>
+                                ${customers.map(c => `
+                                    <option value="${c.id}" ${selectedCustomerId == c.id ? 'selected' : ''}>${c.name}</option>
+                                `).join('')}
+                            </select>
+
+                            <!-- Customer info snippet -->
+                            <div id="customer-info-box" class="mt-2 text-xs text-slate-600 p-2.5 bg-slate-50 rounded-lg border border-slate-200 hidden"></div>
+                        </div>
+
                         <!-- Project / Billing Title (โครงการ / ข้อมูลออกบิล) -->
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
@@ -693,25 +712,6 @@ window.documentsModule = {
                             <div id="custom-header-wrapper" class="mt-2">
                                 <input type="text" id="project-name-custom" name="project_name_custom" value="${projectNameCustom || ''}" placeholder="หรือพิมพ์ระบุชื่อหัวบิล/โครงการที่นี่..." class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:border-sky-500">
                             </div>
-                        </div>
-
-                        <!-- Customer Dropdown (ชื่อลูกค้า / ผู้ติดต่อ) -->
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
-                                <span>ชื่อลูกค้า / ผู้ติดต่อ <span class="text-rose-500">*</span></span>
-                                <button type="button" onclick="window.customersModule.openCustomerModal()" class="text-[11px] text-sky-700 font-bold hover:underline">
-                                    + เพิ่มลูกค้าใหม่
-                                </button>
-                            </label>
-                            <select id="doc-customer-select" name="customer_id" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none" onchange="window.documentsModule.onCustomerSelected(this.value)">
-                                <option value="">-- เลือกลูกค้า (ชื่อคนค้นหาง่าย) --</option>
-                                ${customers.map(c => `
-                                    <option value="${c.id}" ${selectedCustomerId == c.id ? 'selected' : ''}>${c.name}</option>
-                                `).join('')}
-                            </select>
-
-                            <!-- Customer info snippet -->
-                            <div id="customer-info-box" class="mt-2 text-xs text-slate-600 p-2.5 bg-slate-50 rounded-lg border border-slate-200 hidden"></div>
                         </div>
 
                         <!-- Issue Date (รองรับลงย้อนหลัง & ออกบิลไม่ลงวันที่) -->

@@ -430,12 +430,30 @@ const app = {
             });
         });
 
-        // Close modals on clicking backdrop or close buttons
+        // Close modals on clicking close buttons
         document.querySelectorAll('.modal-close-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const modal = btn.closest('.modal-container');
                 if (modal) this.closeModal(modal.id);
             });
+        });
+
+        // Close modals on clicking outer backdrop
+        document.querySelectorAll('.modal-container').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.closeModal(modal.id);
+                }
+            });
+        });
+
+        // Close modals on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-container:not(.hidden)').forEach(modal => {
+                    this.closeModal(modal.id);
+                });
+            }
         });
     },
 

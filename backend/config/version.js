@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.32',
-    releaseDate: '2026-11-07',
-    codename: 'Full Project Edit Capability & Clean Document Creation UI',
+    version: '2.9.33',
+    releaseDate: '2026-11-08',
+    codename: 'Bilingual Professional Bill Layout & Enhanced Modal Usability',
     changelog: [
+        {
+            version: '2.9.33',
+            date: '2026-11-08',
+            title: 'Bilingual Professional Bill Layout & Enhanced Modal Usability',
+            features: [
+                'แก้ปัญหาการปิดโมดัลโครงการ (Fixed Modal Overflow & Close): ปรับโครงสร้างโมดัลให้อยู่ในหน้าจอเสมอ (max-h-[92vh]) โดยหัวข้อและปุ่ม ✕ ไม่ถูกดันหลุดจอ พร้อมเพิ่มปุ่ม "✕ ปิดหน้าต่าง" ที่ด้านล่าง และรองรับการคลิกพื้นหลัง/กดปุ่ม Escape เพื่อปิดหน้าต่างได้ทันที',
+                'สลับตำแหน่งในหน้าสร้างเอกสาร: ปรับช่อง "ชื่อลูกค้า / ผู้ติดต่อ" ให้อยู่ฝั่งซ้าย และ "โครงการ / ข้อมูลออกบิล" อยู่ฝั่งขวา เพื่อให้ลำดับการเลือกลูกค้าก่อนเลือกโครงการเป็นไปตามธรรมชาติ',
+                'จัด Layout หัวบิลแบบ 2 ภาษา (Bilingual Professional Invoice): แสดงป้ายกำกับชัดเจนทั้งภาษาไทยและอังกฤษ (CUSTOMER / BILL TO, TAX ID, NAME, ATTN, ADDRESS, CONTACT, TEL, EMAIL) พร้อมจัดวางตารางรายการสินค้า ยอดรวม และช่องลงนามให้สวยงามได้มาตรฐานระดับสากล'
+            ]
+        },
         {
             version: '2.9.32',
             date: '2026-11-07',
