@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.30',
+    version: '2.9.31',
     releaseDate: '2026-11-07',
-    codename: 'Customer Person Name & Project Billing Metadata Integration',
+    codename: 'Streamlined Customer Creation & Left-Aligned Clean Bill Layout',
     changelog: [
+        {
+            version: '2.9.31',
+            date: '2026-11-07',
+            title: 'Streamlined Customer Creation & Left-Aligned Clean Bill Layout',
+            features: [
+                'ฟอร์มเพิ่มลูกค้าแบบกระชับ (Minimal Customer Form): เหลือเฉพาะช่องใส่ชื่อคนเพื่อความรวดเร็วและค้นหาง่ายเวลาออกบิล',
+                'ฟอร์มเพิ่มโครงการครบครัน 7 ช่อง (Full Project Billing Entity): รองรับ ชื่อโครงการ/บริษัท/นิติบุคคล, เลขผู้เสียภาษี, เบอร์โทรศัพท์, อีเมล, ผู้ติดต่อ, ที่อยู่/สถานที่ส่งของ และหมายเหตุ',
+                'จัด Layout หัวบิลใหม่ตามสั่ง (Left-Aligned Beautiful Ledger): แสดงหัว "ลูกค้า / CUSTOMER" พร้อม Tax ID ด้านบน, ชื่อโครงการ/ผู้ว่าจ้าง, และจัดที่อยู่ติดชิดซ้ายมืออย่างสวยงาม เป็นระเบียบ ไม่เบี้ยวขวา'
+            ]
+        },
         {
             version: '2.9.30',
             date: '2026-11-07',

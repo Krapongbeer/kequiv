@@ -173,42 +173,51 @@ window.printModule = {
                 </div>
             </div>
 
-            <!-- 2. Project & Client Info Block (No "ข้อมูลโครงการ", No pin icon) -->
+            <!-- 2. Customer & Project Info Block (ลูกค้า / CUSTOMER + ที่อยู่ติดซ้าย) -->
             <div class="py-1.5 border-b-2 border-[#1f1d1a] font-mono avoid-page-break">
                 <div class="bg-[#faf6ee] px-3 py-2 rounded border border-stone-800 text-[11px]">
-                    <div class="flex items-start justify-between gap-4 pb-1 mb-1 border-b border-stone-300">
-                        <div class="font-bold text-stone-950 text-[12px] leading-snug">
-                            ${escapeHtml(doc.project_name_custom || doc.project_name || doc.customer_name || '-')}
-                        </div>
+                    <!-- Top Bar: ลูกค้า / CUSTOMER + Tax ID -->
+                    <div class="flex items-center justify-between pb-1 mb-1.5 border-b border-stone-300">
+                        <span class="text-[9.5px] font-bold uppercase tracking-wider text-stone-700 font-typewriter">
+                            ลูกค้า / CUSTOMER
+                        </span>
                         ${(doc.project_tax_id || doc.customer_tax_id) ? `
-                            <div class="text-[10px] text-stone-700 font-mono font-bold shrink-0">
+                            <span class="text-[10px] text-stone-800 font-mono font-bold">
                                 Tax: ${escapeHtml(doc.project_tax_id || doc.customer_tax_id)}
-                            </div>
+                            </span>
                         ` : ''}
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
-                        <div>
-                            ${(doc.project_name_custom || doc.project_name) && doc.customer_name ? `
-                                <div class="text-[10.5px] text-stone-700">
-                                    ลูกค้า / ผู้ติดต่อ: <strong>${escapeHtml(doc.customer_name)}</strong>
-                                </div>
-                            ` : ''}
-
-                            ${(doc.project_contact_person || doc.customer_phone) ? `
-                                <div class="text-[10px] text-stone-600 mt-0.5">
-                                    ผู้ประสานงาน/โทร: <b>${escapeHtml(doc.project_contact_person || doc.customer_phone)}</b>
-                                </div>
-                            ` : ''}
-                        </div>
-
-                        <div class="text-[10px] text-stone-600 space-y-0.5">
-                            ${(doc.project_site_address || doc.customer_address) ? `
-                                <div class="leading-tight"><span class="font-bold text-stone-700">ที่อยู่ / สถานที่:</span> ${escapeHtml(doc.project_site_address || doc.customer_address)}</div>
-                            ` : ''}
-                            ${(doc.project_email || doc.customer_email) ? `<div>อีเมล: ${escapeHtml(doc.project_email || doc.customer_email)}</div>` : ''}
-                        </div>
+                    <!-- Project / Company Title -->
+                    <div class="font-bold text-stone-950 text-[12px] leading-snug">
+                        ${escapeHtml(doc.project_name_custom || doc.project_name || doc.customer_name || '-')}
                     </div>
+
+                    <!-- Customer / Contact Person (if distinct from project title) -->
+                    ${((doc.project_name_custom || doc.project_name) && doc.customer_name && doc.customer_name !== (doc.project_name_custom || doc.project_name)) ? `
+                        <div class="text-[10.5px] text-stone-700 mt-0.5">
+                            <span class="font-semibold text-stone-800">ชื่อลูกค้า / ผู้ติดต่อ:</span> ${escapeHtml(doc.customer_name)}
+                        </div>
+                    ` : ''}
+
+                    <!-- Address (ติดซ้ายมือ 100%) -->
+                    ${(doc.project_site_address || doc.customer_address) ? `
+                        <div class="text-[10.5px] text-stone-700 mt-1 leading-tight text-left">
+                            <span class="font-bold text-stone-800">ที่อยู่ / สถานที่:</span> ${escapeHtml(doc.project_site_address || doc.customer_address)}
+                        </div>
+                    ` : ''}
+
+                    <!-- Contact details row (ติดซ้ายมือ) -->
+                    ${(doc.project_contact_person || doc.customer_phone || doc.project_email || doc.customer_email) ? `
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-0.5 text-[10px] text-stone-600 mt-1 text-left">
+                            ${(doc.project_contact_person || doc.customer_phone) ? `
+                                <div><span class="font-semibold text-stone-700">ผู้ประสานงาน / โทร:</span> <b>${escapeHtml(doc.project_contact_person || doc.customer_phone)}</b></div>
+                            ` : ''}
+                            ${(doc.project_email || doc.customer_email) ? `
+                                <div><span class="font-semibold text-stone-700">อีเมล:</span> <b>${escapeHtml(doc.project_email || doc.customer_email)}</b></div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
                 </div>
             </div>
 
