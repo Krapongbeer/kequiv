@@ -118,12 +118,15 @@ router.get('/', async (req, res) => {
                 month_docs: monthDocs
             };
 
-            // Unpaid billing (only open billing notes that have NOT been paid or converted to a receipt)
-            const unpaidBillingDocs = docs.filter(d => 
-                d.type === 'billing' && 
-                d.status === 'issued' && 
-                !docsReferencedByReceipt.has(Number(d.id))
-            );
+            // Unpaid receivables:
+            // 1. Open receipts that haven't been marked as paid yet (d.type === 'receipt' && d.status === 'issued')
+            // 2. Open billing notes that haven't been paid AND haven't been converted to a receipt yet
+            const unpaidBillingDocs = docs.filter(d => {
+                if (d.status !== 'issued') return false;
+                if (d.type === 'receipt') return true;
+                if (d.type === 'billing' && !docsReferencedByReceipt.has(Number(d.id))) return true;
+                return false;
+            });
 
             let unpaidRegularTotal = 0;
             let unpaidServiceFeeTotal = 0;
@@ -265,11 +268,13 @@ router.get('/', async (req, res) => {
             SELECT id, type, status, issue_date, due_date, grand_total, remark
             FROM documents
             WHERE deleted_at IS NULL
-              AND type = 'billing'
               AND status = 'issued'
-              AND id NOT IN (
-                  SELECT reference_document_id FROM documents 
-                  WHERE type = 'receipt' AND status != 'cancelled' AND reference_document_id IS NOT NULL
+              AND (
+                  type = 'receipt'
+                  OR (type = 'billing' AND id NOT IN (
+                      SELECT reference_document_id FROM documents 
+                      WHERE type = 'receipt' AND status != 'cancelled' AND reference_document_id IS NOT NULL
+                  ))
               )
         `).all();
 

@@ -825,10 +825,7 @@ router.post('/:id/convert', async (req, res) => {
                     .eq('code', newCode);
             }
 
-            // If billing note was converted to a receipt, mark source billing note as paid
-            if (target_type === 'receipt' && sourceDoc.type === 'billing') {
-                await supabase.from('documents').update({ status: 'paid', updated_at: new Date().toISOString() }).eq('id', sourceDoc.id);
-            }
+            // Note: Source document remains with its current status upon convert (User will manually mark RE as paid when payment is received)
 
             return res.json({
                 success: true,
@@ -915,10 +912,7 @@ router.post('/:id/convert', async (req, res) => {
                 db.prepare("UPDATE document_reservations SET used_by_doc_id = ?, status = 'used', used_at = datetime('now') WHERE code = ?").run(newDocId, newCode);
             }
 
-            // If billing note was converted to a receipt, mark source billing note as paid
-            if (target_type === 'receipt' && sourceDoc.type === 'billing') {
-                db.prepare("UPDATE documents SET status = 'paid', updated_at = datetime('now', 'localtime') WHERE id = ?").run(sourceDoc.id);
-            }
+            // Note: Source document remains with its current status upon convert (User will manually mark RE as paid when payment is received)
 
             db.exec('COMMIT');
 
@@ -1006,33 +1000,102 @@ router.post('/:id/cancel', async (req, res) => {
     }
 });
 
-// POST mark as paid
+// POST mark as paid (supports toggle and RE-INV synchronization)
 router.post('/:id/mark-paid', async (req, res) => {
     try {
         const id = req.params.id;
 
         if (isSupabaseConfigured && supabase) {
+            const { data: doc, error: fetchErr } = await supabase
+                .from('documents')
+                .select('id, code, type, status, reference_document_id')
+                .eq('id', id)
+                .is('deleted_at', null)
+                .maybeSingle();
+
+            if (fetchErr || !doc) {
+                return res.status(404).json({ success: false, error: 'ไม่พบเอกสาร' });
+            }
+
+            const newStatus = doc.status === 'paid' ? 'issued' : 'paid';
+            const nowIso = new Date().toISOString();
+
             await supabase
                 .from('documents')
                 .update({
-                    status: 'paid',
-                    updated_at: new Date().toISOString()
+                    status: newStatus,
+                    updated_at: nowIso
                 })
-                .eq('id', id)
-                .is('deleted_at', null);
+                .eq('id', id);
 
-            return res.json({ success: true, message: 'บันทึกสถานะชำระเงินแล้ว' });
+            // If this is a receipt (RE) linked to a billing note (INV), sync the status to the source INV
+            if (doc.type === 'receipt' && doc.reference_document_id) {
+                await supabase
+                    .from('documents')
+                    .update({
+                        status: newStatus,
+                        updated_at: nowIso
+                    })
+                    .eq('id', doc.reference_document_id)
+                    .is('deleted_at', null);
+            }
+
+            // If this is a billing note linked to a receipt, sync the status to the receipt
+            if (doc.type === 'billing') {
+                await supabase
+                    .from('documents')
+                    .update({
+                        status: newStatus,
+                        updated_at: nowIso
+                    })
+                    .eq('reference_document_id', id)
+                    .eq('type', 'receipt')
+                    .is('deleted_at', null);
+            }
+
+            return res.json({
+                success: true,
+                message: newStatus === 'paid' ? 'บันทึกสถานะชำระเงินเรียบร้อยแล้ว' : 'เปลี่ยนสถานะเป็นยังไม่ชำระเงินเรียบร้อยแล้ว',
+                status: newStatus
+            });
         }
 
         // SQLite Fallback
+        const doc = db.prepare('SELECT id, code, type, status, reference_document_id FROM documents WHERE id = ? AND deleted_at IS NULL').get(id);
+        if (!doc) {
+            return res.status(404).json({ success: false, error: 'ไม่พบเอกสาร' });
+        }
+
+        const newStatus = doc.status === 'paid' ? 'issued' : 'paid';
         db.prepare(`
             UPDATE documents SET
-                status = 'paid',
-                updated_at = datetime('now')
+                status = ?,
+                updated_at = datetime('now', 'localtime')
             WHERE id = ? AND deleted_at IS NULL
-        `).run(id);
+        `).run(newStatus, id);
 
-        res.json({ success: true, message: 'บันทึกสถานะชำระเงินแล้ว' });
+        if (doc.type === 'receipt' && doc.reference_document_id) {
+            db.prepare(`
+                UPDATE documents SET
+                    status = ?,
+                    updated_at = datetime('now', 'localtime')
+                WHERE id = ? AND deleted_at IS NULL
+            `).run(newStatus, doc.reference_document_id);
+        }
+        if (doc.type === 'billing') {
+            db.prepare(`
+                UPDATE documents SET
+                    status = ?,
+                    updated_at = datetime('now', 'localtime')
+                WHERE reference_document_id = ? AND type = 'receipt' AND deleted_at IS NULL
+            `).run(newStatus, id);
+        }
+
+        res.json({
+            success: true,
+            message: newStatus === 'paid' ? 'บันทึกสถานะชำระเงินเรียบร้อยแล้ว' : 'เปลี่ยนสถานะเป็นยังไม่ชำระเงินเรียบร้อยแล้ว',
+            status: newStatus
+        });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }

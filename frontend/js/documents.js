@@ -222,10 +222,16 @@ window.documentsModule = {
                                             <button onclick="window.documentsModule.openConvertModal(${d.id}, '${d.type}', '${d.code}', '${d.issue_date || ''}')" class="btn-paper text-xs py-1 px-2" title="แปลงเป็นเอกสารขั้นถัดไป">
                                                 🔄 แปลง
                                             </button>
-                                            ${d.type === 'billing' && d.status !== 'paid' ? `
-                                                <button onclick="window.documentsModule.markPaid(${d.id})" class="btn-paper text-xs py-1 px-2 text-emerald-800 border-emerald-300 bg-emerald-50 hover:bg-emerald-100" title="ทำเครื่องหมายว่าชำระแล้ว">
-                                                    ✓ ชำระแล้ว
-                                                </button>
+                                            ${d.type === 'receipt' ? `
+                                                ${d.status !== 'paid' ? `
+                                                    <button onclick="window.documentsModule.markPaid(${d.id}, '${d.status}')" class="btn-paper text-xs py-1 px-2 text-emerald-800 border-emerald-300 bg-emerald-50 hover:bg-emerald-100 font-bold" title="บันทึกว่าได้รับเงินแล้ว (ชำระแล้ว)">
+                                                        ✓ ชำระแล้ว
+                                                    </button>
+                                                ` : `
+                                                    <button onclick="window.documentsModule.markPaid(${d.id}, '${d.status}')" class="btn-paper text-xs py-1 px-1.5 text-slate-500 border-slate-300 bg-slate-50 hover:bg-slate-100" title="คลิกเพื่อยกเลิกสถานะชำระเงิน (เปลี่ยนกลับเป็นยังไม่ได้รับเงิน)">
+                                                        ↩ คืนสถานะ
+                                                    </button>
+                                                `}
                                             ` : ''}
                                             <button onclick="window.documentsModule.duplicate(${d.id})" class="btn-paper text-xs py-1 px-2" title="คัดลอกสร้างฉบับใหม่">
                                                 📋
@@ -1926,12 +1932,16 @@ window.documentsModule = {
         }
     },
 
-    async markPaid(id) {
-        if (!confirm('ยืนยันบันทึกสถานะเป็น "ชำระเงินแล้ว"?')) return;
+    async markPaid(id, currentStatus) {
+        const isPaid = currentStatus === 'paid';
+        const msg = isPaid
+            ? 'ต้องการเปลี่ยนสถานะเอกสารกลับเป็น "ยังไม่ได้รับเงิน (ออกเอกสารแล้ว)" ใช่หรือไม่?'
+            : 'ยืนยันว่าได้รับเงินเรียบร้อยแล้ว และต้องการบันทึกสถานะเป็น "ชำระเงินแล้ว"?';
+        if (!confirm(msg)) return;
 
         try {
-            await api.markPaid(id);
-            app.toast('บันทึกสถานะชำระเงินเรียบร้อยแล้ว', 'success');
+            const res = await api.markPaid(id);
+            app.toast(res.message || 'บันทึกสถานะเรียบร้อยแล้ว', 'success');
             this.loadList();
         } catch (err) {
             app.toast(err.message, 'error');

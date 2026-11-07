@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.9.27',
+    version: '2.9.28',
     releaseDate: '2026-11-07',
-    codename: 'Dashboard Unpaid Gross Reference Fix & Stability Patch',
+    codename: 'Manual Payment Marking on Receipt (RE) & Dual Status Synchronization',
     changelog: [
+        {
+            version: '2.9.28',
+            date: '2026-11-07',
+            title: 'Manual Payment Marking on Receipt (RE) & Dual Status Synchronization',
+            features: [
+                'ย้ายปุ่ม "✓ ชำระแล้ว" จากใบแจ้งหนี้ (INV) ไปไว้ที่ใบเสร็จรับเงิน (RE) ตามกระบวนการใช้งานจริง: บ่อยครั้งที่ต้องออก RE ให้ลูกค้าเพื่อวางบิลเบิกเงินก่อนที่เงินจะเข้าบัญชีจริง',
+                'ยกเลิกการปรับสถานะเป็น "ชำระแล้ว" อัตโนมัติเมื่อแปลงเอกสาร: เอกสาร INV และ RE จะคงสถานะ "ออกเอกสารแล้ว" ไว้ จนกว่าผู้ใช้จะกดปุ่ม "✓ ชำระแล้ว" ที่ตัว RE ด้วยตนเอง',
+                'ระบบซิงค์สถานะสองทางอัตโนมัติ (Bidirectional Synchronization): เมื่อผู้ใช้กด "✓ ชำระแล้ว" ที่ RE ระบบจะปรับสถานะทั้ง RE และ INV ต้นทางเป็นชำระเงินแล้วพร้อมกัน และสามารถกด "↩ คืนสถานะ" ได้หากต้องการยกเลิก',
+                'ปรับปรุงการคำนวณยอดรอเก็บเงินบน Dashboard: นับรวมใบเสร็จ (RE) ที่ยังไม่ได้รับเงินเข้าไปในยอดรอเก็บเงินอย่างแม่นยำ 100%'
+            ]
+        },
         {
             version: '2.9.27',
             date: '2026-11-07',
