@@ -3,10 +3,18 @@
  */
 
 module.exports = {
-    version: '2.9.26',
+    version: '2.9.27',
     releaseDate: '2026-11-07',
-    codename: 'Detailed Service Fee Audit Breakdown & Transparent Revenue Itemization',
+    codename: 'Dashboard Unpaid Gross Reference Fix & Stability Patch',
     changelog: [
+        {
+            version: '2.9.27',
+            date: '2026-11-07',
+            title: 'Dashboard Unpaid Gross Reference Fix & Stability Patch',
+            features: [
+                'แก้ไขข้อผิดพลาด ReferenceError: Cannot access unpaidGrossVal before initialization ในหน้าแรก (Dashboard): ปรับการกำหนดค่าตัวแปร unpaidGrossVal ให้อ้างอิง unpaidBilling.gross_total อย่างถูกต้องและปลอดภัย พร้อม fallback ป้องกัน error 100%'
+            ]
+        },
         {
             version: '2.9.26',
             date: '2026-11-07',

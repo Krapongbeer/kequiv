@@ -55,8 +55,8 @@ window.dashboardModule = {
         const grossBilledVal = monthGrossBilled !== undefined ? monthGrossBilled : monthRevenue;
 
         const hasUnpaidServiceBills = unpaidBilling && (unpaidBilling.service_bills_count > 0 || (unpaidBilling.service_fee_total > 0));
-        const unpaidRegularVal = unpaidBilling.regular_total !== undefined ? unpaidBilling.regular_total : unpaidBilling.total;
-        const unpaidGrossVal = unpaidBilling.gross_total !== undefined ? unpaidGrossVal : unpaidBilling.total;
+        const unpaidRegularVal = unpaidBilling ? (unpaidBilling.regular_total !== undefined ? unpaidBilling.regular_total : (unpaidBilling.total || 0)) : 0;
+        const unpaidGrossVal = unpaidBilling ? (unpaidBilling.gross_total !== undefined ? unpaidBilling.gross_total : (unpaidBilling.total || 0)) : 0;
 
         container.innerHTML = `
             <!-- Top Summary Cards -->
