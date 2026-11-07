@@ -663,18 +663,34 @@ window.documentsModule = {
 
                     <!-- Section 2: Project, Customer & Dates -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <!-- Project / Billing Title (โครงการ / หัวบิล) -->
+                        <!-- Project / Billing Title (โครงการ / ข้อมูลออกบิล) -->
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
-                                <span>โครงการ / หัวบิล <span class="text-[10px] text-slate-400 font-normal">งาน / สถานที่</span></span>
-                                <button type="button" id="btn-add-project-shortcut" onclick="window.customersModule.openProjectsModal(document.getElementById('doc-customer-select')?.value || window.documentsModule.state?.selectedCustomerId)" class="text-[11px] text-blue-600 font-semibold hover:underline">
+                                <span>โครงการ / ข้อมูลออกบิล <span class="text-[10px] text-slate-400 font-normal">บริษัท / นิติบุคคล / หน้างาน</span></span>
+                                <button type="button" id="btn-add-project-shortcut" onclick="window.customersModule.openProjectsModal(document.getElementById('doc-customer-select')?.value || window.documentsModule.state?.selectedCustomerId)" class="text-[11px] text-sky-700 font-bold hover:underline">
                                     + เพิ่มโครงการ
                                 </button>
                             </label>
                             <select id="doc-project-select" name="project_id" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none" onchange="window.documentsModule.onProjectSelected(this.value)">
-                                <option value="">-- ไม่ระบุโครงการ / หัวบิลย่อย --</option>
+                                <option value="">-- ไม่ระบุโครงการ / ใช้หัวบิลทั่วไป --</option>
                             </select>
-                            <div class="mt-2">
+
+                            <!-- Project info snippet -->
+                            <div id="project-info-box" class="mt-2 text-xs p-3 bg-sky-50/70 rounded-lg border border-sky-200 hidden">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div id="p-box-name" class="font-bold text-slate-900 text-sm"></div>
+                                    <div id="p-box-tax" class="font-mono text-sky-900 font-bold bg-white px-2 py-0.5 rounded border border-sky-300 text-[11px] shrink-0 hidden"></div>
+                                </div>
+                                <div id="p-box-site" class="mt-1 text-slate-600 hidden"></div>
+                                <div id="p-box-contact" class="mt-0.5 text-slate-600 hidden"></div>
+                                <div class="mt-2 pt-1.5 border-t border-sky-200/60 flex items-center justify-between">
+                                    <button type="button" onclick="document.getElementById('custom-header-wrapper').classList.toggle('hidden')" class="text-[11px] text-sky-700 hover:text-sky-900 font-semibold underline">
+                                        ✏️ กำหนดชื่อหัวบิลเอง (กรณีต้องการระบุต่างจากโครงการ)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="custom-header-wrapper" class="mt-2">
                                 <input type="text" id="project-name-custom" name="project_name_custom" value="${projectNameCustom || ''}" placeholder="หรือพิมพ์ระบุชื่อหัวบิล/โครงการที่นี่..." class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:border-sky-500">
                             </div>
                         </div>
@@ -683,7 +699,7 @@ window.documentsModule = {
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
                                 <span>ชื่อลูกค้า / ผู้ติดต่อ <span class="text-rose-500">*</span></span>
-                                <button type="button" onclick="window.customersModule.openCustomerModal()" class="text-[11px] text-blue-600 font-semibold hover:underline">
+                                <button type="button" onclick="window.customersModule.openCustomerModal()" class="text-[11px] text-sky-700 font-bold hover:underline">
                                     + เพิ่มลูกค้าใหม่
                                 </button>
                             </label>
@@ -695,10 +711,7 @@ window.documentsModule = {
                             </select>
 
                             <!-- Customer info snippet -->
-                            <div id="customer-info-box" class="mt-2 text-xs text-slate-500 p-3 bg-slate-50 rounded-lg border border-slate-200 hidden">
-                                <div id="c-box-tax" class="font-mono text-[11px]"></div>
-                                <div id="c-box-address" class="mt-0.5"></div>
-                            </div>
+                            <div id="customer-info-box" class="mt-2 text-xs text-slate-600 p-2.5 bg-slate-50 rounded-lg border border-slate-200 hidden"></div>
                         </div>
 
                         <!-- Issue Date (รองรับลงย้อนหลัง & ออกบิลไม่ลงวันที่) -->
@@ -896,7 +909,7 @@ window.documentsModule = {
         this.recalculate();
 
         if (selectedCustomerId) {
-            this.onCustomerSelected(selectedCustomerId);
+            this.onCustomerSelected(selectedCustomerId, selectedProjectId);
         }
     },
 
@@ -1473,15 +1486,20 @@ window.documentsModule = {
         }
     },
 
-    async onCustomerSelected(customerId) {
+    async onCustomerSelected(customerId, selectedProjectId = null) {
         const infoBox = document.getElementById('customer-info-box');
         const projectSelect = document.getElementById('doc-project-select');
+        const projInfoBox = document.getElementById('project-info-box');
 
         if (!customerId) {
             if (infoBox) infoBox.classList.add('hidden');
-            if (projectSelect) projectSelect.innerHTML = '<option value="">-- ใช้หัวบิลทั่วไปของลูกค้า --</option>';
+            if (projInfoBox) projInfoBox.classList.add('hidden');
+            if (projectSelect) projectSelect.innerHTML = '<option value="">-- ไม่ระบุโครงการ / ใช้หัวบิลทั่วไป --</option>';
             const btnAddProject = document.getElementById('btn-add-project-shortcut');
             if (btnAddProject) btnAddProject.classList.add('hidden');
+            const customWrapper = document.getElementById('custom-header-wrapper');
+            if (customWrapper) customWrapper.classList.remove('hidden');
+            this.currentCustomerProjects = [];
             return;
         }
 
@@ -1490,22 +1508,42 @@ window.documentsModule = {
             const c = res.data;
 
             if (infoBox) {
-                infoBox.classList.remove('hidden');
-                document.getElementById('c-box-tax').textContent = c.tax_id ? `เลขประจำตัวผู้เสียภาษี: ${c.tax_id}` : 'ไม่ได้ระบุเลขผู้เสียภาษี';
-                document.getElementById('c-box-address').textContent = c.address ? `ที่อยู่: ${c.address}` : '';
+                const parts = [];
+                if (c.phone) parts.push(`<span>📞 <b>${c.phone}</b></span>`);
+                if (c.email) parts.push(`<span>✉️ ${c.email}</span>`);
+                if (c.tax_id) parts.push(`<span>Tax: <b>${c.tax_id}</b></span>`);
+                if (c.address) parts.push(`<div>📍 ${c.address}</div>`);
+                if (c.note) parts.push(`<div class="text-slate-400 italic">📝 ${c.note}</div>`);
+
+                if (parts.length > 0) {
+                    infoBox.innerHTML = parts.join(' &bull; ');
+                    infoBox.classList.remove('hidden');
+                } else {
+                    infoBox.classList.add('hidden');
+                }
             }
 
             // Populate projects
+            this.currentCustomerProjects = c.projects || [];
             if (projectSelect) {
-                projectSelect.innerHTML = '<option value="">-- ใช้หัวบิลทั่วไปของลูกค้า --</option>';
-                if (c.projects && c.projects.length > 0) {
-                    c.projects.forEach(p => {
+                projectSelect.innerHTML = '<option value="">-- ไม่ระบุโครงการ / ใช้หัวบิลทั่วไป --</option>';
+                if (this.currentCustomerProjects.length > 0) {
+                    this.currentCustomerProjects.forEach(p => {
                         const opt = document.createElement('option');
                         opt.value = p.id;
                         opt.textContent = `${p.project_name}${p.contact_person ? ` (${p.contact_person})` : ''}`;
+                        if (selectedProjectId && p.id == selectedProjectId) {
+                            opt.selected = true;
+                        }
                         projectSelect.appendChild(opt);
                     });
                 }
+            }
+
+            if (selectedProjectId) {
+                this.onProjectSelected(selectedProjectId);
+            } else {
+                this.onProjectSelected('');
             }
 
             // Show/hide add-project shortcut button
@@ -1518,9 +1556,81 @@ window.documentsModule = {
 
     onProjectSelected(projectId) {
         const customInput = document.getElementById('project-name-custom');
+        const customWrapper = document.getElementById('custom-header-wrapper');
+        const infoBox = document.getElementById('project-info-box');
         const select = document.getElementById('doc-project-select');
-        if (projectId && select && customInput) {
-            const text = select.options[select.selectedIndex].text.replace('📌 ', '');
+
+        if (!projectId) {
+            if (infoBox) infoBox.classList.add('hidden');
+            if (customWrapper) customWrapper.classList.remove('hidden');
+            return;
+        }
+
+        const p = (this.currentCustomerProjects || []).find(item => item.id == projectId);
+        if (p) {
+            let taxId = p.tax_id || '';
+            let email = p.email || '';
+            let phone = p.phone || '';
+            let cleanNote = p.note || '';
+            if (!taxId && cleanNote.includes('[TAX:')) {
+                const m = cleanNote.match(/\[TAX:(.*?)\]/);
+                if (m) taxId = m[1];
+            }
+            if (!email && cleanNote.includes('[EMAIL:')) {
+                const m = cleanNote.match(/\[EMAIL:(.*?)\]/);
+                if (m) email = m[1];
+            }
+            if (!phone && cleanNote.includes('[PHONE:')) {
+                const m = cleanNote.match(/\[PHONE:(.*?)\]/);
+                if (m) phone = m[1];
+            }
+            cleanNote = cleanNote.replace(/\[TAX:.*?\]/g, '').replace(/\[EMAIL:.*?\]/g, '').replace(/\[PHONE:.*?\]/g, '').trim();
+
+            if (customInput) customInput.value = p.project_name || '';
+            if (customWrapper) customWrapper.classList.add('hidden');
+
+            if (infoBox) {
+                const nameEl = document.getElementById('p-box-name');
+                if (nameEl) nameEl.textContent = p.project_name;
+
+                const taxEl = document.getElementById('p-box-tax');
+                if (taxEl) {
+                    if (taxId) {
+                        taxEl.textContent = `Tax: ${taxId}`;
+                        taxEl.classList.remove('hidden');
+                    } else {
+                        taxEl.classList.add('hidden');
+                    }
+                }
+
+                const siteEl = document.getElementById('p-box-site');
+                if (siteEl) {
+                    if (p.site_address) {
+                        siteEl.textContent = `📍 หน้างาน/ที่อยู่: ${p.site_address}`;
+                        siteEl.classList.remove('hidden');
+                    } else {
+                        siteEl.classList.add('hidden');
+                    }
+                }
+
+                const contactEl = document.getElementById('p-box-contact');
+                if (contactEl) {
+                    const contactParts = [];
+                    if (p.contact_person || phone) contactParts.push(`👤 ผู้ประสานงาน: ${p.contact_person || phone}`);
+                    if (email) contactParts.push(`✉️ ${email}`);
+                    if (cleanNote) contactParts.push(`📝 ${cleanNote}`);
+                    if (contactParts.length > 0) {
+                        contactEl.innerHTML = contactParts.join(' &nbsp;|&nbsp; ');
+                        contactEl.classList.remove('hidden');
+                    } else {
+                        contactEl.classList.add('hidden');
+                    }
+                }
+
+                infoBox.classList.remove('hidden');
+            }
+        } else if (select && customInput) {
+            const text = select.options[select.selectedIndex]?.text?.replace('📌 ', '') || '';
             customInput.value = text;
         }
     },

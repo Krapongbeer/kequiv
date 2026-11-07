@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.9.31',
+    version: '2.9.32',
     releaseDate: '2026-11-07',
-    codename: 'Streamlined Customer Creation & Left-Aligned Clean Bill Layout',
+    codename: 'Full Project Edit Capability & Clean Document Creation UI',
     changelog: [
+        {
+            version: '2.9.32',
+            date: '2026-11-07',
+            title: 'Full Project Edit Capability & Clean Document Creation UI',
+            features: [
+                'ระบบแก้ไขโครงการเต็มรูปแบบ (Full Project Editing): เพิ่มปุ่มแก้ไขในแฟ้มโครงการ พร้อมโหลดข้อมูลทั้ง 7 ช่องขึ้นมาแก้ไขและบันทึกได้ทันที ทั้ง Supabase และ SQLite',
+                'ปุ่มเพิ่มโครงการเปิดโมดัลเต็มช่อง: แก้ไขปุ่ม + เพิ่มโครงการ ด้านล่างการ์ดลูกค้า จากเดิมเปิด prompt 1 บรรทัด ให้เปิดโมดัลโครงการ 7 ช่องครบถ้วน',
+                'ปรับปรุงหน้าสร้างเอกสารให้คลีน (Clean Document Billing View): เมื่อเลือกโครงการจะแสดงกล่องรายละเอียดโครงการ (Tax ID, ที่อยู่หน้างาน, ผู้ประสานงาน) สวยงาม และซ่อนช่องพิมพ์ซ้ำซ้อน พร้อมตัดข้อความ "ไม่ได้ระบุเลขผู้เสียภาษี" ใต้ชื่อลูกค้าออก',
+                'ปรับปรุงการ์ดลูกค้า: เอาไอคอน 📌 ออกทั้งหมด และไม่แสดง "ไม่ได้ระบุที่อยู่" หากลูกค้าเป็นชื่อบุคคลธรรมดา'
+            ]
+        },
         {
             version: '2.9.31',
             date: '2026-11-07',

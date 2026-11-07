@@ -106,7 +106,7 @@ window.customersModule = {
                                         ${c.tax_id ? `<span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-[10px] font-bold border border-slate-300 font-mono">เลขผู้เสียภาษี: ${c.tax_id}</span>` : ''}
                                         ${isTrash ? `<span class="px-2 py-0.5 bg-rose-50 text-rose-700 rounded text-[10px] font-bold border border-rose-300">ลบเมื่อ: ${app.formatDateThai(c.deleted_at)}</span>` : ''}
                                     </div>
-                                    <p class="text-xs text-slate-600 mt-1">${c.address || 'ไม่ได้ระบุที่อยู่'}</p>
+                                    ${c.address ? `<p class="text-xs text-slate-600 mt-1">${c.address}</p>` : ''}
                                     
                                     <div class="flex flex-wrap items-center gap-4 text-xs text-slate-500 mt-2">
                                         ${c.phone ? `<span>โทร: <strong class="text-slate-800">${c.phone}</strong></span>` : ''}
@@ -126,7 +126,7 @@ window.customersModule = {
                                             + ออกบิล
                                         </button>
                                         <button onclick="window.customersModule.openProjectsModal(${c.id})" class="btn-paper text-xs py-1.5 px-3 bg-sky-50 text-sky-900 border-sky-300 hover:bg-sky-100">
-                                            📌 แฟ้มโครงการ (${c.projects ? c.projects.length : 0})
+                                            โครงการ (${c.projects ? c.projects.length : 0})
                                         </button>
                                         <button onclick="window.customersModule.openEditCustomer(${c.id})" class="btn-paper text-xs py-1.5 px-2.5">
                                             ✏️ แก้ไข
@@ -144,14 +144,13 @@ window.customersModule = {
                                     <span class="text-[11px] font-bold text-slate-400">โครงการ / สาขา:</span>
                                     ${c.projects && c.projects.length > 0 ? c.projects.map(p => `
                                         <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-[11px]">
-                                            <span>📌</span>
                                             <strong>${p.project_name}</strong>
                                             ${p.contact_person ? `<span class="text-slate-400 text-[10px]">(${p.contact_person})</span>` : ''}
                                         </span>
                                     `).join('') : `
                                         <span class="text-slate-400 text-[11px]">ใช้หัวบิลทั่วไป (ไม่มีโครงการย่อย)</span>
                                     `}
-                                    <button onclick="window.customersModule.openAddProjectPrompt(${c.id})" class="text-xs font-bold text-sky-700 hover:underline ml-1">
+                                    <button onclick="window.customersModule.openProjectsModal(${c.id})" class="text-xs font-bold text-sky-700 hover:underline ml-1">
                                         + เพิ่มโครงการ
                                     </button>
                                 </div>
@@ -258,6 +257,9 @@ window.customersModule = {
     },
 
     // --- Customer Projects Management ---
+    editingProjectId: null,
+    currentCustomerProjects: [],
+
     async openProjectsModal(customerId) {
         if (!customerId) {
             const selectEl = document.getElementById('doc-customer-select');
@@ -272,6 +274,7 @@ window.customersModule = {
         }
 
         this.selectedCustomerId = customerId;
+        this.cancelEditProject();
         const container = document.getElementById('projects-list-container');
         if (!container) return;
 
@@ -284,7 +287,8 @@ window.customersModule = {
             const nameEl = document.getElementById('projects-modal-customer-name');
             if (nameEl) nameEl.textContent = `ลูกค้า: ${customer.name}`;
 
-            this.renderProjectsInModal(customer.projects || []);
+            this.currentCustomerProjects = customer.projects || [];
+            this.renderProjectsInModal(this.currentCustomerProjects);
         } catch (err) {
             container.innerHTML = `<div class="text-rose-600 text-xs">${err.message}</div>`;
         }
@@ -334,26 +338,78 @@ window.customersModule = {
                             ${email ? `<div class="text-slate-600 mt-0.5">✉️ อีเมล: ${email}</div>` : ''}
                             ${cleanNote ? `<div class="text-slate-400 italic mt-0.5">📝 หมายเหตุ: ${cleanNote}</div>` : ''}
                         </div>
-                        <button type="button" onclick="window.customersModule.deleteProject(${p.id}, ${JSON.stringify(p.project_name || '').replace(/"/g, '&quot;')})" class="btn-paper text-[11px] py-1 px-2.5 text-rose-700 border-rose-300 hover:bg-rose-50 shadow-xs">
-                            ลบ
-                        </button>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button type="button" onclick="window.customersModule.editProject(${p.id})" class="btn-paper text-[11px] py-1 px-2.5 text-sky-700 border-sky-300 hover:bg-sky-50 shadow-xs">
+                                ✏️ แก้ไข
+                            </button>
+                            <button type="button" onclick="window.customersModule.deleteProject(${p.id}, ${JSON.stringify(p.project_name || '').replace(/"/g, '&quot;')})" class="btn-paper text-[11px] py-1 px-2 text-rose-700 border-rose-300 hover:bg-rose-50 shadow-xs">
+                                ลบ
+                            </button>
+                        </div>
                     </div>
                 `}).join('')}
             </div>
         `;
     },
 
-    async openAddProjectPrompt(customerId) {
-        const name = prompt('ระบุชื่อโครงการ / สาขาของลูกค้า:');
-        if (!name || !name.trim()) return;
+    editProject(projectId) {
+        const p = (this.currentCustomerProjects || []).find(item => item.id == projectId);
+        if (!p) return;
 
-        try {
-            await api.addProject(customerId, { project_name: name.trim() });
-            app.toast('เพิ่มโครงการเรียบร้อยแล้ว', 'success');
-            this.loadList();
-        } catch (err) {
-            app.toast(err.message, 'error');
+        this.editingProjectId = projectId;
+
+        let taxId = p.tax_id || '';
+        let email = p.email || '';
+        let phone = p.phone || '';
+        let cleanNote = p.note || '';
+
+        if (!taxId && cleanNote.includes('[TAX:')) {
+            const m = cleanNote.match(/\[TAX:(.*?)\]/);
+            if (m) taxId = m[1];
         }
+        if (!email && cleanNote.includes('[EMAIL:')) {
+            const m = cleanNote.match(/\[EMAIL:(.*?)\]/);
+            if (m) email = m[1];
+        }
+        if (!phone && cleanNote.includes('[PHONE:')) {
+            const m = cleanNote.match(/\[PHONE:(.*?)\]/);
+            if (m) phone = m[1];
+        }
+        cleanNote = cleanNote.replace(/\[TAX:.*?\]/g, '').replace(/\[EMAIL:.*?\]/g, '').replace(/\[PHONE:.*?\]/g, '').trim();
+
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val || '';
+        };
+
+        setVal('proj-name', p.project_name);
+        setVal('proj-tax-id', taxId);
+        setVal('proj-phone', phone);
+        setVal('proj-email', email);
+        setVal('proj-contact', p.contact_person);
+        setVal('proj-site', p.site_address);
+        setVal('proj-note', cleanNote);
+
+        const titleEl = document.getElementById('form-project-title');
+        if (titleEl) titleEl.textContent = `✏️ แก้ไขโครงการ: ${p.project_name}`;
+        const btnSave = document.getElementById('btn-save-project');
+        if (btnSave) btnSave.textContent = '💾 บันทึกการแก้ไข';
+        const btnCancel = document.getElementById('btn-cancel-edit-project');
+        if (btnCancel) btnCancel.classList.remove('hidden');
+
+        document.getElementById('form-add-project')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    },
+
+    cancelEditProject() {
+        this.editingProjectId = null;
+        const form = document.getElementById('form-add-project');
+        if (form) form.reset();
+        const titleEl = document.getElementById('form-project-title');
+        if (titleEl) titleEl.textContent = '+ เพิ่มโครงการ / ข้อมูลออกบิลใหม่สำหรับลูกค้ารายนี้';
+        const btnSave = document.getElementById('btn-save-project');
+        if (btnSave) btnSave.textContent = '+ บันทึกโครงการ';
+        const btnCancel = document.getElementById('btn-cancel-edit-project');
+        if (btnCancel) btnCancel.classList.add('hidden');
     },
 
     async saveProject() {
@@ -371,18 +427,25 @@ window.customersModule = {
             return;
         }
 
+        const payload = {
+            project_name: name,
+            tax_id: taxId || '',
+            phone: phone || '',
+            email: email || '',
+            contact_person: contact || '',
+            site_address: site || '',
+            note: note || ''
+        };
+
         try {
-            await api.addProject(this.selectedCustomerId, {
-                project_name: name,
-                tax_id: taxId || '',
-                phone: phone || '',
-                email: email || '',
-                contact_person: contact || '',
-                site_address: site || '',
-                note: note || ''
-            });
-            app.toast('บันทึกโครงการสำเร็จ', 'success');
-            document.getElementById('form-add-project')?.reset();
+            if (this.editingProjectId) {
+                await api.updateProject(this.selectedCustomerId, this.editingProjectId, payload);
+                app.toast('แก้ไขข้อมูลโครงการเรียบร้อยแล้ว', 'success');
+            } else {
+                await api.addProject(this.selectedCustomerId, payload);
+                app.toast('บันทึกโครงการสำเร็จ', 'success');
+            }
+            this.cancelEditProject();
             this.openProjectsModal(this.selectedCustomerId);
             this.loadList();
         } catch (err) {

@@ -471,6 +471,63 @@ router.post('/:id/projects', async (req, res) => {
     }
 });
 
+// PUT update customer project - supports both /:customerId/projects/:projectId and /projects/:projectId
+const updateProjectHandler = async (req, res) => {
+    try {
+        const projectId = req.params.projectId;
+        const { project_name, site_address, contact_person, note, tax_id, phone, email } = req.body;
+
+        if (!project_name || !project_name.trim()) {
+            return res.status(400).json({ success: false, error: 'กรุณาระบุชื่อโครงการ / หัวบิล' });
+        }
+
+        let finalContact = (contact_person || '').trim();
+        if (phone && !finalContact.includes(phone)) {
+            finalContact = finalContact ? `${finalContact} (${phone.trim()})` : phone.trim();
+        }
+
+        const tags = [];
+        if (tax_id && tax_id.trim()) tags.push(`[TAX:${tax_id.trim()}]`);
+        if (email && email.trim()) tags.push(`[EMAIL:${email.trim()}]`);
+        if (phone && phone.trim()) tags.push(`[PHONE:${phone.trim()}]`);
+        const finalNote = tags.length > 0 ? `${tags.join('')} ${(note || '').trim()}`.trim() : (note || '').trim();
+
+        if (isSupabaseConfigured && supabase) {
+            const { data, error } = await supabase
+                .from('customer_projects')
+                .update({
+                    project_name: project_name.trim(),
+                    site_address: site_address || '',
+                    contact_person: finalContact,
+                    note: finalNote
+                })
+                .eq('id', projectId)
+                .select()
+                .single();
+
+            if (error) throw new Error(error.message);
+            await logAudit(req, 'PROJECT_UPDATED', { targetType: 'project', targetId: projectId, details: `แก้ไขโครงการ: ${project_name}` });
+            return res.json({ success: true, data: extractProjectMeta(data) });
+        }
+
+        // SQLite Fallback
+        const stmt = db.prepare(`
+            UPDATE customer_projects 
+            SET project_name = ?, site_address = ?, contact_person = ?, note = ?
+            WHERE id = ?
+        `);
+        stmt.run(project_name.trim(), site_address || '', finalContact, finalNote, projectId);
+        const project = db.prepare('SELECT * FROM customer_projects WHERE id = ?').get(projectId);
+        await logAudit(req, 'PROJECT_UPDATED', { targetType: 'project', targetId: projectId, details: `แก้ไขโครงการ: ${project_name}` });
+        res.json({ success: true, data: extractProjectMeta(project) });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+};
+
+router.put('/:customerId/projects/:projectId', updateProjectHandler);
+router.put('/projects/:projectId', updateProjectHandler);
+
 // DELETE customer project (Soft delete) - supports both /:customerId/projects/:projectId and /projects/:projectId
 const deleteProjectHandler = async (req, res) => {
     try {
