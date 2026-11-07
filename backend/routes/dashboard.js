@@ -79,16 +79,58 @@ router.get('/', async (req, res) => {
                 d.status === 'issued' && 
                 !docsReferencedByReceipt.has(Number(d.id))
             );
+
+            let unpaidRegularTotal = 0;
+            let unpaidServiceFeeTotal = 0;
+            let unpaidServiceBillsCount = 0;
+            let unpaidRegularBillsCount = 0;
+            let unpaidGrossTotal = 0;
+
+            unpaidBillingDocs.forEach(d => {
+                extractServiceBillInfo(d);
+                unpaidGrossTotal += Number(d.grand_total || 0);
+                if (d.is_service_bill) {
+                    unpaidServiceBillsCount++;
+                    unpaidServiceFeeTotal += Number(d.service_fee_amount || 0);
+                } else {
+                    unpaidRegularBillsCount++;
+                    unpaidRegularTotal += Number(d.grand_total || 0);
+                }
+            });
+
+            // True shop income expected from unpaid bills (regular sales + service fees)
+            const unpaidNetTotal = unpaidRegularTotal + unpaidServiceFeeTotal;
+
             const unpaidBilling = {
                 count: unpaidBillingDocs.length,
-                total: unpaidBillingDocs.reduce((sum, d) => sum + Number(d.grand_total || 0), 0)
+                total: unpaidNetTotal,
+                gross_total: unpaidGrossTotal,
+                regular_total: unpaidRegularTotal,
+                service_fee_total: unpaidServiceFeeTotal,
+                service_bills_count: unpaidServiceBillsCount,
+                regular_bills_count: unpaidRegularBillsCount
             };
 
             // Overdue billing
             const overdueBillingDocs = unpaidBillingDocs.filter(d => d.due_date && d.due_date < today);
+            let overdueRegularTotal = 0;
+            let overdueServiceFeeTotal = 0;
+            let overdueGrossTotal = 0;
+
+            overdueBillingDocs.forEach(d => {
+                extractServiceBillInfo(d);
+                overdueGrossTotal += Number(d.grand_total || 0);
+                if (d.is_service_bill) {
+                    overdueServiceFeeTotal += Number(d.service_fee_amount || 0);
+                } else {
+                    overdueRegularTotal += Number(d.grand_total || 0);
+                }
+            });
+
             const overdueBilling = {
                 count: overdueBillingDocs.length,
-                total: overdueBillingDocs.reduce((sum, d) => sum + Number(d.grand_total || 0), 0)
+                total: overdueRegularTotal + overdueServiceFeeTotal,
+                gross_total: overdueGrossTotal
             };
 
             // Counts by type & status
@@ -174,8 +216,8 @@ router.get('/', async (req, res) => {
         }
 
         // SQLite Fallback
-        const unpaidBilling = db.prepare(`
-            SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total
+        const unpaidBillingDocsSqlite = db.prepare(`
+            SELECT id, type, status, issue_date, due_date, grand_total, remark
             FROM documents
             WHERE deleted_at IS NULL
               AND type = 'billing'
@@ -184,21 +226,56 @@ router.get('/', async (req, res) => {
                   SELECT reference_document_id FROM documents 
                   WHERE type = 'receipt' AND status != 'cancelled' AND reference_document_id IS NOT NULL
               )
-        `).get();
+        `).all();
 
-        const overdueBilling = db.prepare(`
-            SELECT COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total
-            FROM documents
-            WHERE deleted_at IS NULL
-              AND type = 'billing'
-              AND status = 'issued'
-              AND due_date IS NOT NULL
-              AND due_date < ?
-              AND id NOT IN (
-                  SELECT reference_document_id FROM documents 
-                  WHERE type = 'receipt' AND status != 'cancelled' AND reference_document_id IS NOT NULL
-              )
-        `).get(today);
+        let unpaidRegularTotalSqlite = 0;
+        let unpaidServiceFeeTotalSqlite = 0;
+        let unpaidServiceBillsCountSqlite = 0;
+        let unpaidRegularBillsCountSqlite = 0;
+        let unpaidGrossTotalSqlite = 0;
+
+        unpaidBillingDocsSqlite.forEach(d => {
+            extractServiceBillInfo(d);
+            unpaidGrossTotalSqlite += Number(d.grand_total || 0);
+            if (d.is_service_bill) {
+                unpaidServiceBillsCountSqlite++;
+                unpaidServiceFeeTotalSqlite += Number(d.service_fee_amount || 0);
+            } else {
+                unpaidRegularBillsCountSqlite++;
+                unpaidRegularTotalSqlite += Number(d.grand_total || 0);
+            }
+        });
+
+        const unpaidBilling = {
+            count: unpaidBillingDocsSqlite.length,
+            total: unpaidRegularTotalSqlite + unpaidServiceFeeTotalSqlite,
+            gross_total: unpaidGrossTotalSqlite,
+            regular_total: unpaidRegularTotalSqlite,
+            service_fee_total: unpaidServiceFeeTotalSqlite,
+            service_bills_count: unpaidServiceBillsCountSqlite,
+            regular_bills_count: unpaidRegularBillsCountSqlite
+        };
+
+        const overdueBillingDocsSqlite = unpaidBillingDocsSqlite.filter(d => d.due_date && d.due_date < today);
+        let overdueRegularTotalSqlite = 0;
+        let overdueServiceFeeTotalSqlite = 0;
+        let overdueGrossTotalSqlite = 0;
+
+        overdueBillingDocsSqlite.forEach(d => {
+            extractServiceBillInfo(d);
+            overdueGrossTotalSqlite += Number(d.grand_total || 0);
+            if (d.is_service_bill) {
+                overdueServiceFeeTotalSqlite += Number(d.service_fee_amount || 0);
+            } else {
+                overdueRegularTotalSqlite += Number(d.grand_total || 0);
+            }
+        });
+
+        const overdueBilling = {
+            count: overdueBillingDocsSqlite.length,
+            total: overdueRegularTotalSqlite + overdueServiceFeeTotalSqlite,
+            gross_total: overdueGrossTotalSqlite
+        };
 
         const typeCounts = db.prepare(`
             SELECT type, status, COUNT(*) as count, COALESCE(SUM(grand_total), 0) as total

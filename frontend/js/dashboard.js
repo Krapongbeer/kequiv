@@ -52,6 +52,10 @@ window.dashboardModule = {
         const regularSalesVal = monthRegularSales !== undefined ? monthRegularSales : (monthRevenue - (serviceStats?.month_service_fee_revenue || 0));
         const grossBilledVal = monthGrossBilled !== undefined ? monthGrossBilled : monthRevenue;
 
+        const hasUnpaidServiceBills = unpaidBilling && (unpaidBilling.service_bills_count > 0 || (unpaidBilling.service_fee_total > 0));
+        const unpaidRegularVal = unpaidBilling.regular_total !== undefined ? unpaidBilling.regular_total : unpaidBilling.total;
+        const unpaidGrossVal = unpaidBilling.gross_total !== undefined ? unpaidBilling.gross_total : unpaidBilling.total;
+
         container.innerHTML = `
             <!-- Top Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 font-mono">
@@ -101,8 +105,30 @@ window.dashboardModule = {
                         ฿${app.formatCurrency(unpaidBilling.total)}
                     </div>
                     <p class="text-[11px] text-amber-900 mt-1">
-                        ค้าง ${unpaidBilling.count} บิล ${overdueBilling.count > 0 ? `<span class="text-rose-600 font-bold">(เลยกำหนด ${overdueBilling.count})</span>` : ''}
+                        ${hasUnpaidServiceBills ? 'เงินได้จริงรอรับ' : 'ยอดรอเรียกเก็บ'} (ค้าง ${unpaidBilling.count} บิล) ${overdueBilling.count > 0 ? `<span class="text-rose-600 font-bold">(เลยกำหนด ${overdueBilling.count})</span>` : ''}
                     </p>
+                    ${hasUnpaidServiceBills ? `
+                        <div class="mt-2 pt-2 border-t border-amber-200/60 space-y-1 text-[11px]">
+                            <div class="flex items-center justify-between text-slate-600">
+                                <span>📦 บิลขายปกติ:</span>
+                                <span class="font-bold text-slate-800">฿${app.formatCurrency(unpaidRegularVal)}</span>
+                            </div>
+                            <div class="flex items-center justify-between text-amber-900">
+                                <span class="font-medium flex items-center gap-1">
+                                    <span>🏢</span> ค่าบริการร้าน (${unpaidBilling.service_bills_count} บิล):
+                                </span>
+                                <span class="font-bold text-emerald-700">
+                                    +฿${app.formatCurrency(unpaidBilling.service_fee_total || 0)}
+                                </span>
+                            </div>
+                            ${unpaidGrossVal > unpaidBilling.total ? `
+                                <div class="flex items-center justify-between text-slate-400 text-[10px] pt-1 border-t border-dashed border-amber-200">
+                                    <span>(ยอดหน้าบิลรวมเรียกเก็บ):</span>
+                                    <span>฿${app.formatCurrency(unpaidGrossVal)}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
                 </div>
 
                 <!-- Customers & Projects -->

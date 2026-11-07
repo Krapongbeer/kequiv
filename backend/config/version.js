@@ -3,10 +3,18 @@
  */
 
 module.exports = {
-    version: '2.9.24',
+    version: '2.9.25',
     releaseDate: '2026-11-07',
-    codename: 'Multi-Click Debounce Protection & Cleaned Duplicate Quotations',
+    codename: 'Unpaid Billing Service Fee Breakdown & True Expected Income',
     changelog: [
+        {
+            version: '2.9.25',
+            date: '2026-11-07',
+            title: 'Unpaid Billing Service Fee Breakdown & True Expected Income',
+            features: [
+                'จำแนกรายได้จริงรอรับในการ์ดยอดรอเก็บเงิน (Unpaid Billing True Income Breakdown): ปรับการ์ด "ยอดรอเก็บเงิน" ให้แสดงยอดเงินได้จริงรอรับ (บิลขายปกติ + ค่าบริการร้านสุทธิ) และแจกแจงรายการย่อยเหมือนกับการ์ด "รายได้จริงเดือนนี้" (บิลขายปกติ, ค่าบริการร้านกี่บิล, และยอดหน้าบิลรวมเรียกเก็บ) ให้สอดคล้องกันอย่างสมบูรณ์แบบ'
+            ]
+        },
         {
             version: '2.9.24',
             date: '2026-11-07',
