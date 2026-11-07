@@ -176,10 +176,10 @@ window.printModule = {
             <!-- 2. Customer & Project Info Block (ภาษาไทยล้วน คลีน สบายตา ไม่รก) -->
             <div class="py-1.5 border-b-2 border-[#1f1d1a] font-mono avoid-page-break">
                 <div class="bg-[#faf6ee] px-3.5 py-2.5 rounded border border-stone-800 text-[11px]">
-                    <!-- Top Bar: ลูกค้า / ผู้ว่าจ้าง + เลขประจำตัวผู้เสียภาษี -->
+                    <!-- Top Bar: ลูกค้า + เลขประจำตัวผู้เสียภาษี -->
                     <div class="flex items-center justify-between pb-1 mb-1.5 border-b border-stone-300">
                         <span class="text-[9.5px] font-bold text-stone-700 font-typewriter">
-                            ลูกค้า / ผู้ว่าจ้าง
+                            ลูกค้า
                         </span>
                         ${(doc.project_tax_id || doc.customer_tax_id) ? `
                             <span class="text-[10px] text-stone-800 font-mono font-bold">
@@ -188,33 +188,30 @@ window.printModule = {
                         ` : ''}
                     </div>
 
-                    <!-- Project / Company Title (ชื่อลูกค้า ตรงแนวกับ ที่อยู่) -->
-                    <div class="flex items-start text-xs leading-snug">
-                        <span class="font-bold text-stone-800 shrink-0 w-[70px] pt-0.5">ชื่อลูกค้า:</span>
-                        <span class="font-bold text-stone-950 text-[12px] flex-1">
-                            ${escapeHtml(doc.project_name_custom || doc.project_name || doc.customer_name || '-')}
-                        </span>
+                    <!-- Project / Company Title (ขยับย่อหน้าเข้าไปหน่อย ตรงกับที่อยู่ 239 ...) -->
+                    <div class="font-bold text-stone-950 text-[12px] leading-snug pl-[48px]">
+                        ${escapeHtml(doc.project_name_custom || doc.project_name || doc.customer_name || '-')}
                     </div>
 
                     <!-- Customer / Contact Person (if distinct from project title) -->
                     ${((doc.project_name_custom || doc.project_name) && doc.customer_name && doc.customer_name !== (doc.project_name_custom || doc.project_name)) ? `
                         <div class="flex items-start text-[10.5px] mt-0.5">
-                            <span class="font-semibold text-stone-800 shrink-0 w-[70px]">ผู้ติดต่อ:</span>
+                            <span class="font-semibold text-stone-800 shrink-0 w-[48px]">ผู้ติดต่อ:</span>
                             <span class="text-stone-800 flex-1">${escapeHtml(doc.customer_name)}</span>
                         </div>
                     ` : ''}
 
-                    <!-- Address (ตรงแนวกับชื่อลูกค้า) -->
+                    <!-- Address (ตรงแนวกับการย่อหน้าของชื่อโครงการ) -->
                     ${(doc.project_site_address || doc.customer_address) ? `
                         <div class="flex items-start text-[10.5px] mt-1 leading-tight text-left">
-                            <span class="font-bold text-stone-800 shrink-0 w-[70px]">ที่อยู่:</span>
+                            <span class="font-bold text-stone-800 shrink-0 w-[48px]">ที่อยู่:</span>
                             <span class="text-stone-700 flex-1">${escapeHtml(doc.project_site_address || doc.customer_address)}</span>
                         </div>
                     ` : ''}
 
                     <!-- Contact details row (ติดซ้ายมือ) -->
                     ${(doc.project_contact_person || doc.customer_phone || doc.project_email || doc.customer_email) ? `
-                        <div class="flex flex-wrap items-center gap-x-5 gap-y-0.5 text-[10px] text-stone-600 mt-1 text-left">
+                        <div class="flex flex-wrap items-center gap-x-5 gap-y-0.5 text-[10px] text-stone-600 pt-1 mt-1 border-t border-stone-200 pl-[48px]">
                             ${(doc.project_contact_person || doc.customer_phone) ? `
                                 <div><span class="font-semibold text-stone-700">ผู้ประสานงาน / โทร:</span> <b>${escapeHtml(doc.project_contact_person || doc.customer_phone)}</b></div>
                             ` : ''}

@@ -3,10 +3,18 @@
  */
 
 module.exports = {
-    version: '2.9.35',
+    version: '2.9.36',
     releaseDate: '2026-11-08',
-    codename: 'Aligned Customer Label & Indented Name',
+    codename: 'Streamlined Customer Header & Indented Project Title',
     changelog: [
+        {
+            version: '2.9.36',
+            date: '2026-11-08',
+            title: 'Streamlined Customer Header & Indented Project Title',
+            features: [
+                'ปรับหัวกล่องเป็นคำว่า "ลูกค้า" สั้นกระชับ และขยับย่อหน้าชื่อโครงการให้เยื้องเข้าไปตรงกับข้อความที่อยู่ด้านล่างอย่างพอดี'
+            ]
+        },
         {
             version: '2.9.35',
             date: '2026-11-08',
