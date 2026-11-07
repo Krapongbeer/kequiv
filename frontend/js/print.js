@@ -173,46 +173,54 @@ window.printModule = {
                 </div>
             </div>
 
-            <!-- 2. Balanced & Compact Customer & Project Block -->
-            <div class="grid grid-cols-2 gap-2.5 py-1.5 border-b-2 border-[#1f1d1a] font-mono avoid-page-break">
-                <!-- Customer Box -->
-                <div class="bg-[#faf6ee] px-2.5 py-1.5 rounded border border-stone-800 text-[10.5px]">
-                    <div class="flex items-center justify-between mb-1 pb-0.5 border-b border-stone-300">
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-stone-600 font-typewriter">ลูกค้า / CUSTOMER</span>
-                        ${doc.customer_tax_id ? `<span class="text-[9.5px] text-stone-700 font-mono font-bold">Tax: ${escapeHtml(doc.customer_tax_id)}</span>` : ''}
-                    </div>
-                    <div class="font-bold text-stone-900 text-[11px] leading-snug">${escapeHtml(doc.customer_name) || '-'}</div>
-                    <div class="text-[10px] text-stone-600 mt-0.5 leading-tight whitespace-pre-line">${doc.customer_address ? doc.customer_address.split('\n').map(l => escapeHtml(l.trim())).filter(Boolean).join('\n') : '-'}</div>
-                    <div class="text-[10px] text-stone-600 mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono">
-                        ${doc.customer_phone ? `<div>โทร: <b>${escapeHtml(doc.customer_phone)}</b></div>` : ''}
-                        ${doc.customer_email ? `<div class="break-all">อีเมล: <b>${escapeHtml(doc.customer_email)}</b></div>` : ''}
-                    </div>
-                </div>
-
-                <!-- Project / Site Box -->
-                <div class="bg-[#faf6ee] px-2.5 py-1.5 rounded border border-stone-800 text-[10.5px]">
-                    <div class="flex items-center justify-between mb-1 pb-0.5 border-b border-stone-300">
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-stone-600 font-typewriter">
-                            โครงการ / หัวบิล (PROJECT & SITE)
+            <!-- 2. ข้อมูลโครงการ (Single Unified Project Block) -->
+            <div class="py-1.5 border-b-2 border-[#1f1d1a] font-mono avoid-page-break">
+                <div class="bg-[#faf6ee] px-3 py-2 rounded border border-stone-800 text-[11px]">
+                    <div class="flex items-center justify-between mb-1.5 pb-1 border-b border-stone-300">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-stone-700 font-typewriter flex items-center gap-1.5">
+                            <span>📌</span> ข้อมูลโครงการ
                         </span>
+                        ${doc.customer_tax_id ? `<span class="text-[10px] text-stone-700 font-mono font-bold">Tax: ${escapeHtml(doc.customer_tax_id)}</span>` : ''}
                     </div>
-                    ${(doc.project_name_custom || doc.project_name) ? `
-                        <div class="font-bold text-indigo-950 text-[11px] leading-snug">
-                            ${escapeHtml(doc.project_name_custom || doc.project_name)}
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                        <div>
+                            ${(doc.project_name_custom || doc.project_name) ? `
+                                <div class="font-bold text-indigo-950 text-[12px] leading-snug">
+                                    ${escapeHtml(doc.project_name_custom || doc.project_name)}
+                                </div>
+                                ${doc.customer_name ? `
+                                    <div class="text-[10.5px] text-stone-700 mt-0.5">
+                                        ลูกค้า/ผู้ว่าจ้าง: <strong>${escapeHtml(doc.customer_name)}</strong>
+                                    </div>
+                                ` : ''}
+                            ` : `
+                                <div class="font-bold text-stone-900 text-[12px] leading-snug">
+                                    ${escapeHtml(doc.customer_name) || '-'}
+                                </div>
+                            `}
+
+                            ${doc.project_contact_person ? `
+                                <div class="text-[10px] text-stone-600 mt-0.5">
+                                    ผู้ประสานงาน: <b>${escapeHtml(doc.project_contact_person)}</b>
+                                </div>
+                            ` : (doc.customer_phone ? `
+                                <div class="text-[10px] text-stone-600 mt-0.5">
+                                    โทร: <b>${escapeHtml(doc.customer_phone)}</b>
+                                </div>
+                            ` : '')}
                         </div>
-                        ${doc.project_site_address ? `
-                            <div class="text-[10px] text-stone-600 mt-0.5 leading-tight whitespace-pre-line">
-                                ${doc.project_site_address.split('\n').map(l => escapeHtml(l.trim())).filter(Boolean).join('\n')}
-                            </div>
-                        ` : ''}
-                        ${doc.project_contact_person ? `
-                            <div class="text-[10px] text-stone-600 mt-1 font-mono">
-                                ผู้ประสานงาน: <b>${escapeHtml(doc.project_contact_person)}</b>
-                            </div>
-                        ` : ''}
-                    ` : `
-                        <div class="min-h-[42px]">&nbsp;</div>
-                    `}
+
+                        <div class="text-[10px] text-stone-600 space-y-0.5">
+                            ${doc.project_site_address ? `
+                                <div><span class="font-bold text-stone-700">สถานที่ปฏิบัติงาน/ส่งของ:</span> ${escapeHtml(doc.project_site_address)}</div>
+                            ` : ''}
+                            ${doc.customer_address ? `
+                                <div class="leading-tight"><span class="font-bold text-stone-700">ที่อยู่:</span> ${escapeHtml(doc.customer_address)}</div>
+                            ` : ''}
+                            ${doc.customer_email ? `<div>อีเมล: ${escapeHtml(doc.customer_email)}</div>` : ''}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -363,14 +371,17 @@ window.printModule = {
                     ${bankAccounts.length > 0 ? `
                         <div class="py-1.5 px-2 bg-[#faf6ee] rounded border border-stone-400 text-[11px] space-y-1">
                             <div class="font-bold text-stone-800 flex items-center gap-1 font-typewriter">
-                                <span>💳</span> ข้อมูลบัญชีสำหรับโอนเงิน:
+                                <span>💳</span> ช่องทางการชำระเงิน:
                             </div>
                             <div class="grid grid-cols-1 gap-0.5">
                                 ${bankAccounts.map(b => `
-                                    <div class="flex items-center justify-between bg-white px-2 py-0.5 rounded border border-stone-200">
-                                        <span class="font-medium text-stone-800">${b.bank}</span>
-                                        <span class="font-bold text-blue-900 font-mono">${b.account_no}</span>
-                                        <span class="text-stone-500 text-[10px]">(${b.account_name})</span>
+                                    <div class="flex items-start gap-1.5 bg-white px-2 py-1 rounded border border-stone-200">
+                                        ${b.type ? `<span class="shrink-0 text-[9px] font-bold bg-stone-100 text-stone-700 border border-stone-300 px-1.5 py-0.5 rounded whitespace-nowrap">${escapeHtml(b.type)}</span>` : ''}
+                                        <div class="flex-1 min-w-0">
+                                            ${b.bank ? `<span class="font-medium text-stone-800">${escapeHtml(b.bank)}</span>` : ''}
+                                            ${b.account_no ? `<span class="font-bold text-blue-900 font-mono ml-1.5">${escapeHtml(b.account_no)}</span>` : ''}
+                                            ${b.account_name ? `<span class="text-stone-500 text-[10px] ml-1">(${escapeHtml(b.account_name)})</span>` : ''}
+                                        </div>
                                     </div>
                                 `).join('')}
                             </div>

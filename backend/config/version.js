@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.28',
+    version: '2.9.29',
     releaseDate: '2026-11-07',
-    codename: 'Manual Payment Marking on Receipt (RE) & Dual Status Synchronization',
+    codename: 'Multi-Channel Payment Methods & Bill Form Project Restructure',
     changelog: [
+        {
+            version: '2.9.29',
+            date: '2026-11-07',
+            title: 'Multi-Channel Payment Methods & Bill Form Project Restructure',
+            features: [
+                'รองรับช่องทางการชำระเงินหลายประเภท: เปลี่ยนส่วน "บัญชีธนาคาร" เป็น "ช่องทางการชำระเงิน" รองรับ โอนเงิน (ธนาคาร), พร้อมเพย์, บัตรเครดิต/เดบิต, เงินสด, PromptPay (QR Code), และอื่นๆ ระบุได้หลายช่องทาง',
+                'ปรับปรุงบิลพิมพ์: เปลี่ยนหัวข้อ "ข้อมูลบัญชีสำหรับโอนเงิน" เป็น "ช่องทางการชำระเงิน" และแสดงป้ายประเภทช่องทางชำระเงินในบิลอย่างชัดเจน',
+                'ปรับโครงสร้างฟอร์มสร้างบิล: เปลี่ยนชื่อส่วนโครงการเป็น "ข้อมูลโครงการ" และเพิ่มปุ่มลัด "+ เพิ่มโครงการ" ติดข้างชื่อส่วน โดยปุ่มจะแสดงก็ต่อเมื่อเลือกลูกค้าแล้ว'
+            ]
+        },
         {
             version: '2.9.28',
             date: '2026-11-07',

@@ -259,6 +259,18 @@ window.customersModule = {
 
     // --- Customer Projects Management ---
     async openProjectsModal(customerId) {
+        if (!customerId) {
+            const selectEl = document.getElementById('doc-customer-select');
+            if (selectEl && selectEl.value) {
+                customerId = selectEl.value;
+            }
+        }
+        if (!customerId) {
+            app.toast('กรุณาเลือกลูกค้าก่อน หรือกด "+ เพิ่มลูกค้าใหม่"', 'info');
+            this.openCustomerModal();
+            return;
+        }
+
         this.selectedCustomerId = customerId;
         const container = document.getElementById('projects-list-container');
         if (!container) return;

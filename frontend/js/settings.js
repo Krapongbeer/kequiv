@@ -99,11 +99,11 @@ window.settingsModule = {
                     <div class="pt-4 border-t border-slate-200">
                         <div class="flex items-center justify-between mb-3">
                             <div>
-                                <h3 class="text-sm font-bold text-slate-900 font-typewriter">บัญชีธนาคารสำหรับรับโอนเงิน</h3>
-                                <p class="text-xs text-slate-500">จะพิมพ์ลงท้ายใบแจ้งหนี้และใบเสร็จรับเงิน</p>
+                                <h3 class="text-sm font-bold text-slate-900 font-typewriter">ช่องทางการชำระเงิน</h3>
+                                <p class="text-xs text-slate-500">จะแสดงในบิลทุกประเภท ระบุได้หลายช่องทาง</p>
                             </div>
                             <button type="button" onclick="window.settingsModule.addBankRow()" class="btn-paper text-xs py-1.5 px-3">
-                                + เพิ่มบัญชีธนาคาร
+                                + เพิ่มช่องทางชำระเงิน
                             </button>
                         </div>
 
@@ -190,32 +190,41 @@ window.settingsModule = {
         if (!container) return;
 
         if (this.bankAccounts.length === 0) {
-            container.innerHTML = '<div class="text-xs text-slate-400 italic border border-dashed border-slate-200 rounded-lg p-3">ยังไม่ได้ระบุบัญชีธนาคาร (คลิกปุ่ม "+ เพิ่มบัญชีธนาคาร" ด้านบน)</div>';
+            container.innerHTML = '<div class="text-xs text-slate-400 italic border border-dashed border-slate-200 rounded-lg p-3">ยังไม่ได้ระบุช่องทางการชำระเงิน (คลิกปุ่ม "+ เพิ่มช่องทางชำระเงิน" ด้านบน)</div>';
             return;
         }
 
+        const typeOptions = ['โอนเงิน (ธนาคาร)', 'พร้อมเพย์', 'บัตรเครดิต/เดบิต', 'เงินสด', 'PromptPay (QR Code)', 'อื่นๆ'];
+
         container.innerHTML = this.bankAccounts.map((b, idx) => `
-            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg grid grid-cols-1 md:grid-cols-3 gap-3 items-center text-xs">
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg grid grid-cols-1 md:grid-cols-4 gap-3 items-center text-xs">
                 <div>
-                    <label class="block text-[10px] text-slate-500 mb-0.5">ชื่อธนาคาร / สาขา</label>
-                    <input type="text" value="${b.bank || ''}" placeholder="เช่น กสิกรไทย, ไทยพาณิชย์" 
+                    <label class="block text-[10px] text-slate-500 mb-0.5">ประเภท</label>
+                    <select class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white"
+                        onchange="window.settingsModule.updateBankField(${idx}, 'type', this.value)">
+                        ${typeOptions.map(opt => `<option value="${opt}" ${(b.type || 'โอนเงิน (ธนาคาร)') === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-500 mb-0.5">ชื่อธนาคาร / รายละเอียด</label>
+                    <input type="text" value="${b.bank || ''}" placeholder="เช่น กสิกรไทย, ไทยพาณิชย์"
                         class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white"
                         oninput="window.settingsModule.updateBankField(${idx}, 'bank', this.value)">
                 </div>
                 <div>
-                    <label class="block text-[10px] text-slate-500 mb-0.5">เลขที่บัญชี</label>
-                    <input type="text" value="${b.account_no || ''}" placeholder="เช่น 123-4-56789-0" 
+                    <label class="block text-[10px] text-slate-500 mb-0.5">เลขที่บัญชี / หมายเลข</label>
+                    <input type="text" value="${b.account_no || ''}" placeholder="เช่น 123-4-56789-0"
                         class="w-full px-2.5 py-1.5 text-xs font-mono font-bold border border-slate-300 rounded-lg bg-white"
                         oninput="window.settingsModule.updateBankField(${idx}, 'account_no', this.value)">
                 </div>
                 <div class="flex items-center gap-2">
                     <div class="flex-1">
-                        <label class="block text-[10px] text-slate-500 mb-0.5">ชื่อบัญชี</label>
-                        <input type="text" value="${b.account_name || ''}" placeholder="ชื่อเจ้าของบัญชี" 
+                        <label class="block text-[10px] text-slate-500 mb-0.5">ชื่อบัญชี / เจ้าของ</label>
+                        <input type="text" value="${b.account_name || ''}" placeholder="ชื่อเจ้าของบัญชี"
                             class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white"
                             oninput="window.settingsModule.updateBankField(${idx}, 'account_name', this.value)">
                     </div>
-                    <button type="button" onclick="window.settingsModule.removeBankRow(${idx})" class="btn-paper text-[10px] mt-4 py-1.5 px-2 text-rose-700 border-rose-300 hover:bg-rose-50" title="ลบบัญชีนี้">
+                    <button type="button" onclick="window.settingsModule.removeBankRow(${idx})" class="btn-paper text-[10px] mt-4 py-1.5 px-2 text-rose-700 border-rose-300 hover:bg-rose-50" title="ลบช่องทางนี้">
                         ✕
                     </button>
                 </div>
@@ -224,7 +233,7 @@ window.settingsModule = {
     },
 
     addBankRow() {
-        this.bankAccounts.push({ bank: '', account_no: '', account_name: '' });
+        this.bankAccounts.push({ type: 'โอนเงิน (ธนาคาร)', bank: '', account_no: '', account_name: '' });
         this.renderBankAccounts();
     },
 
@@ -254,7 +263,7 @@ window.settingsModule = {
             year_format: form.year_format.value,
             default_terms: form.default_terms.value.trim(),
             default_remark: form.default_remark.value.trim(),
-            bank_accounts: this.bankAccounts.filter(b => b.bank && b.account_no)
+            bank_accounts: this.bankAccounts.filter(b => b.type || b.bank || b.account_no)
         };
 
         try {
