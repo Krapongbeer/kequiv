@@ -3,10 +3,18 @@
  */
 
 module.exports = {
-    version: '2.9.33',
+    version: '2.9.34',
     releaseDate: '2026-11-08',
-    codename: 'Bilingual Professional Bill Layout & Enhanced Modal Usability',
+    codename: 'Clean Thai-Only Bill Typography',
     changelog: [
+        {
+            version: '2.9.34',
+            date: '2026-11-08',
+            title: 'Clean Thai-Only Bill Typography',
+            features: [
+                'ปรับหัวบิลเป็นภาษาไทยล้วน สะอาดตา ไม่รก (Pure Thai Bill Layout): ตัดภาษาอังกฤษที่ซ้ำซ้อนออกทั้งหมด แสดงชื่อโครงการเด่นชัด ที่อยู่ และข้อมูลผู้ติดต่อด้วยข้อความภาษาไทยกระชับ อ่านง่าย สบายตา'
+            ]
+        },
         {
             version: '2.9.33',
             date: '2026-11-08',
