@@ -3,10 +3,18 @@
  */
 
 module.exports = {
-    version: '2.9.36',
+    version: '2.9.37',
     releaseDate: '2026-11-08',
-    codename: 'Streamlined Customer Header & Indented Project Title',
+    codename: 'Custom Customer Header & Compact Indentation',
     changelog: [
+        {
+            version: '2.9.37',
+            date: '2026-11-08',
+            title: 'Custom Customer Header & Compact Indentation',
+            features: [
+                'ปรับหัวกล่องเป็นคำว่า "นามลูกค้า" และลดระยะเว้นวรรคย่อหน้าชื่อโครงการกับที่อยู่ให้กระชับ ชิดสวยงาม พอดีตา'
+            ]
+        },
         {
             version: '2.9.36',
             date: '2026-11-08',
