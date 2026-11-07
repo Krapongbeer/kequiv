@@ -48,13 +48,15 @@ window.dashboardModule = {
             serviceStats
         } = data;
 
-        const hasServiceBills = serviceStats && (serviceStats.service_bills_count > 0 || (serviceStats.month_service_fee_revenue > 0));
+        const monthServiceCount = serviceStats?.month_service_bills_count !== undefined ? serviceStats.month_service_bills_count : (serviceStats?.month_service_fee_revenue > 0 ? 1 : 0);
+        const monthRegularCount = serviceStats?.month_regular_bills_count !== undefined ? serviceStats.month_regular_bills_count : (monthRevenue > 0 ? 1 : 0);
+        const hasServiceBills = serviceStats && (monthServiceCount > 0 || (serviceStats.month_service_fee_revenue > 0));
         const regularSalesVal = monthRegularSales !== undefined ? monthRegularSales : (monthRevenue - (serviceStats?.month_service_fee_revenue || 0));
         const grossBilledVal = monthGrossBilled !== undefined ? monthGrossBilled : monthRevenue;
 
         const hasUnpaidServiceBills = unpaidBilling && (unpaidBilling.service_bills_count > 0 || (unpaidBilling.service_fee_total > 0));
         const unpaidRegularVal = unpaidBilling.regular_total !== undefined ? unpaidBilling.regular_total : unpaidBilling.total;
-        const unpaidGrossVal = unpaidBilling.gross_total !== undefined ? unpaidBilling.gross_total : unpaidBilling.total;
+        const unpaidGrossVal = unpaidBilling.gross_total !== undefined ? unpaidGrossVal : unpaidBilling.total;
 
         container.innerHTML = `
             <!-- Top Summary Cards -->
@@ -69,17 +71,17 @@ window.dashboardModule = {
                         ฿${app.formatCurrency(monthRevenue)}
                     </div>
                     <p class="text-[11px] text-slate-500 mt-1">
-                        ${hasServiceBills ? 'เงินได้จริง (บิลขายปกติ + ค่าบริการร้าน)' : 'คำนวณจากใบเสร็จและบิลขายจริง (ไม่นับซ้ำ)'}
+                        ${hasServiceBills ? `เงินได้จริง (บิลปกติ ${monthRegularCount} บิล + ค่าบริการร้าน ${monthServiceCount} บิล)` : 'คำนวณจากใบเสร็จและบิลขายจริง (ไม่นับซ้ำ)'}
                     </p>
                     ${hasServiceBills ? `
                         <div class="mt-2 pt-2 border-t border-slate-100 space-y-1 text-[11px]">
                             <div class="flex items-center justify-between text-slate-600">
-                                <span>📦 บิลขายปกติ:</span>
+                                <span>📦 บิลขายปกติ (${monthRegularCount} บิล):</span>
                                 <span class="font-bold text-slate-800">฿${app.formatCurrency(regularSalesVal)}</span>
                             </div>
                             <div class="flex items-center justify-between text-amber-900">
                                 <span class="font-medium flex items-center gap-1">
-                                    <span>🏢</span> ค่าบริการร้าน (${serviceStats.service_bills_count} บิล):
+                                    <span>🏢</span> ค่าบริการร้าน (${monthServiceCount} บิลในเดือนนี้):
                                 </span>
                                 <span class="font-bold text-emerald-700">
                                     +฿${app.formatCurrency(serviceStats.month_service_fee_revenue)}
@@ -89,6 +91,20 @@ window.dashboardModule = {
                                 <div class="flex items-center justify-between text-slate-400 text-[10px] pt-1 border-t border-dashed border-slate-200">
                                     <span>(ยอดหน้าบิลรวมทั้งหมด):</span>
                                     <span>฿${app.formatCurrency(grossBilledVal)}</span>
+                                </div>
+                            ` : ''}
+
+                            ${serviceStats.month_docs && serviceStats.month_docs.length > 0 ? `
+                                <div class="pt-2 border-t border-slate-100 text-[10px] space-y-1">
+                                    <span class="font-bold text-slate-700 block">รายละเอียดบิลเดือนนี้:</span>
+                                    ${serviceStats.month_docs.map(doc => `
+                                        <div class="flex items-center justify-between font-mono bg-slate-50 px-2 py-1 rounded border border-slate-200/60">
+                                            <span class="text-slate-800 font-bold">${doc.code} <span class="font-normal text-slate-500">(${doc.is_service_bill ? `บริการ ${doc.service_fee_percent}%` : 'บิลปกติ'})</span></span>
+                                            <span class="font-bold ${doc.is_service_bill ? 'text-emerald-700' : 'text-slate-800'}">
+                                                ${doc.is_service_bill ? `+฿${app.formatCurrency(doc.service_fee_amount)}` : `฿${app.formatCurrency(doc.grand_total)}`}
+                                            </span>
+                                        </div>
+                                    `).join('')}
                                 </div>
                             ` : ''}
                         </div>
@@ -302,6 +318,52 @@ window.dashboardModule = {
                     </div>
                 </div>
             </div>
+
+            <!-- Service Bills Accounting Section (All-Time Audit Table) -->
+            ${serviceStats?.all_time_service_docs && serviceStats.all_time_service_docs.length > 0 ? `
+                <div class="mt-6 typewriter-card rounded-xl p-5 bg-white border-amber-200 font-mono">
+                    <div class="flex flex-wrap items-center justify-between pb-3 border-b border-amber-100 gap-2 mb-3">
+                        <div>
+                            <h3 class="font-bold text-amber-950 font-typewriter text-sm flex items-center gap-1.5">
+                                <span>🏢</span> รายงานบัญชีบิลที่ร้านให้บริการ (คิดเปอร์เซ็นต์สะสมทั้งหมด)
+                            </h3>
+                            <p class="text-[11px] text-slate-500 mt-0.5">รวมทั้งระบบ ${serviceStats.all_time_service_bills_count} บิล | รวมรายได้ค่าบริการร้านสะสม: <b class="text-emerald-700">฿${app.formatCurrency(serviceStats.total_service_fee_revenue)}</b></p>
+                        </div>
+                        <span class="text-xs bg-amber-100 text-amber-900 border border-amber-300 font-bold px-2.5 py-1 rounded-lg">
+                            ค่าบริการสะสมทุกเดือน: +฿${app.formatCurrency(serviceStats.total_service_fee_revenue)}
+                        </span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left border-collapse min-w-[650px]">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-slate-700 font-bold bg-amber-50/50">
+                                    <th class="py-2 px-3">วันที่</th>
+                                    <th class="py-2 px-3">เลขที่เอกสาร</th>
+                                    <th class="py-2 px-3">ลูกค้า</th>
+                                    <th class="py-2 px-3 text-right">ยอดหน้าบิลเต็ม</th>
+                                    <th class="py-2 px-3 text-center">% ค่าบริการ</th>
+                                    <th class="py-2 px-3 text-right text-emerald-800">ค่าบริการร้าน (เงินได้)</th>
+                                    <th class="py-2 px-3 text-right text-slate-500">เงินส่งต่อผู้ร่วมงาน</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                ${serviceStats.all_time_service_docs.map(doc => `
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="py-2 px-3 text-slate-600 whitespace-nowrap">${app.formatDateThai(doc.issue_date)}</td>
+                                        <td class="py-2 px-3 font-bold text-slate-900">${doc.code}</td>
+                                        <td class="py-2 px-3 text-slate-700 truncate max-w-[150px]">${doc.customer_name || '-'}</td>
+                                        <td class="py-2 px-3 text-right font-bold text-slate-800">฿${app.formatCurrency(doc.grand_total)}</td>
+                                        <td class="py-2 px-3 text-center font-bold text-amber-800">${doc.service_fee_percent}%</td>
+                                        <td class="py-2 px-3 text-right font-bold text-emerald-700">+฿${app.formatCurrency(doc.service_fee_amount)}</td>
+                                        <td class="py-2 px-3 text-right text-slate-500">฿${app.formatCurrency(doc.partner_payout_amount)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ` : ''}
         `;
     }
 };

@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.25',
+    version: '2.9.26',
     releaseDate: '2026-11-07',
-    codename: 'Unpaid Billing Service Fee Breakdown & True Expected Income',
+    codename: 'Detailed Service Fee Audit Breakdown & Transparent Revenue Itemization',
     changelog: [
+        {
+            version: '2.9.26',
+            date: '2026-11-07',
+            title: 'Detailed Service Fee Audit Breakdown & Transparent Revenue Itemization',
+            features: [
+                'แจกแจงที่มาของยอดค่าบริการเดือนนี้อย่างละเอียด (Monthly Revenue Itemization): ปรับตัวเลขจำนวนบิลค่าบริการของการ์ดรายได้จริงเดือนนี้ให้แสดงจำนวนบิลของเดือนนี้โดยเฉพาะ (1 บิล: INV202611-018 ค่าบริการ 20% = ฿2,600.00) แยกขาดจากจำนวนบิลสะสมทั้งระบบอย่างชัดเจน',
+                'แสดงที่มาของยอดบิลเดือนนี้ใต้การ์ด: ระบุรหัสบิลและยอดเงินของแต่ละบิลที่คำนวณเป็นรายได้จริงของเดือนนี้อย่างโปร่งใส (RE202611-001 ฿45,000 และ INV202611-018 ค่าบริการ +฿2,600)',
+                'เพิ่มตารางรายงานบัญชีบิลบริการสะสมทั้งหมด (All-Time Service Bills Audit Table): สรุปบิลที่ร้านให้บริการทั้งหมด 4 บิล ยอดค่าบริการสะสมรวม ฿8,960.00 พร้อมรายละเอียด วันที่ ลูกค้า ยอดหน้าบิล ค่าบริการร้าน และเงินส่งต่อผู้ร่วมงาน ครบถ้วน 100%'
+            ]
+        },
         {
             version: '2.9.25',
             date: '2026-11-07',

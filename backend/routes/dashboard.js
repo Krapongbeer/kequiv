@@ -39,24 +39,65 @@ router.get('/', async (req, res) => {
             let monthServiceFee = 0;
             let monthGrossBilled = 0;
             let monthRegularSales = 0;
+            let monthServiceBillsCount = 0;
+            let monthRegularBillsCount = 0;
             let serviceBillsCount = 0;
             let regularBillsCount = 0;
+            const monthDocs = [];
+            const allTimeServiceDocs = [];
 
             salesDocs.forEach(d => {
                 extractServiceBillInfo(d);
                 const isThisMonth = d.issue_date && d.issue_date >= thisMonthStart;
+
                 if (d.is_service_bill) {
                     serviceBillsCount++;
                     totalServiceFee += Number(d.service_fee_amount || 0);
+                    allTimeServiceDocs.push({
+                        id: d.id,
+                        code: d.code,
+                        type: d.type,
+                        issue_date: d.issue_date,
+                        grand_total: Number(d.grand_total || 0),
+                        service_fee_percent: d.service_fee_percent || 0,
+                        service_fee_amount: Number(d.service_fee_amount || 0),
+                        partner_payout_amount: Number(d.partner_payout_amount || 0),
+                        customer_name: d.customer ? d.customer.name : '-'
+                    });
+
                     if (isThisMonth) {
+                        monthServiceBillsCount++;
                         monthGrossBilled += Number(d.grand_total || 0);
                         monthServiceFee += Number(d.service_fee_amount || 0);
+                        monthDocs.push({
+                            id: d.id,
+                            code: d.code,
+                            type: d.type,
+                            issue_date: d.issue_date,
+                            grand_total: Number(d.grand_total || 0),
+                            is_service_bill: true,
+                            service_fee_percent: d.service_fee_percent || 0,
+                            service_fee_amount: Number(d.service_fee_amount || 0),
+                            customer_name: d.customer ? d.customer.name : '-'
+                        });
                     }
                 } else {
                     regularBillsCount++;
                     if (isThisMonth) {
+                        monthRegularBillsCount++;
                         monthGrossBilled += Number(d.grand_total || 0);
                         monthRegularSales += Number(d.grand_total || 0);
+                        monthDocs.push({
+                            id: d.id,
+                            code: d.code,
+                            type: d.type,
+                            issue_date: d.issue_date,
+                            grand_total: Number(d.grand_total || 0),
+                            is_service_bill: false,
+                            service_fee_percent: 0,
+                            service_fee_amount: 0,
+                            customer_name: d.customer ? d.customer.name : '-'
+                        });
                     }
                 }
             });
@@ -66,11 +107,15 @@ router.get('/', async (req, res) => {
 
             const serviceStats = {
                 total_service_fee_revenue: totalServiceFee,
+                all_time_service_bills_count: serviceBillsCount,
+                all_time_regular_bills_count: regularBillsCount,
+                all_time_service_docs: allTimeServiceDocs,
                 month_service_fee_revenue: monthServiceFee,
-                month_gross_billed: monthGrossBilled,
+                month_service_bills_count: monthServiceBillsCount,
                 month_regular_sales: monthRegularSales,
-                service_bills_count: serviceBillsCount,
-                regular_bills_count: regularBillsCount
+                month_regular_bills_count: monthRegularBillsCount,
+                month_gross_billed: monthGrossBilled,
+                month_docs: monthDocs
             };
 
             // Unpaid billing (only open billing notes that have NOT been paid or converted to a receipt)
@@ -346,8 +391,12 @@ router.get('/', async (req, res) => {
         let monthServiceFee = 0;
         let monthGrossBilled = 0;
         let monthRegularSales = 0;
+        let monthServiceBillsCount = 0;
+        let monthRegularBillsCount = 0;
         let serviceBillsCount = 0;
         let regularBillsCount = 0;
+        const monthDocsSqlite = [];
+        const allTimeServiceDocsSqlite = [];
 
         allSqliteDocs.forEach(d => {
             extractServiceBillInfo(d);
@@ -355,15 +404,47 @@ router.get('/', async (req, res) => {
             if (d.is_service_bill) {
                 serviceBillsCount++;
                 totalServiceFee += Number(d.service_fee_amount || 0);
+                allTimeServiceDocsSqlite.push({
+                    id: d.id,
+                    code: d.code,
+                    type: d.type,
+                    issue_date: d.issue_date,
+                    grand_total: Number(d.grand_total || 0),
+                    service_fee_percent: d.service_fee_percent || 0,
+                    service_fee_amount: Number(d.service_fee_amount || 0),
+                    partner_payout_amount: Number(d.partner_payout_amount || 0)
+                });
                 if (isThisMonth) {
+                    monthServiceBillsCount++;
                     monthGrossBilled += Number(d.grand_total || 0);
                     monthServiceFee += Number(d.service_fee_amount || 0);
+                    monthDocsSqlite.push({
+                        id: d.id,
+                        code: d.code,
+                        type: d.type,
+                        issue_date: d.issue_date,
+                        grand_total: Number(d.grand_total || 0),
+                        is_service_bill: true,
+                        service_fee_percent: d.service_fee_percent || 0,
+                        service_fee_amount: Number(d.service_fee_amount || 0)
+                    });
                 }
             } else {
                 regularBillsCount++;
                 if (isThisMonth) {
+                    monthRegularBillsCount++;
                     monthGrossBilled += Number(d.grand_total || 0);
                     monthRegularSales += Number(d.grand_total || 0);
+                    monthDocsSqlite.push({
+                        id: d.id,
+                        code: d.code,
+                        type: d.type,
+                        issue_date: d.issue_date,
+                        grand_total: Number(d.grand_total || 0),
+                        is_service_bill: false,
+                        service_fee_percent: 0,
+                        service_fee_amount: 0
+                    });
                 }
             }
         });
@@ -372,11 +453,15 @@ router.get('/', async (req, res) => {
 
         const serviceStats = {
             total_service_fee_revenue: totalServiceFee,
+            all_time_service_bills_count: serviceBillsCount,
+            all_time_regular_bills_count: regularBillsCount,
+            all_time_service_docs: allTimeServiceDocsSqlite,
             month_service_fee_revenue: monthServiceFee,
-            month_gross_billed: monthGrossBilled,
+            month_service_bills_count: monthServiceBillsCount,
             month_regular_sales: monthRegularSales,
-            service_bills_count: serviceBillsCount,
-            regular_bills_count: regularBillsCount
+            month_regular_bills_count: monthRegularBillsCount,
+            month_gross_billed: monthGrossBilled,
+            month_docs: monthDocsSqlite
         };
 
         res.json({
