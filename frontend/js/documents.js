@@ -1666,7 +1666,7 @@ window.documentsModule = {
         app.state.pendingConvertDoc = { id, currentType, code, issue_date: issueDate };
 
         const label = document.getElementById('modal-convert-source');
-        if (label) label.textContent = `${app.getDocTypeBadge(currentType)} เลขที่ ${code}`;
+        if (label) label.innerHTML = `${app.getDocTypeBadge(currentType)} <span class="font-bold text-slate-900 ml-1.5">${code}</span>`;
 
         const dateLabel = document.getElementById('modal-convert-source-date');
         if (dateLabel) {

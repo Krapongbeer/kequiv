@@ -3,10 +3,19 @@
  */
 
 module.exports = {
-    version: '2.9.22',
+    version: '2.9.23',
     releaseDate: '2026-11-07',
-    codename: 'Smart Document Conversion with Date Lock & Auto-Matching Reserved Codes',
+    codename: 'Fix Schema Cache & Convert Modal Badge Display',
     changelog: [
+        {
+            version: '2.9.23',
+            date: '2026-11-07',
+            title: 'Fix Schema Cache & Convert Modal Badge Display',
+            features: [
+                'แก้ไขข้อผิดพลาด Could not find is_service_bill column: ปรับแต่งการแปลงเอกสารใน Supabase ให้บันทึกข้อมูลผ่าน remark ตามมาตรฐานสถาปัตยกรรมระบบ ป้องกันปัญหา schema cache mismatch 100%',
+                'แสดงป้ายประเภทเอกสารในหน้าต่างแปลงบิลอย่างถูกต้อง: ปรับการแสดงผลป้ายต้นทางเป็น HTML ช่วยให้แสดงชื่อประเภทเอกสารและเลขที่บิลได้อย่างสวยงามและคมชัด'
+            ]
+        },
         {
             version: '2.9.22',
             date: '2026-11-07',

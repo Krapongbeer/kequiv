@@ -790,12 +790,7 @@ router.post('/:id/convert', async (req, res) => {
                     grand_total: sourceDoc.grand_total,
                     status: 'issued',
                     remark: combinedRemark,
-                    payment_terms: sourceDoc.payment_terms || '',
-                    is_service_bill: sourceDoc.is_service_bill || false,
-                    service_fee_percent: sourceDoc.service_fee_percent || null,
-                    service_fee_amount: sourceDoc.service_fee_amount || 0,
-                    partner_payout_amount: sourceDoc.partner_payout_amount || 0,
-                    partner_name: sourceDoc.partner_name || null
+                    payment_terms: sourceDoc.payment_terms || ''
                 })
                 .select()
                 .single();
