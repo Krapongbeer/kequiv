@@ -1522,6 +1522,8 @@ window.documentsModule = {
     },
 
     async submitDocument(statusOverride = null) {
+        if (this.isSubmitting) return;
+
         const form = document.getElementById('doc-create-form');
         if (!form) return;
 
@@ -1559,6 +1561,10 @@ window.documentsModule = {
             const futurePicker = document.getElementById('future-date-picker');
             if (futurePicker && futurePicker.value) {
                 form.issue_date.value = futurePicker.value;
+            }
+            const activeCode = this.futureCodesCache?.[type]?.code;
+            if (activeCode && activeCode !== '-') {
+                specified_code = activeCode;
             }
         }
 
@@ -1621,7 +1627,7 @@ window.documentsModule = {
         const editId = document.getElementById('doc-edit-id')?.value;
 
         const payload = {
-            code_mode: code_mode === 'future' ? 'auto' : code_mode,
+            code_mode: code_mode === 'future' ? (specified_code ? 'custom' : 'auto') : code_mode,
             specified_code,
             type,
             customer_id: parseInt(customer_id, 10),
@@ -1641,18 +1647,36 @@ window.documentsModule = {
             partner_name: partnerName
         };
 
+        this.isSubmitting = true;
+        const submitBtns = form.querySelectorAll('button[type="submit"], button[onclick*="submitDocument"]');
+        submitBtns.forEach(b => {
+            b.dataset.origText = b.innerHTML;
+            b.disabled = true;
+            b.classList.add('opacity-50', 'cursor-not-allowed');
+            b.innerHTML = '⏳ กำลังบันทึก...';
+        });
+
         try {
             if (editId) {
                 const res = await api.updateDocument(editId, payload);
                 app.toast(res.message, 'success');
+                this.loadList();
                 window.printModule.openPrint(editId);
             } else {
                 const res = await api.createDocument(payload);
                 app.toast(res.message, 'success');
+                this.loadList();
                 window.printModule.openPrint(res.data.id);
             }
         } catch (err) {
             app.toast(err.message, 'error');
+        } finally {
+            this.isSubmitting = false;
+            submitBtns.forEach(b => {
+                b.disabled = false;
+                b.classList.remove('opacity-50', 'cursor-not-allowed');
+                if (b.dataset.origText) b.innerHTML = b.dataset.origText;
+            });
         }
     },
 

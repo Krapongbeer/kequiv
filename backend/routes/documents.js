@@ -820,8 +820,7 @@ router.post('/:id/convert', async (req, res) => {
                     .from('document_reservations')
                     .update({
                         status: 'used',
-                        used_at: new Date().toISOString(),
-                        used_by_doc_id: newDoc.id
+                        used_at: new Date().toISOString()
                     })
                     .eq('code', newCode);
             }

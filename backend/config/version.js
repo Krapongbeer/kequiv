@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.23',
+    version: '2.9.24',
     releaseDate: '2026-11-07',
-    codename: 'Fix Schema Cache & Convert Modal Badge Display',
+    codename: 'Multi-Click Debounce Protection & Cleaned Duplicate Quotations',
     changelog: [
+        {
+            version: '2.9.24',
+            date: '2026-11-07',
+            title: 'Multi-Click Debounce Protection & Cleaned Duplicate Quotations',
+            features: [
+                'ระบบป้องกันการกดบันทึกซ้ำ (Submit Guard & Debounce Lock): ล็อกปุ่มบันทึกทันทีเมื่อกด และแสดง "กำลังบันทึก..." ป้องกันการยิงคำขอสร้างเอกสารซ้ำหลายฉบับในคราวเดียว 100%',
+                'เคลียร์เอกสารซ้ำเรียบร้อย: ลบ QT202610-003 และ QT202610-004 ที่ถูกบันทึกซ้ำออก คงเหลือเฉพาะ QT202610-001 ฉบับเดียวที่ตรงกับเลขที่กันไว้ (INV202610-001 และ RE202610-001)',
+                'รีเซ็ตสถานะเลขสำรอง INV202610-001: พร้อมสำหรับการกด "แปลง" เป็น INV และ RE ได้ทันที'
+            ]
+        },
         {
             version: '2.9.23',
             date: '2026-11-07',
