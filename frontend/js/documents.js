@@ -447,7 +447,7 @@ window.documentsModule = {
 
             const customers = (customersRes && customersRes.data) || [];
             const nextCodePreview = (nextCodeRes && nextCodeRes.data && nextCodeRes.data.code) || '';
-            const availableReservations = (reservationsRes && reservationsRes.data) || [];
+            const availableReservations = this.sortReservationsByDate((reservationsRes && reservationsRes.data) || []);
 
             // Initialize default items (3 empty item rows ready for quick entry)
             this.formData.items = [
@@ -571,11 +571,11 @@ window.documentsModule = {
 
                                     <!-- Container for Reserved Code Dropdown -->
                                     <div id="code-reserved-container" class="${useReservedCode ? '' : 'hidden'}">
-                                        <select id="reserved-code-select" class="w-full px-3 py-2 bg-purple-50 border border-purple-200 text-purple-950 font-mono font-bold text-sm rounded-lg focus:outline-none">
+                                        <select id="reserved-code-select" onchange="window.documentsModule.onReservedCodeSelected(this.value)" class="w-full px-3 py-2 bg-purple-50 border border-purple-200 text-purple-950 font-mono font-bold text-sm rounded-lg focus:outline-none">
                                             ${availableReservations.length === 0 ? `
                                                 <option value="">-- ไม่มีเลขสำรองในคลัง (ไปที่แท็บ 'คลังเลขสำรอง' เพื่อกดเพิ่มเลข) --</option>
                                             ` : availableReservations.map(r => `
-                                                <option value="${r.code}" ${useReservedCode === r.code ? 'selected' : ''}>
+                                                <option value="${r.code}" data-note="${app.escapeHtml ? app.escapeHtml(r.note || '') : (r.note || '')}" ${useReservedCode === r.code ? 'selected' : ''}>
                                                     ${r.code} ${r.note ? `— [${r.note}]` : ''}
                                                 </option>
                                             `).join('')}
@@ -1401,16 +1401,44 @@ window.documentsModule = {
 
             const resSelect = document.getElementById('reserved-code-select');
             if (resSelect) {
-                if (resRes.data.length === 0) {
+                const sorted = this.sortReservationsByDate(resRes.data || []);
+                if (sorted.length === 0) {
                     resSelect.innerHTML = '<option value="">-- ไม่มีเลขที่กันไว้สำหรับประเภทนี้ (ไปที่แท็บ "คลังเลขที่กันไว้" เพื่อกดกันเลข) --</option>';
                 } else {
-                    resSelect.innerHTML = resRes.data.map(r => `
-                        <option value="${r.code}">${r.code} ${r.note ? `— [${r.note}]` : ''}</option>
+                    resSelect.innerHTML = sorted.map(r => `
+                        <option value="${r.code}" data-note="${app.escapeHtml ? app.escapeHtml(r.note || '') : (r.note || '')}">
+                            ${r.code} ${r.note ? `— [${r.note}]` : ''}
+                        </option>
                     `).join('');
                 }
             }
         } catch (e) {
             console.error(e);
+        }
+    },
+
+    sortReservationsByDate(list) {
+        return (list || []).slice().sort((a, b) => {
+            const dateA = (a.note || '').match(/\[(\d{4}-\d{2}-\d{2})\]/)?.[1] || a.reserved_at || '';
+            const dateB = (b.note || '').match(/\[(\d{4}-\d{2}-\d{2})\]/)?.[1] || b.reserved_at || '';
+            if (dateA && dateB && dateA !== dateB) {
+                return dateA.localeCompare(dateB);
+            }
+            return (a.code || '').localeCompare(b.code || '');
+        });
+    },
+
+    onReservedCodeSelected(code) {
+        const select = document.getElementById('reserved-code-select');
+        const selectedOption = select?.options[select.selectedIndex];
+        const note = selectedOption?.getAttribute('data-note') || '';
+        const m = note.match(/\[(\d{4}-\d{2}-\d{2})\]/);
+        if (m && m[1]) {
+            const dateInput = document.getElementById('doc-issue-date');
+            if (dateInput) {
+                dateInput.value = m[1];
+                app.toast(`ปรับวันที่ออกบิลเป็น ${app.formatDateThai(m[1])} ตามโควตาเลขสำรอง`, 'info');
+            }
         }
     },
 

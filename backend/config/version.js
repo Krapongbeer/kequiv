@@ -3,10 +3,21 @@
  */
 
 module.exports = {
-    version: '2.9.19',
+    version: '2.9.20',
     releaseDate: '2026-11-07',
-    codename: 'Service Bill Accounting & Dynamic Fee Rate System (บิลที่ร้านให้บริการ)',
+    codename: 'Comprehensive Daily Auto-Buffer with Automatic Missed-Day Catchup & Chronological Sorting',
     changelog: [
+        {
+            version: '2.9.20',
+            date: '2026-11-07',
+            title: 'Comprehensive Daily Auto-Buffer with Automatic Missed-Day Catchup & Chronological Sorting',
+            features: [
+                'ระบบกันเลขสำรองประจำวันแบบตรวจจับวันตกหล่นอัตโนมัติ (Automatic Missed-Day Catchup): ระบบจะตรวจสอบย้อนหลังทุกวันในเดือน หากมีวันใดที่ไม่ได้เปิดระบบหรือไม่มีคนเข้า (เช่น วันที่ 6 หรือวันหยุด) ระบบจะออกเลขสำรองของวันนั้นๆ ครบทุกประเภท (QT, INV, RE) อัตโนมัติทันที',
+                'เติมเลขสำรองวันที่ 6 พ.ย. 2026 เรียบร้อย: ออกเลขสำรองย้อนหลังให้ครบทั้ง QT, INV และ RE ครบทั้ง 5 เลข',
+                'เรียงลำดับเลขสำรองตามวันและเวลาอย่างแม่นยำ (Chronological Ordering): ใน Dropdown ตัวเลือก "ใช้เลขสำรอง" เรียงตามวันที่ในวงเล็บ [YYYY-MM-DD] อย่างถูกต้อง (วันที่ 4 -> 5 -> 6 -> 7)',
+                'อัปเดตวันที่ออกบิลอัตโนมัติตามเลขสำรองที่เลือก: เมื่อเลือกเลขสำรองของวันที่ใด ระบบจะปรับช่อง "วันที่ออกเอกสาร" เป็นวันที่ของเลขนั้นทันทีเพื่อความสะดวกในการออกบิลย้อนหลัง'
+            ]
+        },
         {
             version: '2.9.19',
             date: '2026-11-07',

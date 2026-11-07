@@ -4,11 +4,31 @@ const db = require('../db');
 const { reserveBatchNumbers } = require('../utils/docNumber');
 const { reserveBatchNumbersSupabase } = require('../utils/docNumberSupabase');
 const { supabase, isSupabaseConfigured } = require('../supabase');
+const { ensureDailyBuffer } = require('../services/autoBuffer');
+
+// Helper to sort reservations chronologically by date tag in note, then code
+function sortReservationsByNoteDate(list) {
+    return (list || []).sort((a, b) => {
+        const dateA = (a.note || '').match(/\[(\d{4}-\d{2}-\d{2})\]/)?.[1] || a.reserved_at || '';
+        const dateB = (b.note || '').match(/\[(\d{4}-\d{2}-\d{2})\]/)?.[1] || b.reserved_at || '';
+        if (dateA && dateB && dateA !== dateB) {
+            return dateA.localeCompare(dateB);
+        }
+        return (a.code || '').localeCompare(b.code || '');
+    });
+}
 
 // GET all reservations
 router.get('/', async (req, res) => {
     try {
         const { doc_type, status } = req.query;
+
+        // Ensure all daily quotas are buffered and missing days backfilled
+        try {
+            await ensureDailyBuffer();
+        } catch (e) {
+            console.error('ensureDailyBuffer error in GET /reservations:', e.message);
+        }
 
         if (isSupabaseConfigured && supabase) {
             let query = supabase
@@ -39,6 +59,8 @@ router.get('/', async (req, res) => {
                 project_name: r.project ? r.project.project_name : null
             }));
 
+            sortReservationsByNoteDate(result);
+
             return res.json({ success: true, data: result });
         }
 
@@ -68,6 +90,7 @@ router.get('/', async (req, res) => {
         query += ' ORDER BY r.code ASC, r.id DESC';
 
         const list = db.prepare(query).all(...params);
+        sortReservationsByNoteDate(list);
         res.json({ success: true, data: list });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
