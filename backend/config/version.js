@@ -3,10 +3,18 @@
  */
 
 module.exports = {
-    version: '2.9.34',
+    version: '2.9.35',
     releaseDate: '2026-11-08',
-    codename: 'Clean Thai-Only Bill Typography',
+    codename: 'Aligned Customer Label & Indented Name',
     changelog: [
+        {
+            version: '2.9.35',
+            date: '2026-11-08',
+            title: 'Aligned Customer Label & Indented Name',
+            features: [
+                'จัดแนวหัวบิลให้ชื่อลูกค้าตรงกับที่อยู่: เพิ่มคำว่า "ชื่อลูกค้า:" และจัดความกว้างป้ายกำกับให้ข้อความชื่อลูกค้าเว้นวรรคเข้าไปตรงกับที่อยู่ด้านล่างอย่างเป็นระเบียบ สวยงาม'
+            ]
+        },
         {
             version: '2.9.34',
             date: '2026-11-08',

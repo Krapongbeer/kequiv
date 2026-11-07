@@ -188,22 +188,27 @@ window.printModule = {
                         ` : ''}
                     </div>
 
-                    <!-- Project / Company Title (ตัวหนา เด่นชัด ไม่รก) -->
-                    <div class="font-bold text-stone-950 text-[12px] leading-snug">
-                        ${escapeHtml(doc.project_name_custom || doc.project_name || doc.customer_name || '-')}
+                    <!-- Project / Company Title (ชื่อลูกค้า ตรงแนวกับ ที่อยู่) -->
+                    <div class="flex items-start text-xs leading-snug">
+                        <span class="font-bold text-stone-800 shrink-0 w-[70px] pt-0.5">ชื่อลูกค้า:</span>
+                        <span class="font-bold text-stone-950 text-[12px] flex-1">
+                            ${escapeHtml(doc.project_name_custom || doc.project_name || doc.customer_name || '-')}
+                        </span>
                     </div>
 
                     <!-- Customer / Contact Person (if distinct from project title) -->
                     ${((doc.project_name_custom || doc.project_name) && doc.customer_name && doc.customer_name !== (doc.project_name_custom || doc.project_name)) ? `
-                        <div class="text-[10.5px] text-stone-700 mt-0.5">
-                            <span class="font-semibold text-stone-800">ผู้ติดต่อ:</span> ${escapeHtml(doc.customer_name)}
+                        <div class="flex items-start text-[10.5px] mt-0.5">
+                            <span class="font-semibold text-stone-800 shrink-0 w-[70px]">ผู้ติดต่อ:</span>
+                            <span class="text-stone-800 flex-1">${escapeHtml(doc.customer_name)}</span>
                         </div>
                     ` : ''}
 
-                    <!-- Address (ติดซ้ายมือ 100%) -->
+                    <!-- Address (ตรงแนวกับชื่อลูกค้า) -->
                     ${(doc.project_site_address || doc.customer_address) ? `
-                        <div class="text-[10.5px] text-stone-700 mt-1 leading-tight text-left">
-                            <span class="font-bold text-stone-800">ที่อยู่:</span> ${escapeHtml(doc.project_site_address || doc.customer_address)}
+                        <div class="flex items-start text-[10.5px] mt-1 leading-tight text-left">
+                            <span class="font-bold text-stone-800 shrink-0 w-[70px]">ที่อยู่:</span>
+                            <span class="text-stone-700 flex-1">${escapeHtml(doc.project_site_address || doc.customer_address)}</span>
                         </div>
                     ` : ''}
 
