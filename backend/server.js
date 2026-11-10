@@ -303,6 +303,19 @@ app.get('/api/presets', (req, res) => {
     });
 });
 
+// Vercel Daily Cron Endpoint (runs at 00:05 Asia/Bangkok = 17:05 UTC)
+app.get('/api/cron/auto-buffer', async (req, res) => {
+    try {
+        if (process.env.CRON_SECRET && req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+            return res.status(401).json({ success: false, error: 'Unauthorized' });
+        }
+        const result = await ensureDailyBuffer(5, true);
+        res.json({ success: true, ...result });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // Protected API Routes (Require Authentication)
 app.use('/api/company', requireAuth, require('./routes/company'));
 app.use('/api/customers', requireAuth, require('./routes/customers'));
@@ -331,10 +344,12 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Run User Provisioning, Daily Auto-Buffer & Supabase Keep-Alive on startup
+// Run User Provisioning, Daily Auto-Buffer & Supabase Keep-Alive on startup (non-serverless)
 ensureDefaultUsers().catch(err => console.error('Initial user provisioning error:', err));
-ensureDailyBuffer(5).catch(err => console.error('Initial auto-buffer error:', err));
-startKeepAliveSchedule(24);
+if (!process.env.VERCEL) {
+    ensureDailyBuffer(5).catch(err => console.error('Initial auto-buffer error:', err));
+    startKeepAliveSchedule(24);
+}
 
 // Start server when run directly (not on Vercel serverless and not when required by tests)
 if (!process.env.VERCEL && require.main === module) {

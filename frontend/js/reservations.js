@@ -33,9 +33,28 @@ window.reservationsModule = {
         }
     },
 
+    getDisplayDate(r) {
+        const m = (r.note || '').match(/\[(\d{4}-\d{2}-\d{2})\]/);
+        if (m && m[1]) return m[1];
+        if (!r.reserved_at) return '';
+        try {
+            return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(new Date(r.reserved_at));
+        } catch (e) {
+            return String(r.reserved_at).slice(0, 10);
+        }
+    },
+
     render(list) {
         const container = document.getElementById('reservations-content');
         if (!container) return;
+
+        // Sort newest date first so today's auto-buffer is immediately visible at the top
+        const sortedList = (list || []).slice().sort((a, b) => {
+            const dA = this.getDisplayDate(a);
+            const dB = this.getDisplayDate(b);
+            if (dA !== dB) return dB.localeCompare(dA);
+            return (a.code || '').localeCompare(b.code || '');
+        });
 
         container.innerHTML = `
             <div class="typewriter-card rounded-xl p-6 mb-6 font-mono bg-white">
@@ -46,12 +65,17 @@ window.reservationsModule = {
                             <span>🔢</span> คลังเลขสำรอง (สำหรับออกบิลย้อนหลัง)
                         </h2>
                         <p class="text-xs text-slate-500 mt-1">
-                            ระบบรันเลขกันไว้ล่วงหน้าวันละ 5 เลขอัตโนมัติ เพื่อให้มีเลขพร้อมดึงออกบิลย้อนหลังได้ตลอดเวลา เลขไม่กระโดดข้าม ไม่ชนกับบิลปัจจุบัน
+                            ระบบรันเลขกันไว้ล่วงหน้าวันละ 5 เลขอัตโนมัติ เพื่อให้มีเลขพร้อมดึงออกบิลย้อนหลังได้ตลอดเวลา เลขไม่กระโดดข้าม ไม่ชนกับบิลปัจจุบัน (เรียงจากวันที่ล่าสุด)
                         </p>
                     </div>
-                    <button onclick="window.reservationsModule.openReserveModal()" class="btn-ocean text-xs py-2 px-3.5">
-                        <span>+ จองเลขสำรองเพิ่ม</span>
-                    </button>
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <button id="btn-sync-buffer" onclick="window.reservationsModule.syncBuffer()" class="btn-paper text-xs py-2 px-3 border-sky-300 text-sky-800 hover:bg-sky-50">
+                            <span>🔄 เช็ค/สำรองเลขวันนี้</span>
+                        </button>
+                        <button onclick="window.reservationsModule.openReserveModal()" class="btn-ocean text-xs py-2 px-3.5">
+                            <span>+ จองเลขสำรองเพิ่ม</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Filters -->
@@ -101,7 +125,7 @@ window.reservationsModule = {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            ${list.length === 0 ? `
+                            ${sortedList.length === 0 ? `
                                 <tr>
                                     <td colspan="7" class="py-12 text-center text-slate-400 font-mono">
                                         ไม่มีรายการเลขสำรองในหมวดนี้
@@ -111,7 +135,9 @@ window.reservationsModule = {
                                         </button>
                                     </td>
                                 </tr>
-                            ` : list.map(r => `
+                            ` : sortedList.map(r => {
+                                const dispDate = this.getDisplayDate(r);
+                                return `
                                 <tr class="hover:bg-slate-50 transition">
                                     <td class="py-2.5 px-3.5 font-mono">
                                         <span class="font-bold text-slate-900 font-typewriter text-sm">${r.code}</span>
@@ -122,7 +148,7 @@ window.reservationsModule = {
                                     <td class="py-2.5 px-3.5">
                                         ${r.customer_name ? `
                                             <div class="font-bold text-slate-900">${r.customer_name}</div>
-                                            ${r.project_name ? `<div class="text-[10px] text-sky-700 font-medium">📌 ${r.project_name}</div>` : ''}
+                                            ${r.project_name ? `<div class="text-[10px] text-sky-700 font-medium">${r.project_name}</div>` : ''}
                                         ` : `
                                             <span class="text-slate-400 text-[11px]">ทั่วไป (ไม่ระบุ)</span>
                                         `}
@@ -131,7 +157,7 @@ window.reservationsModule = {
                                         ${r.note || '-'}
                                     </td>
                                     <td class="py-2.5 px-3.5 whitespace-nowrap text-slate-600">
-                                        ${r.reserved_at ? app.formatDateThai(r.reserved_at.slice(0, 10)) : '-'}
+                                        ${dispDate ? app.formatDateThai(dispDate) : '-'}
                                     </td>
                                     <td class="py-2.5 px-3.5 text-center whitespace-nowrap">
                                         ${app.getStatusBadge(r.status)}
@@ -149,12 +175,33 @@ window.reservationsModule = {
                                         `}
                                     </td>
                                 </tr>
-                            `).join('')}
+                            `;
+                            }).join('')}
                         </tbody>
                     </table>
                 </div>
             </div>
         `;
+    },
+
+    async syncBuffer() {
+        const btn = document.getElementById('btn-sync-buffer');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin inline-block">⚙️</span> กำลังตรวจสอบ...';
+        }
+        try {
+            const res = await api.syncReservationBuffer();
+            app.toast(res.message || 'ตรวจสอบเลขสำรองเรียบร้อย', 'success');
+            await this.loadList();
+        } catch (err) {
+            app.toast(err.message || 'เกิดข้อผิดพลาดในการซิงค์เลขสำรอง', 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span>🔄 เช็ค/สำรองเลขวันนี้</span>';
+            }
+        }
     },
 
     filterType(type) {

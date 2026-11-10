@@ -1,5 +1,11 @@
 {
   "version": 2,
+  "crons": [
+    {
+      "path": "/api/cron/auto-buffer",
+      "schedule": "5 17 * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",

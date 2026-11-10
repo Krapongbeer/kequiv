@@ -10,16 +10,21 @@ const TYPE_PREFIXES = {
 };
 
 function getYearMonth(dateStr, yearFormat = 'CE') {
-    const d = dateStr ? new Date(dateStr) : new Date();
-    let year = d.getFullYear();
-    if (isNaN(year)) {
-        year = new Date().getFullYear();
+    let year, month;
+    if (typeof dateStr === 'string' && /^\d{4}-\d{2}/.test(dateStr)) {
+        const parts = dateStr.split('-');
+        year = parseInt(parts[0], 10);
+        month = parseInt(parts[1], 10);
+    } else {
+        const nowStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(dateStr ? new Date(dateStr) : new Date());
+        const parts = nowStr.split('-');
+        year = parseInt(parts[0], 10);
+        month = parseInt(parts[1], 10);
     }
     if (yearFormat === 'BE') {
         year += 543;
     }
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    return `${year}${month}`;
+    return `${year}${String(month).padStart(2, '0')}`;
 }
 
 function formatCode(prefix, yearMonth, num) {
@@ -133,25 +138,43 @@ async function commitDocumentCodeSupabase(supabase, docType, issueDate, specifie
 }
 
 async function reserveBatchNumbersSupabase(supabase, docType, count, options = {}) {
-    const { note = '', customer_id = null, project_id = null, yearMonth = null } = options;
+    const { note = '', customer_id = null, project_id = null, yearMonth = null, date = null, yearFormat = null } = options;
     const prefix = TYPE_PREFIXES[docType] || 'DOC';
 
     let ym = yearMonth;
     if (!ym) {
-        const { data: comp } = await supabase
-            .from('company_profile')
-            .select('year_format')
-            .eq('id', 1)
-            .single();
-        ym = getYearMonth(new Date().toISOString(), comp ? comp.year_format : 'CE');
+        let fmt = yearFormat;
+        if (!fmt) {
+            const { data: comp } = await supabase
+                .from('company_profile')
+                .select('year_format')
+                .eq('id', 1)
+                .single();
+            fmt = comp ? comp.year_format : 'CE';
+        }
+        ym = getYearMonth(date || null, fmt);
     }
 
-    const { data: seqRow } = await supabase
-        .from('document_sequences')
-        .select('id, current_number')
-        .eq('doc_type', docType)
-        .eq('year_month', ym)
-        .maybeSingle();
+    const codePrefix = `${prefix}${ym}-`;
+    const [
+        { data: seqRow },
+        { data: existingDocs },
+        { data: existingRes }
+    ] = await Promise.all([
+        supabase
+            .from('document_sequences')
+            .select('id, current_number')
+            .eq('doc_type', docType)
+            .eq('year_month', ym)
+            .maybeSingle(),
+        supabase.from('documents').select('code').ilike('code', `${codePrefix}%`),
+        supabase.from('document_reservations').select('code').ilike('code', `${codePrefix}%`)
+    ]);
+
+    const usedCodes = new Set([
+        ...(existingDocs || []).map(d => d.code),
+        ...(existingRes || []).map(r => r.code)
+    ]);
 
     let nextNum = (seqRow ? seqRow.current_number : 0) + 1;
     const reservedCodes = [];
@@ -160,19 +183,8 @@ async function reserveBatchNumbersSupabase(supabase, docType, count, options = {
     while (reservedCodes.length < count) {
         const candidateCode = formatCode(prefix, ym, nextNum);
 
-        const { data: docExists } = await supabase
-            .from('documents')
-            .select('id')
-            .eq('code', candidateCode)
-            .maybeSingle();
-
-        const { data: resExists } = await supabase
-            .from('document_reservations')
-            .select('id')
-            .eq('code', candidateCode)
-            .maybeSingle();
-
-        if (!docExists && !resExists) {
+        if (!usedCodes.has(candidateCode)) {
+            usedCodes.add(candidateCode);
             reservedCodes.push(candidateCode);
             rowsToInsert.push({
                 doc_type: docType,
@@ -249,6 +261,7 @@ async function reserveBatchNumbersSupabase(supabase, docType, count, options = {
 }
 
 module.exports = {
+    getYearMonth,
     getNextDocumentCodeSupabase,
     commitDocumentCodeSupabase,
     reserveBatchNumbersSupabase

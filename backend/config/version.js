@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.37',
-    releaseDate: '2026-11-08',
-    codename: 'Custom Customer Header & Compact Indentation',
+    version: '2.9.38',
+    releaseDate: '2026-11-10',
+    codename: 'Reliable Serverless Auto-Buffer & Daily Cron Sync',
     changelog: [
+        {
+            version: '2.9.38',
+            date: '2026-11-10',
+            title: 'Reliable Serverless Auto-Buffer & Daily Cron Sync',
+            features: [
+                'แก้ปัญหาระบบสำรองเลขอัตโนมัติไม่ทำงานบน Vercel (Serverless Fix): แก้ Race Condition ของตัวล็อกใน autoBufferMiddleware ที่เคยถูกตัดการทำงานกลางคันก่อนบันทึกเสร็จ พร้อมปรับการเช็คและออกเลขสำรองเป็นแบบ Batch เพื่อลดเวลาทำงานเหลือไม่กี่ร้อยมิลลิวินาที',
+                'เพิ่ม Cron Job สำรองเลขอัตโนมัติทุกคืน (Daily Vercel Cron): ตั้งเวลาทำงานอัตโนมัติทุกวันเวลา 00:05 น. (ตามเวลาประเทศไทย) และเพิ่มปุ่ม "🔄 เช็ค/สำรองเลขวันนี้" ในหน้าคลังเลขสำรอง',
+                'ปรับปรุงหน้าคลังเลขสำรอง: เรียงข้อมูลจากวันที่ล่าสุดขึ้นบนสุด (เพื่อให้เห็นเลขสำรองของวันนี้ทันที) และแก้การแสดงวันที่สำรองให้ใช้เวลาประเทศไทยอย่างถูกต้อง'
+            ]
+        },
         {
             version: '2.9.37',
             date: '2026-11-08',

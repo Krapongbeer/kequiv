@@ -110,6 +110,7 @@ const api = {
 
     // Reservations
     getReservations: (docType = '', status = 'all') => request(`/reservations?doc_type=${encodeURIComponent(docType)}&status=${encodeURIComponent(status)}`),
+    syncReservationBuffer: () => request('/reservations/sync-buffer', { method: 'POST' }),
     reserveBatch: (data) => request('/reservations/batch', { method: 'POST', body: JSON.stringify(data) }),
     reserveBatchAll: (data) => request('/reservations/batch-all', { method: 'POST', body: JSON.stringify(data) }),
     cancelReservation: (id) => request(`/reservations/${id}`, { method: 'DELETE' }),

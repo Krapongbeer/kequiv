@@ -97,6 +97,23 @@ router.get('/', async (req, res) => {
     }
 });
 
+// POST manually trigger auto-buffer sync (checks missed days + today)
+router.post('/sync-buffer', async (req, res) => {
+    try {
+        const result = await ensureDailyBuffer(5, true);
+        const created = result.createdCount || 0;
+        res.json({
+            success: true,
+            message: created > 0
+                ? `ตรวจสอบและสำรองเลขอัตโนมัติเพิ่ม ${created} เลข (ถึงวันที่ ${result.today}) เรียบร้อยแล้ว`
+                : `เลขสำรองอัปเดตครบถึงวันนี้ (${result.today}) แล้ว ไม่พบวันที่ตกหล่น`,
+            ...result
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // POST reserve batch numbers
 router.post('/batch', async (req, res) => {
     try {

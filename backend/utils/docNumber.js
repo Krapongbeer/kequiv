@@ -10,16 +10,21 @@ const TYPE_PREFIXES = {
 };
 
 function getYearMonth(dateStr, yearFormat = 'BE') {
-    const d = dateStr ? new Date(dateStr) : new Date();
-    let year = d.getFullYear();
-    if (isNaN(year)) {
-        year = new Date().getFullYear();
+    let year, month;
+    if (typeof dateStr === 'string' && /^\d{4}-\d{2}/.test(dateStr)) {
+        const parts = dateStr.split('-');
+        year = parseInt(parts[0], 10);
+        month = parseInt(parts[1], 10);
+    } else {
+        const nowStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(dateStr ? new Date(dateStr) : new Date());
+        const parts = nowStr.split('-');
+        year = parseInt(parts[0], 10);
+        month = parseInt(parts[1], 10);
     }
     if (yearFormat === 'BE') {
         year += 543;
     }
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    return `${year}${month}`;
+    return `${year}${String(month).padStart(2, '0')}`;
 }
 
 function formatCode(prefix, yearMonth, num) {
