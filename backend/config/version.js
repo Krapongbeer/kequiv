@@ -3,10 +3,19 @@
  */
 
 module.exports = {
-    version: '2.9.38',
-    releaseDate: '2026-11-10',
-    codename: 'Reliable Serverless Auto-Buffer & Daily Cron Sync',
+    version: '2.9.39',
+    releaseDate: '2026-11-24',
+    codename: 'Clean Bill Header - Remove Contact Person on Bill',
     changelog: [
+        {
+            version: '2.9.39',
+            date: '2026-11-24',
+            title: 'Clean Bill Header - Remove Contact Person on Bill',
+            features: [
+                'ตัดบรรทัด "ผู้ติดต่อ" ออกจากหัวบิลเวลาออกบิล: ชื่อลูกค้าที่บันทึกไว้จะใช้สำหรับค้นหาและเรียกชื่อในระบบเท่านั้น ไม่นำมาแสดงเป็นผู้ติดต่อบนหัวบิล',
+                'ปรับข้อความในหน้าสร้างเอกสารและหน้าเพิ่มลูกค้าให้เป็น "ชื่อลูกค้า" (ตัด / ผู้ติดต่อ ออก) เพื่อความกระชับและไม่สับสน'
+            ]
+        },
         {
             version: '2.9.38',
             date: '2026-11-10',

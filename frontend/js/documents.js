@@ -661,12 +661,12 @@ window.documentsModule = {
                         </div>
                     </div>
 
-                    <!-- Section 2: Customer, Project & Dates (สลับชื่อลูกค้า/ผู้ติดต่อไว้ซ้าย โครงการไว้ขวา) -->
+                    <!-- Section 2: Customer, Project & Dates (สลับชื่อลูกค้าไว้ซ้าย โครงการไว้ขวา) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <!-- Customer Dropdown (ชื่อลูกค้า / ผู้ติดต่อ) -->
+                        <!-- Customer Dropdown (ชื่อลูกค้า) -->
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
-                                <span>ชื่อลูกค้า / ผู้ติดต่อ <span class="text-rose-500">*</span></span>
+                                <span>ชื่อลูกค้า <span class="text-rose-500">*</span></span>
                                 <button type="button" onclick="window.customersModule.openCustomerModal()" class="text-[11px] text-sky-700 font-bold hover:underline">
                                     + เพิ่มลูกค้าใหม่
                                 </button>

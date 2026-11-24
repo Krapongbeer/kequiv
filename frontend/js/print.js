@@ -193,13 +193,6 @@ window.printModule = {
                         ${escapeHtml(doc.project_name_custom || doc.project_name || doc.customer_name || '-')}
                     </div>
 
-                    <!-- Customer / Contact Person (if distinct from project title) -->
-                    ${((doc.project_name_custom || doc.project_name) && doc.customer_name && doc.customer_name !== (doc.project_name_custom || doc.project_name)) ? `
-                        <div class="text-[10.5px] text-stone-700 mt-0.5 pl-[32px]">
-                            <span class="font-semibold text-stone-800">ผู้ติดต่อ:</span> ${escapeHtml(doc.customer_name)}
-                        </div>
-                    ` : ''}
-
                     <!-- Address (เขบิบเข้ามาให้ชิดสวยงาม ตรงกับชื่อโครงการ) -->
                     ${(doc.project_site_address || doc.customer_address) ? `
                         <div class="flex items-start text-[10.5px] mt-1 leading-tight text-left">
