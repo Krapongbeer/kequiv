@@ -41,8 +41,10 @@ window.printModule = {
         const bankAccounts = company.bank_accounts || [];
 
         const isUndated = doc.is_undated || (doc.remark && doc.remark.includes('[ไม่ลงวันที่]')) || !doc.issue_date;
+        const isDueUndated = (doc.remark && doc.remark.includes('[ไม่ลงวันครบกำหนด]'));
         const cleanRemark = (doc.remark || '')
             .replace(/\[ไม่ลงวันที่\]/g, '')
+            .replace(/\[ไม่ลงวันครบกำหนด\]/g, '')
             .replace(/\[บิลที่ร้านให้บริการ:.*?\]/g, '')
             .trim();
 
@@ -157,10 +159,10 @@ window.printModule = {
                             <span class="text-stone-500 text-[11px] whitespace-nowrap">วันที่ออก:</span>
                             <span class="font-bold text-stone-800 text-xs">${isUndated ? '' : app.formatDateThai(doc.issue_date, true)}</span>
                         </div>
-                        ${doc.due_date ? `
+                        ${(doc.due_date || isDueUndated || (doc.type === 'billing' && isDueUndated)) ? `
                             <div class="flex justify-between items-center">
                                 <span class="text-stone-500 text-[11px]">ครบกำหนด:</span>
-                                <span class="font-bold text-stone-800 text-xs">${app.formatDateThai(doc.due_date, true)}</span>
+                                <span class="font-bold text-stone-800 text-xs">${isDueUndated ? '' : (doc.due_date ? app.formatDateThai(doc.due_date, true) : '')}</span>
                             </div>
                         ` : ''}
                         ${doc.reference_code ? `

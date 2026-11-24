@@ -415,8 +415,12 @@ window.documentsModule = {
 
                 const rawRemark = doc.remark || '';
                 const isUndated = rawRemark.includes('[ไม่ลงวันที่]');
+                const isDueUndated = rawRemark.includes('[ไม่ลงวันครบกำหนด]');
                 const serviceInfo = this.parseServiceBill(doc);
-                const cleanRemark = serviceInfo.clean_remark.replace(/\[ไม่ลงวันที่\]/g, '').trim();
+                const cleanRemark = serviceInfo.clean_remark
+                    .replace(/\[ไม่ลงวันที่\]/g, '')
+                    .replace(/\[ไม่ลงวันครบกำหนด\]/g, '')
+                    .trim();
 
                 this.renderCreateForm({
                     isEdit: true,
@@ -436,6 +440,7 @@ window.documentsModule = {
                     paymentTerms: doc.payment_terms,
                     remark: cleanRemark,
                     isUndated,
+                    isDueUndated,
                     isServiceBill: serviceInfo.is_service_bill,
                     serviceFeePercent: serviceInfo.service_fee_percent,
                     partnerName: serviceInfo.partner_name,
@@ -494,7 +499,7 @@ window.documentsModule = {
             isEdit, docId, docCode, docStatus,
             type, issue_date, due_date, customers, nextCodePreview,
             availableReservations, selectedCustomerId, selectedProjectId, projectNameCustom,
-            discountTotal, paymentTerms, remark, isUndated, useReservedCode,
+            discountTotal, paymentTerms, remark, isUndated, isDueUndated, useReservedCode,
             isServiceBill = false, serviceFeePercent = 20, partnerName = ''
         } = ctx;
 
@@ -733,10 +738,19 @@ window.documentsModule = {
 
                         <!-- Due Date -->
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                                วันที่ครบกำหนด / มีผลถึงวันที่
-                            </label>
-                            <input type="date" id="doc-due-date" name="due_date" value="${due_date || ''}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-bold text-slate-700">
+                                    วันที่ครบกำหนด / มีผลถึงวันที่
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 cursor-pointer text-[11px] text-sky-700 font-medium select-none hover:text-sky-900" title="พิมพ์วันครบกำหนดบนบิลเป็นเว้นว่าง">
+                                    <input type="checkbox" id="doc-is-due-undated" ${isDueUndated ? 'checked' : ''} onchange="window.documentsModule.toggleDueUndated(this.checked)" class="rounded border-slate-300 text-sky-600 focus:ring-sky-500">
+                                    <span>ไม่ลงวันครบกำหนด (เว้นว่าง)</span>
+                                </label>
+                            </div>
+                            <input type="date" id="doc-due-date" name="due_date" value="${due_date || ''}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none ${isDueUndated ? 'opacity-50' : ''}" onchange="window.documentsModule.onDueDateChanged()">
+                            <div id="due-undated-helper" class="text-[11px] text-amber-700 mt-1 font-mono ${isDueUndated ? '' : 'hidden'}">
+                                ℹ️ บนบิลจริงจะแสดงเป็น: <span class="font-bold">..... / ..... / ..........</span> (สามารถประทับตรายางหรือลงวันครบกำหนดภายหลังได้)
+                            </div>
                         </div>
                     </div>
 
@@ -1242,6 +1256,70 @@ window.documentsModule = {
         }
     },
 
+    toggleDueUndated(checked) {
+        const dateInput = document.getElementById('doc-due-date');
+        const helper = document.getElementById('due-undated-helper');
+        if (dateInput) {
+            if (checked) {
+                dateInput.dataset.savedValue = dateInput.value;
+                dateInput.value = '';
+                dateInput.classList.add('opacity-50');
+            } else {
+                if (dateInput.dataset.savedValue) {
+                    dateInput.value = dateInput.dataset.savedValue;
+                }
+                dateInput.classList.remove('opacity-50');
+            }
+        }
+        if (helper) {
+            if (checked) helper.classList.remove('hidden');
+            else helper.classList.add('hidden');
+        }
+    },
+
+    onDueDateChanged() {
+        const check = document.getElementById('doc-is-due-undated');
+        const helper = document.getElementById('due-undated-helper');
+        const dateInput = document.getElementById('doc-due-date');
+        if (dateInput && dateInput.value && check && check.checked) {
+            check.checked = false;
+            dateInput.classList.remove('opacity-50');
+            if (helper) helper.classList.add('hidden');
+        }
+    },
+
+    toggleConvertDueUndated(checked) {
+        const dateInput = document.getElementById('convert-due-date');
+        const helper = document.getElementById('convert-due-undated-helper');
+        if (dateInput) {
+            if (checked) {
+                dateInput.dataset.savedValue = dateInput.value;
+                dateInput.value = '';
+                dateInput.classList.add('opacity-50');
+            } else {
+                if (dateInput.dataset.savedValue) {
+                    dateInput.value = dateInput.dataset.savedValue;
+                }
+                dateInput.classList.remove('opacity-50');
+            }
+        }
+        if (helper) {
+            if (checked) helper.classList.remove('hidden');
+            else helper.classList.add('hidden');
+        }
+    },
+
+    onConvertDueDateChanged() {
+        const check = document.getElementById('convert-is-due-undated');
+        const helper = document.getElementById('convert-due-undated-helper');
+        const dateInput = document.getElementById('convert-due-date');
+        if (dateInput && dateInput.value && check && check.checked) {
+            check.checked = false;
+            dateInput.classList.remove('opacity-50');
+            if (helper) helper.classList.add('hidden');
+        }
+    },
+
     futureCodesCache: null,
 
     toggleCodeMode(mode) {
@@ -1656,16 +1734,24 @@ window.documentsModule = {
         const project_id = form.project_id.value || null;
         const project_name_custom = form.project_name_custom.value.trim();
         const issue_date = form.issue_date.value;
-        const due_date = form.due_date.value || null;
+        const isDueUndated = document.getElementById('doc-is-due-undated')?.checked || false;
+        const due_date = isDueUndated ? null : (form.due_date.value || null);
         const discount_total = parseFloat(document.getElementById('doc-discount-total').value) || 0;
         const payment_terms = document.getElementById('doc-payment-terms').value.trim();
         let remark = document.getElementById('doc-remark').value.trim();
         // Remove any existing tags from typed input
-        remark = remark.replace(/\[ไม่ลงวันที่\]/g, '').replace(/\[บิลที่ร้านให้บริการ:.*?\]/g, '').trim();
+        remark = remark
+            .replace(/\[ไม่ลงวันที่\]/g, '')
+            .replace(/\[ไม่ลงวันครบกำหนด\]/g, '')
+            .replace(/\[บิลที่ร้านให้บริการ:.*?\]/g, '')
+            .trim();
 
         const isUndated = document.getElementById('doc-is-undated')?.checked || false;
         if (isUndated) {
             remark = remark ? `${remark}\n[ไม่ลงวันที่]` : '[ไม่ลงวันที่]';
+        }
+        if (isDueUndated) {
+            remark = remark ? `${remark}\n[ไม่ลงวันครบกำหนด]` : '[ไม่ลงวันครบกำหนด]';
         }
 
         const isServiceBill = document.getElementById('doc-is-service-bill')?.checked || false;
@@ -1984,7 +2070,8 @@ window.documentsModule = {
         if (!app.state.pendingConvertDoc) return;
         const targetType = document.getElementById('convert-target-type').value;
         const issueDate = document.getElementById('convert-issue-date').value;
-        const dueDate = document.getElementById('convert-due-date')?.value || null;
+        const isConvertDueUndated = document.getElementById('convert-is-due-undated')?.checked || false;
+        const dueDate = isConvertDueUndated ? null : (document.getElementById('convert-due-date')?.value || null);
         const codeMode = document.querySelector('input[name="convert_code_mode"]:checked')?.value || 'reserved';
         const reservedCode = (codeMode === 'reserved') ? document.getElementById('convert-reserved-select')?.value : null;
 
@@ -1999,6 +2086,7 @@ window.documentsModule = {
                 target_type: targetType,
                 issue_date: issueDate,
                 due_date: targetType === 'billing' ? dueDate : null,
+                is_due_undated: (targetType === 'billing' && isConvertDueUndated),
                 reserved_code: reservedCode || null
             };
 

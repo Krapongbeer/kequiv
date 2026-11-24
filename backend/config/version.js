@@ -3,10 +3,19 @@
  */
 
 module.exports = {
-    version: '2.9.39',
+    version: '2.9.40',
     releaseDate: '2026-11-24',
-    codename: 'Clean Bill Header - Remove Contact Person on Bill',
+    codename: 'Undated Due Date Option for Billing',
     changelog: [
+        {
+            version: '2.9.40',
+            date: '2026-11-24',
+            title: 'Undated Due Date Option for Billing',
+            features: [
+                'เพิ่มตัวเลือก "ไม่ลงวันครบกำหนด (เว้นว่าง)" แบบ checkbox ให้สามารถติ๊กเลือกได้ในฟอร์มออกเอกสารและหน้าต่างแปลงเป็นใบวางบิล',
+                'บนบิลฉบับพิมพ์/PDF จะแสดงบรรทัดวันครบกำหนดแบบเว้นว่าง พร้อมประทับตรายางหรือลงวันที่ภายหลังได้เหมือนกับวันที่ออกเอกสาร'
+            ]
+        },
         {
             version: '2.9.39',
             date: '2026-11-24',

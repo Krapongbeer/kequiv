@@ -754,7 +754,7 @@ router.put('/:id', async (req, res) => {
 router.post('/:id/convert', async (req, res) => {
     try {
         const id = req.params.id;
-        const { target_type, issue_date, due_date = null, reserved_code } = req.body;
+        const { target_type, issue_date, due_date = null, reserved_code, is_due_undated = false } = req.body;
 
         if (!['quotation', 'billing', 'receipt'].includes(target_type)) {
             return res.status(400).json({ success: false, error: 'ประเภทเอกสารปลายทางไม่ถูกต้อง' });
@@ -800,9 +800,12 @@ router.post('/:id/convert', async (req, res) => {
             // Build clean reference remark without redundant duplication
             const existingRemark = (sourceDoc.remark || '').trim();
             const refLine = `อ้างอิงจากเอกสาร ${sourceDoc.code}`;
-            const combinedRemark = existingRemark
+            let combinedRemark = existingRemark
                 ? (existingRemark.includes(sourceDoc.code) ? existingRemark : `${refLine}\n${existingRemark}`)
                 : refLine;
+            if (is_due_undated) {
+                combinedRemark = combinedRemark ? `${combinedRemark}\n[ไม่ลงวันครบกำหนด]` : '[ไม่ลงวันครบกำหนด]';
+            }
 
             const { data: newDoc, error: nErr } = await supabase
                 .from('documents')
@@ -814,7 +817,7 @@ router.post('/:id/convert', async (req, res) => {
                     project_name_custom: sourceDoc.project_name_custom,
                     reference_document_id: sourceDoc.id,
                     issue_date: finalIssueDate,
-                    due_date: due_date || null,
+                    due_date: is_due_undated ? null : (due_date || null),
                     subtotal: sourceDoc.subtotal,
                     discount_total: sourceDoc.discount_total,
                     vat_amount: 0,
@@ -908,13 +911,16 @@ router.post('/:id/convert', async (req, res) => {
             // Build clean reference remark without redundant duplication
             const existingRemarkSqlite = (sourceDoc.remark || '').trim();
             const refLineSqlite = `อ้างอิงจากเอกสาร ${sourceDoc.code}`;
-            const combinedRemarkSqlite = existingRemarkSqlite
+            let combinedRemarkSqlite = existingRemarkSqlite
                 ? (existingRemarkSqlite.includes(sourceDoc.code) ? existingRemarkSqlite : `${refLineSqlite}\n${existingRemarkSqlite}`)
                 : refLineSqlite;
+            if (is_due_undated) {
+                combinedRemarkSqlite = combinedRemarkSqlite ? `${combinedRemarkSqlite}\n[ไม่ลงวันครบกำหนด]` : '[ไม่ลงวันครบกำหนด]';
+            }
 
             const result = insertDoc.run(
                 newCode, target_type, sourceDoc.customer_id, sourceDoc.project_id, sourceDoc.project_name_custom,
-                sourceDoc.id, finalIssueDate, due_date || null,
+                sourceDoc.id, finalIssueDate, is_due_undated ? null : (due_date || null),
                 sourceDoc.subtotal, sourceDoc.discount_total, sourceDoc.grand_total,
                 combinedRemarkSqlite,
                 sourceDoc.payment_terms || '',
