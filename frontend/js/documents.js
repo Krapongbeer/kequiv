@@ -1260,15 +1260,16 @@ window.documentsModule = {
         const dateInput = document.getElementById('doc-due-date');
         const helper = document.getElementById('due-undated-helper');
         if (dateInput) {
+            dateInput.disabled = !!checked;
             if (checked) {
                 dateInput.dataset.savedValue = dateInput.value;
                 dateInput.value = '';
-                dateInput.classList.add('opacity-50');
+                dateInput.classList.add('opacity-50', 'bg-slate-100', 'cursor-not-allowed');
             } else {
                 if (dateInput.dataset.savedValue) {
                     dateInput.value = dateInput.dataset.savedValue;
                 }
-                dateInput.classList.remove('opacity-50');
+                dateInput.classList.remove('opacity-50', 'bg-slate-100', 'cursor-not-allowed');
             }
         }
         if (helper) {
@@ -1283,7 +1284,8 @@ window.documentsModule = {
         const dateInput = document.getElementById('doc-due-date');
         if (dateInput && dateInput.value && check && check.checked) {
             check.checked = false;
-            dateInput.classList.remove('opacity-50');
+            dateInput.disabled = false;
+            dateInput.classList.remove('opacity-50', 'bg-slate-100', 'cursor-not-allowed');
             if (helper) helper.classList.add('hidden');
         }
     },
@@ -1292,15 +1294,16 @@ window.documentsModule = {
         const dateInput = document.getElementById('convert-due-date');
         const helper = document.getElementById('convert-due-undated-helper');
         if (dateInput) {
+            dateInput.disabled = !!checked;
             if (checked) {
                 dateInput.dataset.savedValue = dateInput.value;
                 dateInput.value = '';
-                dateInput.classList.add('opacity-50');
+                dateInput.classList.add('opacity-50', 'bg-slate-100', 'cursor-not-allowed');
             } else {
                 if (dateInput.dataset.savedValue) {
                     dateInput.value = dateInput.dataset.savedValue;
                 }
-                dateInput.classList.remove('opacity-50');
+                dateInput.classList.remove('opacity-50', 'bg-slate-100', 'cursor-not-allowed');
             }
         }
         if (helper) {
@@ -1315,7 +1318,8 @@ window.documentsModule = {
         const dateInput = document.getElementById('convert-due-date');
         if (dateInput && dateInput.value && check && check.checked) {
             check.checked = false;
-            dateInput.classList.remove('opacity-50');
+            dateInput.disabled = false;
+            dateInput.classList.remove('opacity-50', 'bg-slate-100', 'cursor-not-allowed');
             if (helper) helper.classList.add('hidden');
         }
     },
@@ -1896,20 +1900,36 @@ window.documentsModule = {
             const doc = (app.state.documents || []).find(d => Number(d.id) === Number(id));
             issueDate = doc ? doc.issue_date : new Date().toISOString().slice(0, 10);
         }
+        const cleanIssueDate = (issueDate ? String(issueDate).slice(0, 10) : '') || new Date().toISOString().slice(0, 10);
 
-        app.state.pendingConvertDoc = { id, currentType, code, issue_date: issueDate };
+        app.state.pendingConvertDoc = { id, currentType, code, issue_date: cleanIssueDate };
 
         const label = document.getElementById('modal-convert-source');
         if (label) label.innerHTML = `${app.getDocTypeBadge(currentType)} <span class="font-bold text-slate-900 ml-1.5">${code}</span>`;
 
         const dateLabel = document.getElementById('modal-convert-source-date');
         if (dateLabel) {
-            dateLabel.textContent = `${app.formatDateThai(issueDate)} (${issueDate})`;
+            dateLabel.textContent = `${app.formatDateThai(cleanIssueDate)} (${cleanIssueDate})`;
         }
 
         const dateInput = document.getElementById('convert-issue-date');
         if (dateInput) {
-            dateInput.value = issueDate;
+            dateInput.value = cleanIssueDate;
+        }
+
+        // Reset Due Date controls
+        const checkDueUndated = document.getElementById('convert-is-due-undated');
+        if (checkDueUndated) {
+            checkDueUndated.checked = false;
+        }
+        const dueInput = document.getElementById('convert-due-date');
+        if (dueInput) {
+            dueInput.disabled = false;
+            dueInput.classList.remove('opacity-50', 'bg-slate-100', 'cursor-not-allowed');
+        }
+        const dueHelper = document.getElementById('convert-due-undated-helper');
+        if (dueHelper) {
+            dueHelper.classList.add('hidden');
         }
 
         const selectTarget = document.getElementById('convert-target-type');
@@ -2067,18 +2087,42 @@ window.documentsModule = {
     },
 
     async submitConvert() {
-        if (!app.state.pendingConvertDoc) return;
-        const targetType = document.getElementById('convert-target-type').value;
-        const issueDate = document.getElementById('convert-issue-date').value;
+        if (!app.state.pendingConvertDoc) {
+            app.toast('ไม่พบข้อมูลเอกสารต้นทาง กรุณากดแปลงใหม่อีกครั้ง', 'warning');
+            return;
+        }
+
+        const targetTypeSelect = document.getElementById('convert-target-type');
+        const issueDateInput = document.getElementById('convert-issue-date');
+        if (!targetTypeSelect || !issueDateInput) {
+            app.toast('แบบฟอร์มไม่สมบูรณ์ กรุณารีเฟรชหน้าเว็บ', 'error');
+            return;
+        }
+
+        const targetType = targetTypeSelect.value;
+        const issueDate = issueDateInput.value;
+        if (!issueDate) {
+            app.toast('กรุณาระบุวันที่ออกเอกสาร', 'warning');
+            return;
+        }
+
         const isConvertDueUndated = document.getElementById('convert-is-due-undated')?.checked || false;
         const dueDate = isConvertDueUndated ? null : (document.getElementById('convert-due-date')?.value || null);
         const codeMode = document.querySelector('input[name="convert_code_mode"]:checked')?.value || 'reserved';
-        const reservedCode = (codeMode === 'reserved') ? document.getElementById('convert-reserved-select')?.value : null;
+        let reservedCode = null;
+        if (codeMode === 'reserved') {
+            const selectEl = document.getElementById('convert-reserved-select');
+            reservedCode = selectEl ? selectEl.value : null;
+            if (!reservedCode) {
+                app.toast('กรุณาเลือกเลขที่ล็อกไว้ หรือเลือก "รันเลขอัตโนมัติ"', 'warning');
+                return;
+            }
+        }
 
         const submitBtn = document.getElementById('btn-submit-convert');
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.textContent = 'กำลังแปลงเอกสาร...';
+            submitBtn.innerHTML = '⏳ กำลังแปลงเอกสาร...';
         }
 
         try {
@@ -2096,11 +2140,12 @@ window.documentsModule = {
             await this.loadList();
             window.printModule.openPrint(res.data.id);
         } catch (err) {
-            app.toast(err.message, 'error');
+            console.error('Submit convert error:', err);
+            app.toast(err.message || 'เกิดข้อผิดพลาดในการแปลงเอกสาร', 'error');
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = '🔄 ยืนยันการแปลงเอกสาร';
+                submitBtn.innerHTML = '🔄 ยืนยันการแปลงเอกสาร';
             }
         }
     },

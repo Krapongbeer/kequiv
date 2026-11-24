@@ -3,10 +3,19 @@
  */
 
 module.exports = {
-    version: '2.9.40',
+    version: '2.9.41',
     releaseDate: '2026-11-24',
-    codename: 'Undated Due Date Option for Billing',
+    codename: 'Fix Convert Document Confirm & Cache-Busting',
     changelog: [
+        {
+            version: '2.9.41',
+            date: '2026-11-24',
+            title: 'Fix Convert Document Confirm & Cache-Busting',
+            features: [
+                'แก้ปัญหากดยืนยันการแปลงเอกสารไม่ได้ (Modal Convert Fix): ปรับปุ่มให้ผูก onclick เรียกฟังก์ชันโดยตรง พร้อมเพิ่ม disabled และ bg-slate-100 ให้ช่อง Due Date เมื่อติ๊กเว้นว่าง เพื่อไม่ให้เบราว์เซอร์ติดการตรวจความถูกต้องของฟิลด์',
+                'อัปเดต Cache-Busting ให้ทุกไฟล์ JavaScript เป็น ?v=2.9.41 เพื่อให้เบราว์เซอร์โหลดโค้ดตัวล่าสุดทันทีโดยไม่ติด Cache เดิม'
+            ]
+        },
         {
             version: '2.9.40',
             date: '2026-11-24',
