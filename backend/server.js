@@ -18,6 +18,7 @@ const { pingSupabase, startKeepAliveSchedule, getStatus: getKeepAliveStatus } = 
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('./routes/auth');
 const { verifyDocShareKey, generateDocShareKey } = require('./utils/shareSecurity');
+const { thaiBahtText } = require('./utils/thaiBahtText');
 const { logAudit } = require('./services/auditService');
 
 // Middlewares & Security Headers
@@ -234,7 +235,23 @@ app.get('/api/documents/public/:code', shareLimiter, async (req, res) => {
             });
         }
 
-        // Attach share_key to response
+        // Attach Thai baht text, project details, and share_key to response
+        let pTaxId = '';
+        let pEmail = '';
+        let pPhone = '';
+        const pNote = doc.project?.note || doc.project_note || '';
+        if (pNote) {
+            const tm = pNote.match(/\[TAX:(.*?)\]/);
+            if (tm) pTaxId = tm[1];
+            const em = pNote.match(/\[EMAIL:(.*?)\]/);
+            if (em) pEmail = em[1];
+            const pm = pNote.match(/\[PHONE:(.*?)\]/);
+            if (pm) pPhone = pm[1];
+        }
+        doc.project_tax_id = doc.project_tax_id || pTaxId;
+        doc.project_email = doc.project_email || pEmail;
+        doc.project_phone = doc.project_phone || pPhone;
+        doc.grand_total_thai = thaiBahtText(doc.grand_total);
         doc.share_key = generateDocShareKey(doc.code, doc.id);
 
         res.json({

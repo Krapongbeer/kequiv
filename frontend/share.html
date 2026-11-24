@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&family=Sarabun:wght@400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <link rel="stylesheet" href="/css/style.css?v=2.9.20">
+    <link rel="stylesheet" href="/css/style.css?v=2.9.42">
 
     <style>
         @media print {
@@ -71,7 +71,7 @@
     </footer>
 
     <!-- App Scripts -->
-    <script src="/js/print.js?v=2.9.20"></script>
+    <script src="/js/print.js?v=2.9.42"></script>
     <script>
         window.app = {
             formatCurrency: (n) => Number(n || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
@@ -145,8 +145,13 @@
 
                 loadedDoc = json.data;
                 window.printModule.currentDoc = loadedDoc;
-                document.title = `${loadedDoc.type === 'quotation' ? 'ใบเสนอราคา' : 'เอกสาร'} ${loadedDoc.code} - ร้านเคอีควิป`;
-                document.getElementById('doc-title-meta').textContent = `เอกสารเลขที่ ${loadedDoc.code} (${app.formatDateThai(loadedDoc.issue_date)})`;
+                const isUndated = loadedDoc.is_undated || (loadedDoc.remark && loadedDoc.remark.includes('[ไม่ลงวันที่]')) || !loadedDoc.issue_date;
+                const docTypeNames = { quotation: 'ใบเสนอราคา', billing: 'ใบแจ้งหนี้/ใบวางบิล', receipt: 'ใบเสร็จรับเงิน' };
+                const docTypeLabel = docTypeNames[loadedDoc.type] || 'เอกสาร';
+                document.title = `${docTypeLabel} ${loadedDoc.code} - ร้านเคอีควิป`;
+                document.getElementById('doc-title-meta').textContent = isUndated
+                    ? `เอกสารเลขที่ ${loadedDoc.code}`
+                    : `เอกสารเลขที่ ${loadedDoc.code} (${app.formatDateThai(loadedDoc.issue_date)})`;
                 window.printModule.renderSheet(loadedDoc);
             } catch (err) {
                 renderErrorState('ไม่สามารถเปิดเอกสารได้', err.message);

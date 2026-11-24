@@ -3,10 +3,19 @@
  */
 
 module.exports = {
-    version: '2.9.41',
+    version: '2.9.42',
     releaseDate: '2026-11-24',
-    codename: 'Fix Convert Document Confirm & Cache-Busting',
+    codename: 'Hide Date on Share Page for Undated Bills',
     changelog: [
+        {
+            version: '2.9.42',
+            date: '2026-11-24',
+            title: 'Hide Date on Share Page for Undated Bills',
+            features: [
+                'ซ่อนวันที่ในแถบหัวหน้าเปิดดูบิลออนไลน์ (Share Page) หากเป็นบิลที่เลือก "ไม่ลงวันที่": แสดงเฉพาะ "เอกสารเลขที่ ..." โดยตัด "(วันที่)" ออกตามที่ต้องการ',
+                'ปรับการแสดงผลในตารางรายการเอกสาร: แสดงป้าย "ไม่ลงวันที่" ให้เห็นชัดเจนแทนวันที่จริง'
+            ]
+        },
         {
             version: '2.9.41',
             date: '2026-11-24',

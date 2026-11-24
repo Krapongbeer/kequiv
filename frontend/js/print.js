@@ -357,7 +357,7 @@ window.printModule = {
                     <!-- Thai Baht Text Box -->
                     <div class="py-1.5 px-2 bg-[#faf6ee] rounded border border-stone-800 flex items-center gap-1.5 text-xs">
                         <span class="font-bold text-stone-700 shrink-0 font-typewriter">ตัวอักษร:</span>
-                        <span class="font-bold text-stone-900 leading-tight">( ${doc.grand_total_thai || 'ศูนย์บาทถ้วน'} )</span>
+                        <span class="font-bold text-stone-900 leading-tight">( ${(doc.grand_total_thai && doc.grand_total_thai !== 'ศูนย์บาทถ้วน') ? doc.grand_total_thai : this.getThaiBahtText(doc.grand_total)} )</span>
                     </div>
 
                     <!-- Bank Payment Accounts -->
@@ -745,6 +745,74 @@ window.printModule = {
             console.error('Copy image error:', err);
             if (window.app) app.toast('เกิดข้อผิดพลาดในการคัดลอกรูปภาพ', 'error');
         }
+    },
+
+    getThaiBahtText(number) {
+        if (number === null || number === undefined || isNaN(number)) return 'ศูนย์บาทถ้วน';
+        const num = Math.abs(parseFloat(number));
+        if (num === 0) return 'ศูนย์บาทถ้วน';
+
+        const THAI_NUMBERS = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
+        const THAI_UNITS = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'];
+
+        function convertGroup(digits) {
+            let text = '';
+            const len = digits.length;
+            for (let i = 0; i < len; i++) {
+                const digit = parseInt(digits[i], 10);
+                const pos = len - 1 - i;
+                if (digit !== 0) {
+                    if (pos === 0 && digit === 1 && len > 1) {
+                        text += 'เอ็ด';
+                    } else if (pos === 1 && digit === 2) {
+                        text += 'ยี่' + THAI_UNITS[pos];
+                    } else if (pos === 1 && digit === 1) {
+                        text += THAI_UNITS[pos];
+                    } else {
+                        text += THAI_NUMBERS[digit] + THAI_UNITS[pos];
+                    }
+                }
+            }
+            return text;
+        }
+
+        const fixedStr = num.toFixed(2);
+        const [intPart, decPart] = fixedStr.split('.');
+        let intText = '';
+        const intGroups = [];
+        let remainingInt = intPart;
+
+        while (remainingInt.length > 0) {
+            const chunkSize = Math.min(6, remainingInt.length);
+            const chunk = remainingInt.slice(-chunkSize);
+            intGroups.unshift(chunk);
+            remainingInt = remainingInt.slice(0, -chunkSize);
+        }
+
+        for (let i = 0; i < intGroups.length; i++) {
+            const groupText = convertGroup(intGroups[i]);
+            if (groupText) {
+                intText += groupText;
+                if (i < intGroups.length - 1) {
+                    intText += 'ล้าน';
+                }
+            }
+        }
+        if (!intText) intText = 'ศูนย์';
+
+        let result = '';
+        const satangNum = parseInt(decPart, 10);
+        if (satangNum === 0) {
+            result = intText + 'บาทถ้วน';
+        } else {
+            const satangText = convertGroup(decPart);
+            if (intText === 'ศูนย์') {
+                result = satangText + 'สตางค์';
+            } else {
+                result = intText + 'บาท' + satangText + 'สตางค์';
+            }
+        }
+        return (parseFloat(number) < 0 ? 'ลบ' : '') + result;
     }
 };
 

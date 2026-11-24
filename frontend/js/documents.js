@@ -182,10 +182,10 @@ window.documentsModule = {
                                         ` : ''}
                                     </td>
                                     <td class="px-3.5 py-3 text-xs text-slate-600 whitespace-nowrap">
-                                        ${app.formatDateThai(d.issue_date)}
+                                        ${(d.is_undated || (d.remark && d.remark.includes('[ไม่ลงวันที่]'))) ? '<span class="text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-300 text-[10px] font-bold" title="เอกสารไม่ลงวันที่">ไม่ลงวันที่</span>' : app.formatDateThai(d.issue_date)}
                                     </td>
                                     <td class="px-3.5 py-3 text-xs text-slate-500 whitespace-nowrap">
-                                        ${d.due_date ? app.formatDateThai(d.due_date) : '-'}
+                                        ${(d.remark && d.remark.includes('[ไม่ลงวันครบกำหนด]')) ? '<span class="text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-300 text-[10px] font-bold" title="ไม่ลงวันครบกำหนด">ไม่ระบุ</span>' : (d.due_date ? app.formatDateThai(d.due_date) : '-')}
                                     </td>
                                     <td class="px-3.5 py-3 text-right font-bold text-slate-900 whitespace-nowrap">
                                         <div>฿${app.formatCurrency(d.grand_total)}</div>
