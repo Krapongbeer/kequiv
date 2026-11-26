@@ -3,10 +3,20 @@
  */
 
 module.exports = {
-    version: '2.9.42',
-    releaseDate: '2026-11-24',
-    codename: 'Hide Date on Share Page for Undated Bills',
+    version: '2.9.43',
+    releaseDate: '2026-11-26',
+    codename: 'SEO & Social Share Preview Optimization',
     changelog: [
+        {
+            version: '2.9.43',
+            date: '2026-11-26',
+            title: 'SEO & Social Share Preview Optimization',
+            features: [
+                'เพิ่ม Meta Tags และ Open Graph (og:title, og:description, og:image) ครบถ้วน สำหรับการแชร์ลิงก์เว็บและบิลเข้าสู่ LINE / Facebook / โซเชียลมีเดีย',
+                'ล้างข้อความประวัติระบบภายใน (Internal Changelog) ออกจาก HTML หน้าหลัก เพื่อป้องกันบอทหรือ Crawler ดึงข้อความภายใน เช่น การรันเลขสำรอง ไปแสดงเป็นพรีวิวส่งลูกค้า',
+                'ปรับปรุงข้อความและคำอธิบายในระบบให้เป็นทางการและเป็นระเบียบเรียบร้อย 100%'
+            ]
+        },
         {
             version: '2.9.42',
             date: '2026-11-24',

@@ -62,10 +62,10 @@ window.reservationsModule = {
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
                     <div>
                         <h2 class="text-xl font-bold text-slate-900 font-typewriter flex items-center gap-2">
-                            <span>🔢</span> คลังเลขสำรอง (สำหรับออกบิลย้อนหลัง)
+                            <span>🔢</span> คลังเลขเอกสารสำรอง (Document Buffer Pool)
                         </h2>
                         <p class="text-xs text-slate-500 mt-1">
-                            ระบบรันเลขกันไว้ล่วงหน้าวันละ 5 เลขอัตโนมัติ เพื่อให้มีเลขพร้อมดึงออกบิลย้อนหลังได้ตลอดเวลา เลขไม่กระโดดข้าม ไม่ชนกับบิลปัจจุบัน (เรียงจากวันที่ล่าสุด)
+                            คลังจัดสรรเลขเอกสารสำรองล่วงหน้า เพื่อความสะดวกและเป็นระเบียบในการออกเอกสาร (เรียงจากวันที่ล่าสุด)
                         </p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2 shrink-0">
