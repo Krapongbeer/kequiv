@@ -20,6 +20,18 @@
       "destination": "/uploads/$1"
     },
     {
+      "source": "/home",
+      "destination": "/frontend/index.html"
+    },
+    {
+      "source": "/shop",
+      "destination": "/frontend/index.html"
+    },
+    {
+      "source": "/store",
+      "destination": "/frontend/index.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/frontend/$1"
     }
